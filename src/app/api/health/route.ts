@@ -9,7 +9,7 @@ export async function GET() {
 
   return NextResponse.json({
     status: "ok",
-    appName: "Meal Builder for Esther",
+    appName: "Meal Builder",
     notionConfigured: isNotionConfigured,
     databases: {
       ingredients: Boolean(process.env.NOTION_INGREDIENTS_DB_ID),

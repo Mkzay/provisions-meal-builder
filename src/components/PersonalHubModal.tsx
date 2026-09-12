@@ -25,7 +25,7 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
   onProfileSaved,
   owner: propOwner,
 }) => {
-  const owner = propOwner || "Esther";
+  const owner = propOwner || "User";
   const [activeTab, setActiveTab] = useState<PersonalHubTab>(initialTab);
 
   useEffect(() => {

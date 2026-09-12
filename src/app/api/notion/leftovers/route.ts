@@ -17,8 +17,10 @@ export async function POST(req: NextRequest) {
 
     if (session?.user?.ownerName) {
       body.owner = session.user.ownerName;
+    } else if (session?.user?.name) {
+      body.owner = session.user.name;
     } else if (!body.owner) {
-      body.owner = "Esther";
+      body.owner = "User";
     }
 
     const result = await handleLeftoverDecision(body);

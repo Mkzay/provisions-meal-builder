@@ -1,6 +1,11 @@
 import { MealType, NotificationConfig } from "./types";
 
-export const NOTIFICATION_CONFIG_KEY = "esther_meal_notifications_v1";
+export const NOTIFICATION_CONFIG_KEY = "meal_notifications_v1";
+
+export function getNotificationKey(owner?: string): string {
+  if (!owner) return NOTIFICATION_CONFIG_KEY;
+  return `meal_notifications_${owner.toLowerCase().trim()}_v1`;
+}
 
 export const DEFAULT_NOTIFICATION_CONFIG: NotificationConfig = {
   enabled: false,
@@ -18,10 +23,14 @@ export const DEFAULT_NOTIFICATION_CONFIG: NotificationConfig = {
   groceryShoppingDay: "saturday",
 };
 
-export function getStoredNotificationConfig(): NotificationConfig {
+export function getStoredNotificationConfig(owner?: string): NotificationConfig {
   if (typeof window === "undefined") return DEFAULT_NOTIFICATION_CONFIG;
   try {
-    const raw = localStorage.getItem(NOTIFICATION_CONFIG_KEY);
+    const key = getNotificationKey(owner);
+    let raw = localStorage.getItem(key);
+    if (!raw && (!owner || owner.toLowerCase() === "esther")) {
+      raw = localStorage.getItem("esther_meal_notifications_v1");
+    }
     if (!raw) return DEFAULT_NOTIFICATION_CONFIG;
     return { ...DEFAULT_NOTIFICATION_CONFIG, ...JSON.parse(raw) };
   } catch {
@@ -29,10 +38,11 @@ export function getStoredNotificationConfig(): NotificationConfig {
   }
 }
 
-export function saveNotificationConfig(config: NotificationConfig): void {
+export function saveNotificationConfig(config: NotificationConfig, owner?: string): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(NOTIFICATION_CONFIG_KEY, JSON.stringify(config));
+    const key = getNotificationKey(owner);
+    localStorage.setItem(key, JSON.stringify(config));
   } catch (err) {
     console.error("Failed to persist notification preferences", err);
   }
@@ -71,20 +81,22 @@ export function sendBrowserNotification(title: string, body: string, mealType?: 
 
 export function getReminderMessage(
   mealType: MealType,
-  missingItems?: string[]
+  missingItems?: string[],
+  owner?: string
 ): { title: string; body: string } {
   let baseMsg = { title: "", body: "" };
+  const ownerSuffix = owner ? `, ${owner}` : "";
 
   switch (mealType) {
     case "Breakfast":
       baseMsg = {
-        title: "☀️ Good Morning, Esther!",
+        title: `☀️ Good Morning${ownerSuffix}!`,
         body: "Start your day with something easy and warm. A quick bite makes all the difference.",
       };
       break;
     case "Lunch":
       baseMsg = {
-        title: "🌿 Lunchtime, Esther!",
+        title: `🌿 Lunchtime${ownerSuffix}!`,
         body: "Step away from the screen for 10 minutes. Nourish your brain with what's in the kitchen.",
       };
       break;
@@ -96,7 +108,7 @@ export function getReminderMessage(
       break;
     case "Dinner":
       baseMsg = {
-        title: "🌙 Dinner Comfort, Esther",
+        title: `🌙 Dinner Comfort${ownerSuffix}`,
         body: "Unwind from today. You deserve a comforting, satisfying home-cooked dinner.",
       };
       break;
@@ -110,10 +122,15 @@ export function getReminderMessage(
   return baseMsg;
 }
 
-export function sendTestNudge(includeGroceryNote: boolean = true, sampleItem: string = "Crisp Apples"): boolean {
+export function sendTestNudge(
+  includeGroceryNote: boolean = true,
+  sampleItem: string = "Crisp Apples",
+  owner?: string
+): boolean {
   const note = includeGroceryNote ? ` 🛒 Restock note: Pick up ${sampleItem} to elevate your next meal!` : "";
+  const ownerSuffix = owner ? `, ${owner}` : "";
   return sendBrowserNotification(
-    "🥣 Time to Nourish, Esther!",
+    `🥣 Time to Nourish${ownerSuffix}!`,
     `Take 10 minutes to step away from your desk. Your kitchen has good things waiting for you.${note}`,
     "Lunch"
   );

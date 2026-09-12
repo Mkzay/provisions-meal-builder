@@ -32,30 +32,31 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onOpenProgressLog,
   owner: propOwner,
 }) => {
-  const owner = propOwner || "Esther";
+  const owner = propOwner?.trim() || "";
+  const displayName = owner || "there";
 
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
       return {
-        text: `Good morning, ${owner}`,
+        text: `Good morning, ${displayName}`,
         subtitle: "Start your day with something easy & nourishing.",
       };
     }
     if (hour >= 12 && hour < 17) {
       return {
-        text: `Lunchtime, ${owner}`,
+        text: `Lunchtime, ${displayName}`,
         subtitle: "Refuel your mind with what's in your kitchen.",
       };
     }
     if (hour >= 17 && hour < 22) {
       return {
-        text: `Good evening, ${owner}`,
+        text: `Good evening, ${displayName}`,
         subtitle: "Unwind and enjoy a comforting home dinner.",
       };
     }
     return {
-      text: `Night craving, ${owner}?`,
+      text: `Night craving, ${displayName}?`,
       subtitle: "Grab a soothing snack or warm drink before bed.",
     };
   };

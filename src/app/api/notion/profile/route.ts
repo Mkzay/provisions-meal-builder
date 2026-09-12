@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     const { searchParams } = new URL(req.url);
-    const owner = session?.user?.ownerName || searchParams.get("owner") || "Esther";
+    const owner = searchParams.get("owner") || session?.user?.ownerName || session?.user?.name || "User";
 
     const profile = await fetchMealProfile(owner);
     return NextResponse.json(
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     const body = await req.json();
-    const owner = session?.user?.ownerName || body.owner || "Esther";
+    const owner = body.owner || session?.user?.ownerName || session?.user?.name || "User";
     const goal = body.goal as UserGoal;
     const height =
       typeof body.height === "number" && !isNaN(body.height) && body.height > 0

@@ -14,6 +14,7 @@ interface LeftoverModalProps {
   mainIngredient?: string;
   protein?: string;
   supplementary?: string;
+  owner?: string;
   onSubmitDecision: (decision: LeftoverDecision) => void;
   onClose: () => void;
 }
@@ -26,6 +27,7 @@ export const LeftoverModal: React.FC<LeftoverModalProps> = ({
   mainIngredient,
   protein,
   supplementary,
+  owner,
   onSubmitDecision,
   onClose,
 }) => {
@@ -186,7 +188,7 @@ export const LeftoverModal: React.FC<LeftoverModalProps> = ({
 
               <div>
                 <h3 className="text-2xl font-display font-extrabold text-ink">
-                  Enjoy your meal, Esther!
+                  Enjoy your meal{owner ? `, ${owner}` : ""}!
                 </h3>
                 <p className="text-xs sm:text-sm text-stone-600 font-medium mt-1.5 max-w-xs mx-auto">
                   {hadLeftovers

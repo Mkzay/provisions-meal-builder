@@ -17,6 +17,7 @@ interface NotionSettingsModalProps {
   onClose: () => void;
   onRefreshCatalogue: () => Promise<void>;
   onResetSeedData: () => void;
+  owner?: string;
 }
 
 export const NotionSettingsModal: React.FC<NotionSettingsModalProps> = ({
@@ -25,6 +26,7 @@ export const NotionSettingsModal: React.FC<NotionSettingsModalProps> = ({
   onClose,
   onRefreshCatalogue,
   onResetSeedData,
+  owner,
 }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -125,7 +127,7 @@ export const NotionSettingsModal: React.FC<NotionSettingsModalProps> = ({
                 </h4>
               </div>
               <p className="text-xs text-stone-600 font-medium leading-relaxed">
-                Create 3 databases in Notion with these exact column names to connect Esther&apos;s live workspace:
+                Create 3 databases in Notion with these exact column names to connect {owner ? `${owner}'s` : "your"} live workspace:
               </p>
 
               <div className="space-y-2 text-xs">
@@ -138,7 +140,7 @@ export const NotionSettingsModal: React.FC<NotionSettingsModalProps> = ({
                     <li><strong className="text-ink">Meal Type</strong> (Multi-select: Breakfast, Lunch, Dinner, Snack)</li>
                     <li><strong className="text-ink">Role</strong> (Select: Main, Protein, Supplementary)</li>
                     <li><strong className="text-ink">Available</strong> (Checkbox)</li>
-                    <li><strong className="text-ink">Owner</strong> (Select: Esther)</li>
+                    <li><strong className="text-ink">Owner</strong> (Select: {owner || "your name"})</li>
                   </ul>
                 </div>
 
@@ -150,7 +152,7 @@ export const NotionSettingsModal: React.FC<NotionSettingsModalProps> = ({
                     <li><strong className="text-ink">Name</strong> (Title)</li>
                     <li><strong className="text-ink">Meal Type</strong> (Multi-select: Breakfast, Lunch, Dinner, Snack)</li>
                     <li><strong className="text-ink">Available</strong> (Checkbox)</li>
-                    <li><strong className="text-ink">Owner</strong> (Select: Esther)</li>
+                    <li><strong className="text-ink">Owner</strong> (Select: {owner || "your name"})</li>
                   </ul>
                 </div>
 
@@ -166,7 +168,7 @@ export const NotionSettingsModal: React.FC<NotionSettingsModalProps> = ({
                     <li><strong className="text-ink">Protein</strong> (Rich text)</li>
                     <li><strong className="text-ink">Supplementary</strong> (Rich text)</li>
                     <li><strong className="text-ink">Had Leftovers</strong> (Checkbox)</li>
-                    <li><strong className="text-ink">Owner</strong> (Select: Esther)</li>
+                    <li><strong className="text-ink">Owner</strong> (Select: {owner || "your name"})</li>
                   </ul>
                 </div>
               </div>

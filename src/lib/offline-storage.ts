@@ -92,13 +92,13 @@ export function applyOptimisticLeftover(
       id: `local-ready-${Date.now()}`,
       name: newName,
       mealTypes: [decision.mealType],
-      owner: "Esther",
+      owner: decision.owner || "User",
       available: true,
     };
 
     nextCatalogue.readyMeals = [newReadyMeal, ...nextCatalogue.readyMeals];
   }
 
-  saveCachedCatalogue(nextCatalogue);
+  saveCachedCatalogue(nextCatalogue, decision.owner);
   return nextCatalogue;
 }

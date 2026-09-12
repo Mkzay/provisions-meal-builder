@@ -33,8 +33,8 @@ import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 
 export default function MealBuilderPage() {
-  const { data: session } = useSession();
-  const owner = session?.user?.ownerName || "Esther";
+  const { data: session, status } = useSession();
+  const owner = session?.user?.ownerName || session?.user?.name || "Esther";
 
   const [isPersonalHubOpen, setIsPersonalHubOpen] = useState(false);
   const [personalHubTab, setPersonalHubTab] = useState<PersonalHubTab>("profile");
@@ -98,7 +98,7 @@ export default function MealBuilderPage() {
 
   const [isStaplesDrawerOpen, setIsStaplesDrawerOpen] = useState(false);
 
-  if (!isClientReady) {
+  if (!isClientReady || status === "loading") {
     return (
       <div className="flex-1 flex items-center justify-center p-6 bg-background">
         <div className="w-10 h-10 rounded-full border-3 border-basil-500 border-t-transparent animate-spin" />
@@ -324,6 +324,7 @@ export default function MealBuilderPage() {
         mainIngredient={selectedMain?.name}
         protein={selectedProtein?.name}
         supplementary={selectedSupplementary?.name}
+        owner={owner}
         onSubmitDecision={handleSubmitLeftoverDecision}
         onClose={() => {
           setIsLeftoverModalOpen(false);
@@ -335,6 +336,7 @@ export default function MealBuilderPage() {
       <NotificationModal
         isOpen={isNotificationOpen}
         onClose={() => setIsNotificationOpen(false)}
+        owner={owner}
       />
 
       {/* In-App Supplies Restock Modal */}

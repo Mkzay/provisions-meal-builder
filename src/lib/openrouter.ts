@@ -48,9 +48,6 @@ export function getDefaultFallbackNote(
       24
   );
   const selected = notes[dayOfYear % notes.length];
-  if (owner && owner.toLowerCase() !== "esther") {
-    return selected;
-  }
   return selected;
 }
 

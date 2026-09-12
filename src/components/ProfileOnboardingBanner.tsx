@@ -13,7 +13,7 @@ export const ProfileOnboardingBanner: React.FC<ProfileOnboardingBannerProps> = (
   onOpenProfile,
   owner: propOwner,
 }) => {
-  const owner = propOwner || "Esther";
+  const owner = propOwner || "User";
   const [isDismissed, setIsDismissed] = useState(false);
 
   const handleDismiss = () => {
@@ -35,7 +35,7 @@ export const ProfileOnboardingBanner: React.FC<ProfileOnboardingBannerProps> = (
               Optional Setup
             </span>
             <span className="text-xs font-bold text-stone-700 truncate">
-              For {owner}
+              {propOwner ? `For ${propOwner}` : "Personalize Your Plan"}
             </span>
           </div>
           <p className="text-xs sm:text-sm font-bold text-stone-900 leading-snug">

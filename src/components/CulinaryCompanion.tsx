@@ -144,7 +144,7 @@ export const CulinaryCompanion: React.FC<CulinaryCompanionProps> = ({
       {/* AI-Curated Culinary Companion Note */}
       <CompanionNoteCard
         mealType={mealType}
-        owner={owner || "Esther"}
+        owner={owner || "User"}
         isDismissible={false}
       />
     </aside>

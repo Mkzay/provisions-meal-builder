@@ -210,7 +210,7 @@ export async function addSupplyToNotion(
             checkbox: true,
           },
           Owner: {
-            select: { name: input.owner || "Esther" },
+            select: { name: input.owner || "User" },
           },
         },
       });
@@ -231,7 +231,7 @@ export async function addSupplyToNotion(
             checkbox: true,
           },
           Owner: {
-            select: { name: input.owner || "Esther" },
+            select: { name: input.owner || "User" },
           },
         },
       });

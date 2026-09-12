@@ -52,13 +52,15 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
     },
   ];
 
+  const currentOwner = owner || "User";
+
   const commonStaples: Ingredient[] = [
     {
       id: "staple-eggs",
       name: "Fresh Eggs",
       role: "Protein",
       mealTypes: ["Breakfast", "Lunch", "Dinner"],
-      owner: "Esther",
+      owner: currentOwner,
       available: true,
     },
     {
@@ -66,7 +68,7 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
       name: "Sliced Bread",
       role: "Main",
       mealTypes: ["Breakfast", "Snack"],
-      owner: "Esther",
+      owner: currentOwner,
       available: true,
     },
     {
@@ -74,7 +76,7 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
       name: "Rice",
       role: "Main",
       mealTypes: ["Lunch", "Dinner"],
-      owner: "Esther",
+      owner: currentOwner,
       available: true,
     },
     {
@@ -82,7 +84,7 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
       name: "Cream Crackers",
       role: "Main",
       mealTypes: ["Snack"],
-      owner: "Esther",
+      owner: currentOwner,
       available: true,
     },
     {
@@ -90,7 +92,7 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
       name: "Canned Sardines",
       role: "Protein",
       mealTypes: ["Breakfast", "Lunch"],
-      owner: "Esther",
+      owner: currentOwner,
       available: true,
     },
     {
@@ -98,13 +100,15 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
       name: "Peanut Butter",
       role: "Protein",
       mealTypes: ["Breakfast", "Snack"],
-      owner: "Esther",
+      owner: currentOwner,
       available: true,
     },
   ];
 
   const handleApplyStaples = () => {
-    const selected = commonStaples.filter((s) => selectedStapleIds.includes(s.id));
+    const selected = commonStaples
+      .filter((s) => selectedStapleIds.includes(s.id))
+      .map((s) => ({ ...s, owner: currentOwner }));
     onQuickAddStaples(selected);
     setShowStaplesDrawer(false);
   };

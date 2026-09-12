@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const session = await auth();
     const { searchParams } = new URL(req.url);
 
-    const owner = session?.user?.ownerName || searchParams.get("owner") || "Esther";
+    const owner = searchParams.get("owner") || session?.user?.ownerName || session?.user?.name || "User";
     const mealType = (searchParams.get("mealType") as MealType) || "Lunch";
 
     // Fetch user goal to tailor the note

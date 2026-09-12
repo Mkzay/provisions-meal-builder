@@ -23,6 +23,7 @@ import React, { useEffect, useState } from "react";
 interface NotificationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  owner?: string;
 }
 
 const MEAL_TIME_FIELDS: { key: keyof NotificationConfig; label: string; bg: string; iconColor: string }[] = [
@@ -35,9 +36,16 @@ const MEAL_TIME_FIELDS: { key: keyof NotificationConfig; label: string; bg: stri
 export const NotificationModal: React.FC<NotificationModalProps> = ({
   isOpen,
   onClose,
+  owner,
 }) => {
-  const [config, setConfig] = useState<NotificationConfig>(getStoredNotificationConfig);
+  const [config, setConfig] = useState<NotificationConfig>(() => getStoredNotificationConfig(owner));
   const [permission, setPermission] = useState<NotificationPermission>("default");
+
+  useEffect(() => {
+    if (isOpen) {
+      setConfig(getStoredNotificationConfig(owner));
+    }
+  }, [isOpen, owner]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -55,68 +63,53 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  const updateConfig = (updated: NotificationConfig) => {
+    setConfig(updated);
+    saveNotificationConfig(updated, owner);
+  };
+
   const handleToggleEnabled = async () => {
     if (!config.enabled && permission !== "granted") {
       const res = await requestNotificationPermission();
       setPermission(res);
       if (res === "granted") {
-        const updated = { ...config, enabled: true };
-        setConfig(updated);
-        saveNotificationConfig(updated);
+        updateConfig({ ...config, enabled: true });
       }
     } else {
-      const updated = { ...config, enabled: !config.enabled };
-      setConfig(updated);
-      saveNotificationConfig(updated);
+      updateConfig({ ...config, enabled: !config.enabled });
     }
   };
 
   const handleToggleGroceryNudges = () => {
-    const updated = { ...config, includeGroceryNudges: !config.includeGroceryNudges };
-    setConfig(updated);
-    saveNotificationConfig(updated);
+    updateConfig({ ...config, includeGroceryNudges: !config.includeGroceryNudges });
   };
 
   const handleTogglePantryAudit = () => {
-    const updated = { ...config, pantryAuditReminder: !config.pantryAuditReminder };
-    setConfig(updated);
-    saveNotificationConfig(updated);
+    updateConfig({ ...config, pantryAuditReminder: !config.pantryAuditReminder });
   };
 
   const handlePantryFrequencyChange = (freq: ReminderFrequency) => {
-    const updated = { ...config, pantryAuditFrequency: freq };
-    setConfig(updated);
-    saveNotificationConfig(updated);
+    updateConfig({ ...config, pantryAuditFrequency: freq });
   };
 
   const handlePantryDayChange = (day: DayOfWeek) => {
-    const updated = { ...config, pantryAuditDay: day };
-    setConfig(updated);
-    saveNotificationConfig(updated);
+    updateConfig({ ...config, pantryAuditDay: day });
   };
 
   const handleToggleGroceryShopping = () => {
-    const updated = { ...config, groceryShoppingReminder: !config.groceryShoppingReminder };
-    setConfig(updated);
-    saveNotificationConfig(updated);
+    updateConfig({ ...config, groceryShoppingReminder: !config.groceryShoppingReminder });
   };
 
   const handleGroceryFrequencyChange = (freq: ReminderFrequency) => {
-    const updated = { ...config, groceryShoppingFrequency: freq };
-    setConfig(updated);
-    saveNotificationConfig(updated);
+    updateConfig({ ...config, groceryShoppingFrequency: freq });
   };
 
   const handleGroceryDayChange = (day: DayOfWeek) => {
-    const updated = { ...config, groceryShoppingDay: day };
-    setConfig(updated);
-    saveNotificationConfig(updated);
+    updateConfig({ ...config, groceryShoppingDay: day });
   };
 
   const handleTimeChange = (field: keyof NotificationConfig, value: string) => {
-    const updated = { ...config, [field]: value };
-    setConfig(updated);
-    saveNotificationConfig(updated);
+    updateConfig({ ...config, [field]: value });
   };
 
   if (!isOpen) return null;

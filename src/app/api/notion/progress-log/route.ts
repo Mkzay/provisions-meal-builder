@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     const { searchParams } = new URL(req.url);
-    const owner = session?.user?.ownerName || searchParams.get("owner") || "Esther";
+    const owner = searchParams.get("owner") || session?.user?.ownerName || session?.user?.name || "User";
 
     const logs = await fetchWeightLogs(owner);
     return NextResponse.json(
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     const body = await req.json();
-    const owner = session?.user?.ownerName || body.owner || "Esther";
+    const owner = body.owner || session?.user?.ownerName || session?.user?.name || "User";
     const date = body.date || new Date().toISOString().slice(0, 10);
     const weight = typeof body.weight === "number" ? body.weight : parseFloat(body.weight);
 

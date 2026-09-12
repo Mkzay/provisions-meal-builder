@@ -29,7 +29,7 @@ export type FlowStep =
   | "pairing"
   | "confirm";
 
-export function useMealBuilder(owner: string = "Esther") {
+export function useMealBuilder(owner: string = "User") {
   const [catalogue, setCatalogue] = useState<KitchenCatalogue>(EMPTY_CATALOGUE);
   const [isClientReady, setIsClientReady] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -89,8 +89,13 @@ export function useMealBuilder(owner: string = "Esther") {
   };
 
   const handleResetSeedData = () => {
-    setCatalogue(SEED_CATALOGUE);
-    saveCachedCatalogue(SEED_CATALOGUE, owner);
+    const ownerSeed: KitchenCatalogue = {
+      ...SEED_CATALOGUE,
+      ingredients: SEED_CATALOGUE.ingredients.map((i) => ({ ...i, owner })),
+      readyMeals: SEED_CATALOGUE.readyMeals.map((m) => ({ ...m, owner })),
+    };
+    setCatalogue(ownerSeed);
+    saveCachedCatalogue(ownerSeed, owner);
     setIsSettingsOpen(false);
   };
 
@@ -219,13 +224,11 @@ export function useMealBuilder(owner: string = "Esther") {
   const handleQuickAddStaples = (staples: Ingredient[]) => {
     const nextIngredients = [...catalogue.ingredients];
     for (const staple of staples) {
-      const idx = nextIngredients.findIndex(
-        (i) => i.name.toLowerCase() === staple.name.toLowerCase()
-      );
+      const idx = nextIngredients.findIndex((i) => i.name.toLowerCase() === staple.name.toLowerCase());
       if (idx >= 0) {
         nextIngredients[idx] = { ...nextIngredients[idx], available: true };
       } else {
-        nextIngredients.push(staple);
+        nextIngredients.push({ ...staple, owner: staple.owner || owner });
       }
     }
     const nextCatalogue = { ...catalogue, ingredients: nextIngredients };
