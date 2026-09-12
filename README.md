@@ -70,12 +70,28 @@ The app uses three Notion databases as its backend:
 | `Date` | Date | When the meal was eaten |
 | `Meal Type` | Select | `Breakfast`, `Lunch`, `Dinner` |
 | `Source` | Select | `Ready Meal`, `Built` |
-| `Main Ingredient` | Rich text | For built meals |
-| `Protein` | Rich text | For built meals |
-| `Supplementary` | Rich text | For built meals |
-| `Ready Meal` | Rich text | For ready meals |
+| `Main Ingredient` | Relation | Linked to **Ingredients Catalogue** |
+| `Protein` | Relation | Linked to **Ingredients Catalogue** |
+| `Supplementary` | Relation | Linked to **Ingredients Catalogue** |
+| `Ready Meal` | Relation | Linked to **Ready Meals** |
 | `Had Leftovers` | Checkbox | Triggers leftover flow |
 | `Owner` | Select | Instance owner name |
+
+### 4. Meal Profile
+| Property | Type | Notes |
+|----------|------|-------|
+| `Name` | Title | e.g. "Esther's Meal Profile" |
+| `Owner` | Select | Instance owner name |
+| `Goal` | Select | `Lose weight`, `Gain weight`, `Eat healthier`, `Eat more food generally` |
+| `Height` | Number | Optional height record in cm (e.g. `168`) |
+
+### 5. Progress Log
+| Property | Type | Notes |
+|----------|------|-------|
+| `Name` | Title | e.g. "58.5 kg - 2026-09-12" |
+| `Owner` | Select | Instance owner name |
+| `Date` | Date | Date of weigh-in |
+| `Weight` | Number | Weight recorded (e.g. `58.5`) |
 
 ---
 
@@ -106,6 +122,9 @@ NOTION_API_KEY=secret_your_integration_token
 NOTION_INGREDIENTS_DB_ID=your_32_char_database_id
 NOTION_READY_MEALS_DB_ID=your_32_char_database_id
 NOTION_MEAL_LOG_DB_ID=your_32_char_database_id
+NOTION_PROFILE_DB_ID=your_32_char_database_id
+NOTION_PROGRESS_LOG_DB_ID=your_32_char_database_id
+NEXT_PUBLIC_APP_OWNER=Esther
 ```
 
 > If omitted, the app runs in offline demo mode with realistic seed data.
@@ -156,9 +175,11 @@ Each deployment is a single-owner instance. Set `NEXT_PUBLIC_APP_OWNER` to custo
 |-------|--------|---------|
 | `/api/health` | GET | Health check with Notion connection status |
 | `/api/notion/catalogue` | GET | Fetch ingredients and ready meals |
-| `/api/notion/log` | POST | Log a meal decision |
+| `/api/notion/log` | POST | Log a meal decision with linked Relations |
 | `/api/notion/leftovers` | POST | Handle post-meal leftover decisions |
 | `/api/notion/supplies` | POST | Add new ingredient or ready meal |
+| `/api/notion/profile` | GET, POST | Fetch or save eating goal and height in Notion |
+| `/api/notion/progress-log` | GET, POST, DELETE | Track, log, or archive weigh-in entries in Notion |
 
 ---
 

@@ -18,6 +18,7 @@ import {
   PairingResult,
   ReadyMeal,
 } from "./types";
+import { getCurrentOwner } from "./profile-storage";
 import { useEffect, useState } from "react";
 
 export type FlowStep =
@@ -173,12 +174,16 @@ export function useMealBuilder() {
       date: new Date().toISOString(),
       mealType,
       source: selectedSource,
+      mainIngredientId: selectedMain?.id,
       mainIngredient: selectedMain?.name,
+      proteinId: selectedProtein?.id,
       protein: selectedProtein?.name,
+      supplementaryId: selectedSupplementary?.id,
       supplementary: selectedSupplementary?.name,
+      readyMealId: selectedReadyMeal?.id,
       readyMeal: selectedReadyMeal?.name,
       hadLeftovers: false,
-      owner: "Esther",
+      owner: getCurrentOwner(),
     };
 
     try {

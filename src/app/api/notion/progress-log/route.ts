@@ -1,0 +1,85 @@
+import {
+  addWeightLogEntry,
+  deleteWeightLogEntry,
+  fetchWeightLogs,
+} from "@/lib/notion-profile";
+import { getCurrentOwner } from "@/lib/profile-storage";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const owner = searchParams.get("owner") || getCurrentOwner();
+
+    const logs = await fetchWeightLogs(owner);
+    return NextResponse.json({ logs });
+  } catch (error) {
+    console.error("API error fetching weight logs:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch weight logs" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const owner = body.owner || getCurrentOwner();
+    const date = body.date || new Date().toISOString().slice(0, 10);
+    const weight = typeof body.weight === "number" ? body.weight : parseFloat(body.weight);
+
+    if (isNaN(weight) || weight <= 0) {
+      return NextResponse.json(
+        { error: "Valid weight number is required" },
+        { status: 400 }
+      );
+    }
+
+    const result = await addWeightLogEntry({
+      owner,
+      date,
+      weight,
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("API error adding weight log:", error);
+    return NextResponse.json(
+      { error: "Failed to add weight log" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    let id = searchParams.get("id");
+
+    if (!id) {
+      try {
+        const body = await req.json();
+        id = body?.id;
+      } catch {
+        // no body
+      }
+    }
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Entry ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const result = await deleteWeightLogEntry(id);
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("API error deleting weight log:", error);
+    return NextResponse.json(
+      { error: "Failed to delete weight log" },
+      { status: 500 }
+    );
+  }
+}

@@ -2,10 +2,10 @@
 
 import { Check } from "@/components/icons";
 import {
+  fetchClientProfile,
   getCurrentOwner,
   getDefaultGoalForOwner,
-  getStoredProfile,
-  saveStoredProfile,
+  saveClientProfile,
 } from "@/lib/profile-storage";
 import { MealProfile, UserGoal } from "@/lib/types";
 import React, { useEffect, useState } from "react";
@@ -52,42 +52,61 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
   onSaved,
 }) => {
   const owner = propOwner || getCurrentOwner();
-  const [selectedGoal, setSelectedGoal] = useState<UserGoal>(() => {
-    const existing = getStoredProfile(owner);
-    return existing?.goal || getDefaultGoalForOwner(owner);
-  });
-  const [height, setHeight] = useState<string>(() => {
-    const existing = getStoredProfile(owner);
-    return existing?.height || "";
-  });
+  const [selectedGoal, setSelectedGoal] = useState<UserGoal>(() =>
+    getDefaultGoalForOwner(owner)
+  );
+  const [height, setHeight] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
 
   useEffect(() => {
-    const existing = getStoredProfile(owner);
-    setSelectedGoal(existing?.goal || getDefaultGoalForOwner(owner));
-    setHeight(existing?.height || "");
-    setJustSaved(false);
+    let active = true;
+    setIsLoading(true);
+    fetchClientProfile(owner)
+      .then((existing) => {
+        if (!active) return;
+        if (existing) {
+          setSelectedGoal(existing.goal || getDefaultGoalForOwner(owner));
+          setHeight(existing.height ? String(existing.height) : "");
+        } else {
+          setSelectedGoal(getDefaultGoalForOwner(owner));
+          setHeight("");
+        }
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [owner]);
 
-  const handleSave = () => {
-    const updatedProfile: MealProfile = {
+  const handleSave = async () => {
+    setIsSaving(true);
+    const parsedHeight = parseFloat(height);
+    const validHeight =
+      !isNaN(parsedHeight) && parsedHeight > 0
+        ? Math.round(parsedHeight)
+        : undefined;
+
+    const res = await saveClientProfile({
       owner,
       goal: selectedGoal,
-      height: height.trim() || undefined,
-      updatedAt: new Date().toISOString(),
-    };
+      height: validHeight,
+    });
 
-    saveStoredProfile(updatedProfile);
-
-    if (typeof window !== "undefined" && window.navigator?.vibrate) {
-      window.navigator.vibrate(12);
+    setIsSaving(false);
+    if (res.success) {
+      if (typeof window !== "undefined" && window.navigator?.vibrate) {
+        window.navigator.vibrate(12);
+      }
+      setJustSaved(true);
+      onSaved?.(res.profile);
+      setTimeout(() => {
+        setJustSaved(false);
+      }, 1800);
     }
-
-    setJustSaved(true);
-    onSaved?.(updatedProfile);
-    setTimeout(() => {
-      setJustSaved(false);
-    }, 1800);
   };
 
   return (
@@ -164,34 +183,51 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
       {/* Static Height */}
       <div className="p-4 bg-white rounded-2xl border-2 border-stone-900 shadow-brutal-xs space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-bold text-stone-900">Height (Optional)</label>
+          <label className="text-xs font-bold text-stone-900">Height in cm (Optional)</label>
           <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
-            Static record
+            Notion Record
           </span>
         </div>
         <p className="text-[11px] text-stone-600 leading-snug">
-          Stored once for your personal reference. No derived BMI or calories calculated.
+          Stored in your Notion profile. No derived BMI or calories calculated.
         </p>
-        <input
-          type="text"
-          value={height}
-          onChange={(e) => setHeight(e.target.value)}
-          placeholder="e.g. 168 cm or 5'6&quot;"
-          className="w-full bg-[#FAF8F5] border-2 border-stone-900 rounded-xl px-3 py-2 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
-        />
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min="50"
+            max="260"
+            step="1"
+            value={height}
+            onChange={(e) => setHeight(e.target.value)}
+            placeholder="e.g. 168"
+            className="flex-1 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl px-3 py-2 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+          />
+          <span className="text-xs font-black text-stone-700 px-3 py-2 bg-stone-100 border-2 border-stone-900 rounded-xl">
+            cm
+          </span>
+        </div>
       </div>
 
       {/* Action CTA */}
       <button
         type="button"
         onClick={handleSave}
+        disabled={isSaving || isLoading}
         className={`w-full py-3 px-4 rounded-xl font-black text-xs border-2 border-stone-900 shadow-brutal-sm transition-all active:translate-x-[1px] active:translate-y-[1px] flex items-center justify-center gap-2 ${
           justSaved
             ? "bg-emerald-400 text-stone-900"
+            : isSaving
+            ? "bg-amber-200 text-stone-700 cursor-wait"
             : "bg-amber-300 hover:bg-amber-400 text-stone-900"
         }`}
       >
-        <span>{justSaved ? "✓ Profile Saved!" : "Save Eating Profile"}</span>
+        <span>
+          {isSaving
+            ? "Saving to Notion..."
+            : justSaved
+            ? "✓ Profile Saved to Notion!"
+            : "Save Eating Profile"}
+        </span>
       </button>
     </div>
   );

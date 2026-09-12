@@ -1,9 +1,5 @@
 import { MealProfile, UserGoal, WeightLogEntry } from "./types";
 
-const PROFILE_STORAGE_KEY_PREFIX = "meal_builder_profile_";
-const WEIGHT_STORAGE_KEY_PREFIX = "meal_builder_weight_log_";
-const PROMPT_DISMISSED_KEY_PREFIX = "meal_builder_profile_prompt_dismissed_";
-
 /**
  * Returns the configured instance owner, defaulting to Esther.
  * When expanding to other standalone instances (e.g. Victor), setting NEXT_PUBLIC_APP_OWNER
@@ -28,114 +24,134 @@ export function getDefaultGoalForOwner(owner?: string): UserGoal {
   return "Eat healthier";
 }
 
-export function getStoredProfile(owner?: string): MealProfile | null {
-  if (typeof window === "undefined") return null;
+// In-memory transient flag for soft onboarding banner dismissal during active session
+let sessionPromptDismissed = false;
+
+export function hasProfilePromptBeenDismissed(_owner?: string): boolean {
+  return sessionPromptDismissed;
+}
+
+export function setProfilePromptDismissed(_owner?: string): void {
+  sessionPromptDismissed = true;
+}
+
+/**
+ * Client-side API fetchers (calling Notion API routes, zero localStorage)
+ */
+export async function fetchClientProfile(owner?: string): Promise<MealProfile | null> {
   const targetOwner = owner || getCurrentOwner();
   try {
-    const raw = localStorage.getItem(`${PROFILE_STORAGE_KEY_PREFIX}${targetOwner}`);
-    if (!raw) return null;
-    return JSON.parse(raw);
+    const res = await fetch(`/api/notion/profile?owner=${encodeURIComponent(targetOwner)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.profile || null;
   } catch (err) {
-    console.error("Failed to load meal profile", err);
+    console.error("Failed to fetch client profile:", err);
     return null;
   }
 }
 
-export function saveStoredProfile(profile: MealProfile): void {
-  if (typeof window === "undefined") return;
+export async function saveClientProfile(profile: {
+  owner?: string;
+  goal: UserGoal;
+  height?: number;
+}): Promise<{ success: boolean; profile: MealProfile }> {
+  const targetOwner = profile.owner || getCurrentOwner();
   try {
-    localStorage.setItem(
-      `${PROFILE_STORAGE_KEY_PREFIX}${profile.owner}`,
-      JSON.stringify(profile)
-    );
-    // Automatically mark the setup prompt as dismissed once saved
-    setProfilePromptDismissed(profile.owner);
-  } catch (err) {
-    console.error("Failed to save meal profile", err);
-  }
-}
-
-export function hasProfilePromptBeenDismissed(owner?: string): boolean {
-  if (typeof window === "undefined") return true;
-  const targetOwner = owner || getCurrentOwner();
-  try {
-    return localStorage.getItem(`${PROMPT_DISMISSED_KEY_PREFIX}${targetOwner}`) === "true";
-  } catch {
-    return false;
-  }
-}
-
-export function setProfilePromptDismissed(owner?: string): void {
-  if (typeof window === "undefined") return;
-  const targetOwner = owner || getCurrentOwner();
-  try {
-    localStorage.setItem(`${PROMPT_DISMISSED_KEY_PREFIX}${targetOwner}`, "true");
-  } catch (err) {
-    console.error("Failed to dismiss profile prompt", err);
-  }
-}
-
-export function getWeightLogs(owner?: string): WeightLogEntry[] {
-  if (typeof window === "undefined") return [];
-  const targetOwner = owner || getCurrentOwner();
-  try {
-    const raw = localStorage.getItem(`${WEIGHT_STORAGE_KEY_PREFIX}${targetOwner}`);
-    if (!raw) return [];
-    const entries: WeightLogEntry[] = JSON.parse(raw);
-    return entries.sort((a, b) => {
-      const dateCompare = b.date.localeCompare(a.date);
-      if (dateCompare !== 0) return dateCompare;
-      return b.createdAt.localeCompare(a.createdAt);
+    const res = await fetch("/api/notion/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        owner: targetOwner,
+        goal: profile.goal,
+        height: profile.height,
+      }),
     });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error ${res.status}`);
+    }
+
+    const data = await res.json();
+    setProfilePromptDismissed();
+    return data;
   } catch (err) {
-    console.error("Failed to load weight logs", err);
+    console.error("Failed to save client profile:", err);
+    return {
+      success: false,
+      profile: {
+        owner: targetOwner,
+        goal: profile.goal,
+        height: profile.height,
+        updatedAt: new Date().toISOString(),
+      },
+    };
+  }
+}
+
+export async function fetchClientWeightLogs(owner?: string): Promise<WeightLogEntry[]> {
+  const targetOwner = owner || getCurrentOwner();
+  try {
+    const res = await fetch(`/api/notion/progress-log?owner=${encodeURIComponent(targetOwner)}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.logs || [];
+  } catch (err) {
+    console.error("Failed to fetch client weight logs:", err);
     return [];
   }
 }
 
-export function addWeightLog(input: {
+export async function addClientWeightLog(input: {
   owner?: string;
   date: string;
   weight: number;
-  unit?: "kg" | "lbs";
-}): WeightLogEntry {
+}): Promise<{ success: boolean; entry: WeightLogEntry }> {
   const targetOwner = input.owner || getCurrentOwner();
-  const newEntry: WeightLogEntry = {
-    id: `wt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-    owner: targetOwner,
-    date: input.date,
-    weight: Math.round(input.weight * 10) / 10,
-    unit: input.unit || "kg",
-    createdAt: new Date().toISOString(),
-  };
+  try {
+    const res = await fetch("/api/notion/progress-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        owner: targetOwner,
+        date: input.date,
+        weight: input.weight,
+      }),
+    });
 
-  if (typeof window !== "undefined") {
-    try {
-      const current = getWeightLogs(targetOwner);
-      const updated = [newEntry, ...current];
-      localStorage.setItem(
-        `${WEIGHT_STORAGE_KEY_PREFIX}${targetOwner}`,
-        JSON.stringify(updated)
-      );
-    } catch (err) {
-      console.error("Failed to save weight log", err);
+    if (!res.ok) {
+      throw new Error(`HTTP error ${res.status}`);
     }
-  }
 
-  return newEntry;
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to add client weight log:", err);
+    return {
+      success: false,
+      entry: {
+        id: `err-${Date.now()}`,
+        owner: targetOwner,
+        date: input.date,
+        weight: input.weight,
+        unit: "kg",
+      },
+    };
+  }
 }
 
-export function deleteWeightLog(id: string, owner?: string): void {
-  if (typeof window === "undefined") return;
-  const targetOwner = owner || getCurrentOwner();
+export async function deleteClientWeightLog(id: string): Promise<{ success: boolean }> {
   try {
-    const current = getWeightLogs(targetOwner);
-    const updated = current.filter((entry) => entry.id !== id);
-    localStorage.setItem(
-      `${WEIGHT_STORAGE_KEY_PREFIX}${targetOwner}`,
-      JSON.stringify(updated)
-    );
+    const res = await fetch(`/api/notion/progress-log?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error ${res.status}`);
+    }
+
+    return await res.json();
   } catch (err) {
-    console.error("Failed to delete weight log", err);
+    console.error("Failed to delete client weight log:", err);
+    return { success: false };
   }
 }

@@ -2,10 +2,10 @@
 
 import { ChartLineUp, Plus, TrashSimple } from "@/components/icons";
 import {
-  addWeightLog,
-  deleteWeightLog,
+  addClientWeightLog,
+  deleteClientWeightLog,
+  fetchClientWeightLogs,
   getCurrentOwner,
-  getWeightLogs,
 } from "@/lib/profile-storage";
 import { WeightLogEntry } from "@/lib/types";
 import React, { useEffect, useState } from "react";
@@ -19,43 +19,63 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
 }) => {
   const owner = propOwner || getCurrentOwner();
   const [logs, setLogs] = useState<WeightLogEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [dateInput, setDateInput] = useState<string>(() =>
     new Date().toISOString().slice(0, 10)
   );
   const [weightInput, setWeightInput] = useState<string>("");
-  const [unit, setUnit] = useState<"kg" | "lbs">("kg");
   const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
-    setLogs(getWeightLogs(owner));
+    let active = true;
+    setIsLoading(true);
+    fetchClientWeightLogs(owner)
+      .then((data) => {
+        if (active) setLogs(data);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
     setDateInput(new Date().toISOString().slice(0, 10));
     setWeightInput("");
+    return () => {
+      active = false;
+    };
   }, [owner]);
 
-  const handleAddEntry = (e: React.FormEvent) => {
+  const handleAddEntry = async (e: React.FormEvent) => {
     e.preventDefault();
     const val = parseFloat(weightInput);
     if (isNaN(val) || val <= 0) return;
 
+    setIsSubmitting(true);
     if (typeof window !== "undefined" && window.navigator?.vibrate) {
       window.navigator.vibrate(10);
     }
 
-    addWeightLog({
+    const res = await addClientWeightLog({
       owner,
       date: dateInput,
       weight: val,
-      unit,
     });
 
-    setLogs(getWeightLogs(owner));
-    setWeightInput("");
-    setShowAddForm(false);
+    setIsSubmitting(false);
+    if (res.success) {
+      setLogs((prev) => [res.entry, ...prev]);
+      setWeightInput("");
+      setShowAddForm(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteWeightLog(id, owner);
-    setLogs(getWeightLogs(owner));
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    const res = await deleteClientWeightLog(id);
+    setDeletingId(null);
+    if (res.success) {
+      setLogs((prev) => prev.filter((entry) => entry.id !== id));
+    }
   };
 
   const getEntryDelta = (index: number) => {
@@ -162,23 +182,24 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
                     className="w-full bg-white border-2 border-stone-900 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-900"
                     required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setUnit(unit === "kg" ? "lbs" : "kg")}
-                    className="px-2 py-1.5 rounded-xl border-2 border-stone-900 bg-white text-[11px] font-black shrink-0 shadow-xs"
-                  >
-                    {unit}
-                  </button>
+                  <span className="px-2.5 py-1.5 rounded-xl border-2 border-stone-900 bg-stone-100 text-xs font-black shrink-0 shadow-xs">
+                    kg
+                  </span>
                 </div>
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full py-2.5 px-4 rounded-xl font-black text-xs bg-emerald-400 hover:bg-emerald-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs flex items-center justify-center gap-2 active:translate-x-0.5 active:translate-y-0.5"
+              disabled={isSubmitting}
+              className={`w-full py-2.5 px-4 rounded-xl font-black text-xs border-2 border-stone-900 shadow-brutal-xs flex items-center justify-center gap-2 active:translate-x-0.5 active:translate-y-0.5 ${
+                isSubmitting
+                  ? "bg-amber-200 text-stone-700 cursor-wait"
+                  : "bg-emerald-400 hover:bg-emerald-300 text-stone-900"
+              }`}
             >
               <Plus size={14} weight="bold" />
-              <span>Save Weigh-In</span>
+              <span>{isSubmitting ? "Saving to Notion..." : "Save Weigh-In to Notion"}</span>
             </button>
           </form>
         )}
@@ -192,7 +213,13 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
           </span>
         </div>
 
-        {logs.length === 0 ? (
+        {isLoading && logs.length === 0 ? (
+          <div className="p-6 text-center bg-white rounded-2xl border-2 border-stone-200 space-y-2">
+            <span className="text-xs font-bold text-stone-500 animate-pulse">
+              Syncing with Notion...
+            </span>
+          </div>
+        ) : logs.length === 0 ? (
           <div className="p-6 text-center bg-white rounded-2xl border-2 border-dashed border-stone-300 space-y-2">
             <div className="w-10 h-10 rounded-full bg-purple-100 border border-stone-300 flex items-center justify-center mx-auto text-purple-700">
               <ChartLineUp size={20} weight="bold" />
@@ -216,10 +243,13 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
           <div className="space-y-2 max-h-[38vh] overflow-y-auto no-scrollbar pr-0.5">
             {logs.map((entry, idx) => {
               const delta = getEntryDelta(idx);
+              const isDeleting = deletingId === entry.id;
               return (
                 <div
                   key={entry.id}
-                  className="p-3 bg-white rounded-2xl border-2 border-stone-900 shadow-brutal-xs flex items-center justify-between gap-3"
+                  className={`p-3 bg-white rounded-2xl border-2 border-stone-900 shadow-brutal-xs flex items-center justify-between gap-3 transition-opacity ${
+                    isDeleting ? "opacity-50" : ""
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-xl bg-stone-100 border border-stone-900 flex items-center justify-center text-xs font-black text-stone-700">
@@ -227,7 +257,7 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
                     </div>
                     <div>
                       <span className="text-sm font-black text-stone-900 block">
-                        {entry.weight} {entry.unit}
+                        {entry.weight} {entry.unit || "kg"}
                       </span>
                       <span className="text-[11px] text-stone-500 font-medium">
                         {entry.date}
@@ -252,8 +282,9 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
                     <button
                       type="button"
                       onClick={() => handleDelete(entry.id)}
+                      disabled={isDeleting}
                       aria-label={`Delete entry for ${entry.date}`}
-                      className="p-1.5 text-stone-400 hover:text-rose-600 rounded-lg transition-colors"
+                      className="p-1.5 text-stone-400 hover:text-rose-600 rounded-lg transition-colors disabled:opacity-40"
                     >
                       <TrashSimple size={15} weight="bold" />
                     </button>

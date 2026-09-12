@@ -25,9 +25,13 @@ export interface MealLogEntry {
   id?: string;
   mealType: MealType;
   source: MealSource;
+  mainIngredientId?: string;
   mainIngredient?: string;
+  proteinId?: string;
   protein?: string;
+  supplementaryId?: string;
   supplementary?: string;
+  readyMealId?: string;
   readyMeal?: string;
   date: string;
   hadLeftovers: boolean;
@@ -124,18 +128,20 @@ export type UserGoal =
   | "Eat more food generally";
 
 export interface MealProfile {
+  id?: string;
   owner: string;
   goal: UserGoal;
-  height?: string; // Optional static height, e.g. "5'6\"" or "168 cm"
-  updatedAt: string;
+  height?: number; // Number in Notion Database 4
+  updatedAt?: string;
 }
 
 export interface WeightLogEntry {
   id: string;
   owner: string;
   date: string; // "YYYY-MM-DD"
-  weight: number; // e.g. 58.5
-  unit: "kg" | "lbs";
-  createdAt: string;
+  weight: number; // Number in Notion Database 5
+  unit?: "kg" | "lbs";
+  createdAt?: string;
 }
+
 

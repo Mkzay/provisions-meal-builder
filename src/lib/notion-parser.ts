@@ -2,8 +2,11 @@ import {
   Ingredient,
   IngredientRole,
   MealLogEntry,
+  MealProfile,
   MealType,
   ReadyMeal,
+  UserGoal,
+  WeightLogEntry,
 } from "./types";
 
 export function parseNotionIngredient(page: any): Ingredient | null {
@@ -151,51 +154,29 @@ export function buildMealLogProperties(entry: MealLogEntry): Record<string, any>
     },
   };
 
-  if (entry.mainIngredient) {
+  // Relations to Ingredients Catalogue
+  if (entry.mainIngredientId) {
     properties["Main Ingredient"] = {
-      rich_text: [
-        {
-          text: {
-            content: entry.mainIngredient,
-          },
-        },
-      ],
+      relation: [{ id: entry.mainIngredientId }],
     };
   }
 
-  if (entry.protein) {
+  if (entry.proteinId) {
     properties.Protein = {
-      rich_text: [
-        {
-          text: {
-            content: entry.protein,
-          },
-        },
-      ],
+      relation: [{ id: entry.proteinId }],
     };
   }
 
-  if (entry.supplementary) {
+  if (entry.supplementaryId) {
     properties.Supplementary = {
-      rich_text: [
-        {
-          text: {
-            content: entry.supplementary,
-          },
-        },
-      ],
+      relation: [{ id: entry.supplementaryId }],
     };
   }
 
-  if (entry.readyMeal) {
+  // Relation to Ready Meals
+  if (entry.readyMealId) {
     properties["Ready Meal"] = {
-      rich_text: [
-        {
-          text: {
-            content: entry.readyMeal,
-          },
-        },
-      ],
+      relation: [{ id: entry.readyMealId }],
     };
   }
 
@@ -231,6 +212,159 @@ export function buildNewReadyMealProperties(
       select: {
         name: owner,
       },
+    },
+  };
+}
+
+/**
+ * Database 4: Meal Profile
+ * - Owner (Select)
+ * - Goal (Select: Lose weight, Gain weight, Eat healthier, Eat more food generally)
+ * - Height (Number, optional)
+ */
+export function parseNotionMealProfile(page: any): MealProfile | null {
+  try {
+    const props = page.properties;
+    if (!props) return null;
+
+    const owner =
+      props.Owner?.select?.name ||
+      props.Owner?.rich_text?.[0]?.plain_text ||
+      "Esther";
+
+    const goalName = props.Goal?.select?.name || props.goal?.select?.name;
+    const goal: UserGoal =
+      goalName === "Lose weight" ||
+      goalName === "Eat healthier" ||
+      goalName === "Eat more food generally"
+        ? goalName
+        : "Gain weight";
+
+    const heightVal = props.Height?.number ?? props.height?.number;
+    const height =
+      typeof heightVal === "number" && !isNaN(heightVal) && heightVal > 0
+        ? heightVal
+        : undefined;
+
+    return {
+      id: page.id,
+      owner,
+      goal,
+      height,
+      updatedAt: page.last_edited_time || new Date().toISOString(),
+    };
+  } catch (err) {
+    console.error("Error parsing Notion meal profile:", err);
+    return null;
+  }
+}
+
+export function buildMealProfileProperties(profile: {
+  owner: string;
+  goal: UserGoal;
+  height?: number;
+}): Record<string, any> {
+  const properties: Record<string, any> = {
+    Name: {
+      title: [
+        {
+          text: {
+            content: `${profile.owner}'s Meal Profile`,
+          },
+        },
+      ],
+    },
+    Owner: {
+      select: {
+        name: profile.owner,
+      },
+    },
+    Goal: {
+      select: {
+        name: profile.goal,
+      },
+    },
+  };
+
+  if (typeof profile.height === "number" && !isNaN(profile.height) && profile.height > 0) {
+    properties.Height = {
+      number: profile.height,
+    };
+  } else {
+    properties.Height = {
+      number: null,
+    };
+  }
+
+  return properties;
+}
+
+/**
+ * Database 5: Progress Log
+ * - Owner (Select)
+ * - Date (Date)
+ * - Weight (Number)
+ */
+export function parseNotionWeightLog(page: any): WeightLogEntry | null {
+  try {
+    const props = page.properties;
+    if (!props) return null;
+
+    const owner =
+      props.Owner?.select?.name ||
+      props.Owner?.rich_text?.[0]?.plain_text ||
+      "Esther";
+
+    const date =
+      props.Date?.date?.start ||
+      page.created_time?.slice(0, 10) ||
+      new Date().toISOString().slice(0, 10);
+
+    const weightVal = props.Weight?.number ?? props.weight?.number;
+    if (typeof weightVal !== "number" || isNaN(weightVal)) return null;
+
+    return {
+      id: page.id,
+      owner,
+      date,
+      weight: Math.round(weightVal * 10) / 10,
+      unit: "kg",
+      createdAt: page.created_time || new Date().toISOString(),
+    };
+  } catch (err) {
+    console.error("Error parsing Notion weight log:", err);
+    return null;
+  }
+}
+
+export function buildWeightLogProperties(entry: {
+  owner: string;
+  date: string;
+  weight: number;
+}): Record<string, any> {
+  const roundedWeight = Math.round(entry.weight * 10) / 10;
+  return {
+    Name: {
+      title: [
+        {
+          text: {
+            content: `${roundedWeight} kg - ${entry.date}`,
+          },
+        },
+      ],
+    },
+    Owner: {
+      select: {
+        name: entry.owner,
+      },
+    },
+    Date: {
+      date: {
+        start: entry.date,
+      },
+    },
+    Weight: {
+      number: roundedWeight,
     },
   };
 }

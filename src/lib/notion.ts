@@ -2,9 +2,13 @@ import { Client } from "@notionhq/client";
 import { resolveLeftoverAction } from "./flow-logic";
 import {
   buildMealLogProperties,
+  buildMealProfileProperties,
   buildNewReadyMealProperties,
+  buildWeightLogProperties,
   parseNotionIngredient,
+  parseNotionMealProfile,
   parseNotionReadyMeal,
+  parseNotionWeightLog,
 } from "./notion-parser";
 import { SEED_CATALOGUE } from "./seed-data";
 import {
@@ -13,11 +17,14 @@ import {
   KitchenCatalogue,
   LeftoverDecision,
   MealLogEntry,
+  MealProfile,
   ReadyMeal,
+  UserGoal,
+  WeightLogEntry,
 } from "./types";
 
 // Notion Client initialization (server-only)
-function getNotionClient(): Client | null {
+export function getNotionClient(): Client | null {
   const apiKey = process.env.NOTION_API_KEY;
   if (!apiKey || apiKey === "your_notion_api_key_here") {
     return null;
@@ -232,4 +239,15 @@ export async function addSupplyToNotion(
     return { success: false };
   }
 }
+
+// Re-export Database 4 (Meal Profile) and Database 5 (Progress Log) methods
+export {
+  fetchMealProfile,
+  saveMealProfile,
+  fetchWeightLogs,
+  addWeightLogEntry,
+  deleteWeightLogEntry,
+} from "./notion-profile";
+
+
 

@@ -1,44 +1,19 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  addWeightLog,
-  deleteWeightLog,
+  addClientWeightLog,
+  deleteClientWeightLog,
+  fetchClientProfile,
+  fetchClientWeightLogs,
   getCurrentOwner,
   getDefaultGoalForOwner,
-  getStoredProfile,
-  getWeightLogs,
   hasProfilePromptBeenDismissed,
-  saveStoredProfile,
+  saveClientProfile,
   setProfilePromptDismissed,
 } from "../lib/profile-storage";
-import { MealProfile } from "../lib/types";
 
-let storage: Record<string, string> = {};
-
-const mockLocalStorage = {
-  getItem: (key: string) => storage[key] ?? null,
-  setItem: (key: string, val: string) => {
-    storage[key] = String(val);
-  },
-  removeItem: (key: string) => {
-    delete storage[key];
-  },
-  clear: () => {
-    storage = {};
-  },
-};
-
-Object.defineProperty(globalThis, "localStorage", {
-  value: mockLocalStorage,
-  writable: true,
-});
-
-if (typeof window === "undefined") {
-  (globalThis as any).window = globalThis;
-}
-
-describe("Profile & Progress Storage Logic", () => {
+describe("Profile & Progress Client Logic (Notion API backed, zero localStorage)", () => {
   beforeEach(() => {
-    storage = {};
+    vi.restoreAllMocks();
   });
 
   describe("Owner & Defaults", () => {
@@ -57,91 +32,115 @@ describe("Profile & Progress Storage Logic", () => {
     });
   });
 
-  describe("Meal Profile persistence", () => {
-    it("returns null when no profile has been saved", () => {
-      expect(getStoredProfile("Esther")).toBeNull();
-    });
-
-    it("saves and retrieves profile accurately", () => {
-      const profile: MealProfile = {
-        owner: "Esther",
-        goal: "Gain weight",
-        height: "168 cm",
-        updatedAt: new Date().toISOString(),
-      };
-
-      saveStoredProfile(profile);
-      const loaded = getStoredProfile("Esther");
-      expect(loaded).toBeDefined();
-      expect(loaded?.goal).toBe("Gain weight");
-      expect(loaded?.height).toBe("168 cm");
-    });
-
-    it("isolates profiles between different instance owners", () => {
-      saveStoredProfile({
-        owner: "Esther",
-        goal: "Gain weight",
-        updatedAt: new Date().toISOString(),
-      });
-      saveStoredProfile({
-        owner: "Victor",
-        goal: "Lose weight",
-        updatedAt: new Date().toISOString(),
-      });
-
-      expect(getStoredProfile("Esther")?.goal).toBe("Gain weight");
-      expect(getStoredProfile("Victor")?.goal).toBe("Lose weight");
-    });
-
-    it("tracks soft onboarding prompt dismissal flag", () => {
-      expect(hasProfilePromptBeenDismissed("Esther")).toBe(false);
-      setProfilePromptDismissed("Esther");
-      expect(hasProfilePromptBeenDismissed("Esther")).toBe(true);
+  describe("Session-only Onboarding Prompt Dismissal", () => {
+    it("tracks in-memory session dismissal without writing to localStorage", () => {
+      setProfilePromptDismissed();
+      expect(hasProfilePromptBeenDismissed()).toBe(true);
     });
   });
 
-  describe("Weight Log persistence", () => {
-    it("returns empty array when no weight logs exist", () => {
-      expect(getWeightLogs("Esther")).toEqual([]);
+  describe("Client API Fetchers (calling server API routes)", () => {
+    it("fetches profile from /api/notion/profile", async () => {
+      const mockProfile = {
+        id: "profile-1",
+        owner: "Esther",
+        goal: "Gain weight",
+        height: 168,
+      };
+
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ profile: mockProfile }),
+      } as any);
+
+      const profile = await fetchClientProfile("Esther");
+      expect(globalThis.fetch).toHaveBeenCalledWith("/api/notion/profile?owner=Esther");
+      expect(profile).toEqual(mockProfile);
     });
 
-    it("adds weight entries and rounds to 1 decimal place", () => {
-      const entry = addWeightLog({
+    it("saves profile via POST /api/notion/profile", async () => {
+      const mockSaved = {
         owner: "Esther",
-        date: "2026-09-10",
-        weight: 58.456,
+        goal: "Gain weight" as const,
+        height: 168,
+      };
+
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, profile: mockSaved }),
+      } as any);
+
+      const result = await saveClientProfile(mockSaved);
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "/api/notion/profile",
+        expect.objectContaining({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        })
+      );
+      expect(result.success).toBe(true);
+      expect(result.profile.goal).toBe("Gain weight");
+    });
+
+    it("fetches weight logs from /api/notion/progress-log", async () => {
+      const mockLogs = [
+        { id: "wt-1", owner: "Esther", date: "2026-09-12", weight: 58.5, unit: "kg" },
+      ];
+
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ logs: mockLogs }),
+      } as any);
+
+      const logs = await fetchClientWeightLogs("Esther");
+      expect(globalThis.fetch).toHaveBeenCalledWith("/api/notion/progress-log?owner=Esther");
+      expect(logs).toEqual(mockLogs);
+    });
+
+    it("adds weight log via POST /api/notion/progress-log", async () => {
+      const mockEntry = {
+        id: "wt-created-1",
+        owner: "Esther",
+        date: "2026-09-12",
+        weight: 58.5,
         unit: "kg",
+      };
+
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, entry: mockEntry }),
+      } as any);
+
+      const result = await addClientWeightLog({
+        owner: "Esther",
+        date: "2026-09-12",
+        weight: 58.5,
       });
 
-      expect(entry.id).toBeDefined();
-      expect(entry.weight).toBe(58.5);
-      expect(entry.unit).toBe("kg");
-
-      const logs = getWeightLogs("Esther");
-      expect(logs).toHaveLength(1);
-      expect(logs[0].id).toBe(entry.id);
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "/api/notion/progress-log",
+        expect.objectContaining({
+          method: "POST",
+        })
+      );
+      expect(result.success).toBe(true);
+      expect(result.entry.id).toBe("wt-created-1");
     });
 
-    it("sorts entries chronologically descending (newest date first)", () => {
-      addWeightLog({ owner: "Esther", date: "2026-09-01", weight: 57.0 });
-      addWeightLog({ owner: "Esther", date: "2026-09-12", weight: 58.2 });
-      addWeightLog({ owner: "Esther", date: "2026-09-05", weight: 57.8 });
+    it("deletes weight log via DELETE /api/notion/progress-log", async () => {
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true }),
+      } as any);
 
-      const logs = getWeightLogs("Esther");
-      expect(logs).toHaveLength(3);
-      expect(logs[0].date).toBe("2026-09-12");
-      expect(logs[1].date).toBe("2026-09-05");
-      expect(logs[2].date).toBe("2026-09-01");
-    });
-
-    it("deletes a weight entry cleanly", () => {
-      const e1 = addWeightLog({ owner: "Esther", date: "2026-09-01", weight: 57.0 });
-      const e2 = addWeightLog({ owner: "Esther", date: "2026-09-02", weight: 57.2 });
-
-      deleteWeightLog(e1.id, "Esther");
-      const logs = getWeightLogs("Esther");
-      expect(logs).toHaveLength(1);
-      expect(logs[0].id).toBe(e2.id);
+      const result = await deleteClientWeightLog("wt-to-delete");
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "/api/notion/progress-log?id=wt-to-delete",
+        expect.objectContaining({
+          method: "DELETE",
+        })
+      );
+      expect(result.success).toBe(true);
     });
   });
 });

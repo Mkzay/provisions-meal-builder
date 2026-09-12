@@ -22,20 +22,26 @@ import {
 import { ProfileOnboardingBanner } from "@/components/ProfileOnboardingBanner";
 import { ReadyMealHero } from "@/components/ReadyMealHero";
 import {
-  getStoredProfile,
+  fetchClientProfile,
   hasProfilePromptBeenDismissed,
 } from "@/lib/profile-storage";
 import { useMealBuilder } from "@/lib/useMealBuilder";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function MealBuilderPage() {
   const [isPersonalHubOpen, setIsPersonalHubOpen] = useState(false);
   const [personalHubTab, setPersonalHubTab] = useState<PersonalHubTab>("profile");
-  const [hasProfile, setHasProfile] = useState<boolean>(() => !!getStoredProfile());
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
   const [isPromptDismissed, setIsPromptDismissed] = useState<boolean>(() =>
     hasProfilePromptBeenDismissed()
   );
+
+  useEffect(() => {
+    fetchClientProfile().then((p) => {
+      setHasProfile(!!p);
+    });
+  }, []);
 
   const handleOpenPersonalHub = (tab: PersonalHubTab = "profile") => {
     setPersonalHubTab(tab);

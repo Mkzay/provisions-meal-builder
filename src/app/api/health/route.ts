@@ -11,6 +11,13 @@ export async function GET() {
     status: "ok",
     appName: "Meal Builder for Esther",
     notionConfigured: isNotionConfigured,
+    databases: {
+      ingredients: Boolean(process.env.NOTION_INGREDIENTS_DB_ID),
+      readyMeals: Boolean(process.env.NOTION_READY_MEALS_DB_ID),
+      mealLog: Boolean(process.env.NOTION_MEAL_LOG_DB_ID),
+      profile: Boolean(process.env.NOTION_PROFILE_DB_ID),
+      progressLog: Boolean(process.env.NOTION_PROGRESS_LOG_DB_ID),
+    },
     timestamp: new Date().toISOString(),
   });
 }
