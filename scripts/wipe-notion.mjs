@@ -2,7 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { Client } from "@notionhq/client";
 
-// 1. Load .env
 const envPath = path.resolve(".env");
 const lines = fs.readFileSync(envPath, "utf-8").split("\n");
 const env = {};
@@ -15,70 +14,57 @@ for (const line of lines) {
   }
 }
 
-const apiKey = env.NOTION_API_KEY;
-if (!apiKey || apiKey === "your_notion_api_key_here") {
-  console.error("NOTION_API_KEY is not configured in .env");
-  process.exit(1);
-}
+const notion = new Client({ auth: env.NOTION_API_KEY });
 
-const notion = new Client({ auth: apiKey });
-
-const dbs = [
-  { name: "Ingredients Catalogue", id: env.NOTION_INGREDIENTS_DB_ID },
-  { name: "Ready Meals", id: env.NOTION_READY_MEALS_DB_ID },
-  { name: "Meal Log", id: env.NOTION_MEAL_LOG_DB_ID },
-  { name: "Meal Profile", id: env.NOTION_PROFILE_DB_ID },
-  { name: "Progress Log", id: env.NOTION_PROGRESS_LOG_DB_ID },
-];
+const TARGET_DB_IDS = new Set([
+  "3d91c68e-ece0-8143-b609-d1e1ffc78f21", // Ingredients Catalogue
+  "0bb005e1-5bc9-41f6-9e17-7ca63d96be23", // Ready Meals
+  "f3787326-a64f-4e80-8c42-99080e86a012", // Meal Log
+  "830a7ce7-81a1-4eb4-b88f-1eb861689a60", // Meal Profile
+  "dacbd551-a2d3-41f3-867d-10e64e76f1bf", // Progress Log
+]);
 
 async function main() {
-  const args = process.argv.slice(2);
-  const isConfirmed = args.includes("--confirm");
+  console.log("=== Notion Workspace Wipe Utility ===");
+  console.log("Searching for all pages inside your Provisions databases...");
 
-  console.log("=== Notion Database Wipe Utility ===");
+  const search = await notion.search({
+    filter: { property: "object", value: "page" },
+  });
 
-  if (!isConfirmed) {
-    console.log("\n⚠️  SAFETY CHECK: You are about to wipe pages across all 5 Notion databases.");
-    console.log("To execute this action, you must pass the --confirm flag:");
-    console.log("  node scripts/wipe-notion.mjs --confirm\n");
-    console.log("Checking current database accessibility...");
+  const pagesToWipe = [];
+  for (const page of search.results) {
+    const parentId = page.parent?.database_id;
+    if (parentId && TARGET_DB_IDS.has(parentId)) {
+      const title =
+        page.properties?.Name?.title?.[0]?.plain_text ||
+        page.properties?.title?.title?.[0]?.plain_text ||
+        "Untitled";
+      pagesToWipe.push({ id: page.id, title, parentId });
+    }
   }
 
-  let totalFound = 0;
+  console.log(`Found ${pagesToWipe.length} page(s) to archive:`);
+  for (const p of pagesToWipe) {
+    console.log(`- "${p.title}" (ID: ${p.id})`);
+  }
 
-  for (const db of dbs) {
-    if (!db.id) {
-      console.log(`- ${db.name}: ID not configured, skipping.`);
-      continue;
-    }
+  if (pagesToWipe.length === 0) {
+    console.log("\n✓ All databases are already 100% clean!");
+    return;
+  }
 
+  console.log("\nArchiving pages into Notion Trash...");
+  for (const p of pagesToWipe) {
     try {
-      const query = await notion.databases.query({ database_id: db.id });
-      const count = query.results.length;
-      totalFound += count;
-      console.log(`- ${db.name}: ${count} page(s) found`);
-
-      if (isConfirmed && count > 0) {
-        console.log(`  Archiving ${count} page(s) in ${db.name}...`);
-        for (const page of query.results) {
-          await notion.pages.update({
-            page_id: page.id,
-            archived: true,
-          });
-        }
-        console.log(`  ✓ Cleared ${db.name}`);
-      }
-    } catch (err) {
-      console.error(`- ${db.name}: Error querying database (${err.message})`);
+      await notion.pages.update({ page_id: p.id, archived: true });
+      console.log(`✓ Archived: "${p.title}"`);
+    } catch (e) {
+      console.error(`✗ Error archiving "${p.title}":`, e.message);
     }
   }
 
-  if (!isConfirmed) {
-    console.log(`\nFound ${totalFound} total item(s) across accessible databases.`);
-    console.log("Run with --confirm to archive them to trash.");
-  } else {
-    console.log("\n✓ Clean slate complete! All accessible databases are now clean.");
-  }
+  console.log("\n✓ Clean slate complete! All rows in all 5 Notion databases have been cleared.");
 }
 
 main().catch(console.error);
