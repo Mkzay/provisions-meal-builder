@@ -51,6 +51,71 @@ describe("Food Ideas & Inspiration Catalogue", () => {
     expect(greekYogurt.nutrientTags).toContain("High Protein");
   });
 
+  it("includes all Nigerian household reference staples from pantry inventory list", () => {
+    const names = FOOD_IDEAS_CATALOGUE.map((i) => i.name.toLowerCase());
+
+    // Mains
+    expect(names.some((n) => n.includes("amala"))).toBe(true);
+    expect(names.some((n) => n.includes("fufu"))).toBe(true);
+    expect(names.some((n) => n.includes("tuwo"))).toBe(true);
+    expect(names.some((n) => n.includes("cassava"))).toBe(true);
+    expect(names.some((n) => n.includes("cocoyam"))).toBe(true);
+    expect(names.some((n) => n.includes("wheat meal"))).toBe(true);
+    expect(names.some((n) => n.includes("bread"))).toBe(true);
+    expect(names.some((n) => n.includes("ofada"))).toBe(true);
+    expect(names.some((n) => n.includes("unripe plantain"))).toBe(true);
+
+    // Proteins
+    expect(names.some((n) => n.includes("goat meat"))).toBe(true);
+    expect(names.some((n) => n.includes("croaker"))).toBe(true);
+    expect(names.some((n) => n.includes("catfish"))).toBe(true);
+    expect(names.some((n) => n.includes("panla"))).toBe(true);
+    expect(names.some((n) => n.includes("turkey"))).toBe(true);
+    expect(names.some((n) => n.includes("snail"))).toBe(true);
+    expect(names.some((n) => n.includes("shaki"))).toBe(true);
+    expect(names.some((n) => n.includes("ponmo"))).toBe(true);
+    expect(names.some((n) => n.includes("stockfish"))).toBe(true);
+    expect(names.some((n) => n.includes("crayfish"))).toBe(true);
+    expect(names.some((n) => n.includes("lentils"))).toBe(true);
+    expect(names.some((n) => n.includes("egg whites"))).toBe(true);
+
+    // Vegetables / Supplementary
+    expect(names.some((n) => n.includes("ugu"))).toBe(true);
+    expect(names.some((n) => n.includes("ewedu"))).toBe(true);
+    expect(names.some((n) => n.includes("okra"))).toBe(true);
+    expect(names.some((n) => n.includes("bitterleaf"))).toBe(true);
+    expect(names.some((n) => n.includes("waterleaf"))).toBe(true);
+    expect(names.some((n) => n.includes("efo shoko"))).toBe(true);
+    expect(names.some((n) => n.includes("green beans"))).toBe(true);
+    expect(names.some((n) => n.includes("palm oil"))).toBe(true);
+    expect(names.some((n) => n.includes("iru"))).toBe(true);
+    expect(names.some((n) => n.includes("peanut butter"))).toBe(true);
+
+    // Fruits
+    expect(names.some((n) => n.includes("banana"))).toBe(true);
+    expect(names.some((n) => n.includes("pawpaw"))).toBe(true);
+    expect(names.some((n) => n.includes("watermelon"))).toBe(true);
+    expect(names.some((n) => n.includes("orange"))).toBe(true);
+    expect(names.some((n) => n.includes("pineapple"))).toBe(true);
+    expect(names.some((n) => n.includes("mango"))).toBe(true);
+    expect(names.some((n) => n.includes("guava"))).toBe(true);
+    expect(names.some((n) => n.includes("apple"))).toBe(true);
+    expect(names.some((n) => n.includes("coconut"))).toBe(true);
+
+    // Palm oil honestly tagged High Fat
+    const palmOil = FOOD_IDEAS_CATALOGUE.find((i) => i.name.toLowerCase().includes("palm oil"))!;
+    expect(palmOil.nutrientTags).toContain("High Fat");
+
+    // Amala tagged High Fiber and High Carb
+    const amala = FOOD_IDEAS_CATALOGUE.find((i) => i.name.toLowerCase().includes("amala"))!;
+    expect(amala.nutrientTags).toContain("High Fiber");
+    expect(amala.nutrientTags).toContain("High Carb");
+
+    // Snail tagged High Protein
+    const snail = FOOD_IDEAS_CATALOGUE.find((i) => i.name.toLowerCase().includes("snail"))!;
+    expect(snail.nutrientTags).toContain("High Protein");
+  });
+
   it("validates that all food ideas have qualitative nutrient tags from allowed set", () => {
     const validTags = new Set(["High Fiber", "High Protein", "High Carb", "High Fat"]);
     for (const idea of FOOD_IDEAS_CATALOGUE) {

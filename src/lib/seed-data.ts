@@ -47,6 +47,16 @@ export const INITIAL_INGREDIENTS: Ingredient[] = [
     mealTypes: ["Breakfast", "Lunch", "Dinner"], role: "Main", owner: "Esther", available: true,
     nutrientTags: ["High Carb", "High Fiber"],
   },
+  {
+    id: "ing-7b", name: "Garri (White / Yellow / Ijebu)",
+    mealTypes: ["Breakfast", "Lunch", "Dinner", "Snack"], role: "Main", owner: "Esther", available: true,
+    nutrientTags: ["High Carb", "High Fiber"],
+  },
+  {
+    id: "ing-7c", name: "Amala (Yam Flour / Elubo)",
+    mealTypes: ["Lunch", "Dinner"], role: "Main", owner: "Esther", available: true,
+    nutrientTags: ["High Fiber", "High Carb"],
+  },
 
   // Proteins
   {
@@ -75,6 +85,11 @@ export const INITIAL_INGREDIENTS: Ingredient[] = [
     nutrientTags: ["High Protein", "High Fiber", "High Carb"],
   },
   {
+    id: "ing-12c", name: "Honey Beans (Ewa Oloyin)",
+    mealTypes: ["Breakfast", "Lunch", "Dinner"], role: "Protein", owner: "Esther", available: true,
+    nutrientTags: ["High Protein", "High Fiber", "High Carb"],
+  },
+  {
     id: "ing-12b", name: "Peanut Butter / Nut Spread",
     mealTypes: ["Breakfast", "Snack"], role: "Protein", owner: "Esther", available: true,
     nutrientTags: ["High Fat", "High Protein"],
@@ -86,6 +101,11 @@ export const INITIAL_INGREDIENTS: Ingredient[] = [
   },
 
   // Supplementary
+  {
+    id: "ing-13b", name: "Red Palm Oil (Unrefined)",
+    mealTypes: ["Breakfast", "Lunch", "Dinner"], role: "Supplementary", owner: "Esther", available: true,
+    nutrientTags: ["High Fat"],
+  },
   {
     id: "ing-14", name: "Dodo (Fried Plantain)",
     mealTypes: ["Breakfast", "Lunch", "Dinner"], role: "Supplementary", owner: "Esther", available: true,
