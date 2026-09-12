@@ -69,6 +69,14 @@ describe("Component import integrity", () => {
     await import("../components/AddSupplyModal");
   });
 
+  it("imports AddSupplySingleTab", async () => {
+    await import("../components/AddSupplySingleTab");
+  });
+
+  it("imports AddSupplyBulkTab", async () => {
+    await import("../components/AddSupplyBulkTab");
+  });
+
   it("imports MealProfileModal", async () => {
     await import("../components/MealProfileModal");
   });

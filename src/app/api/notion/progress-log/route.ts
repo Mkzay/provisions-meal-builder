@@ -6,6 +6,8 @@ import {
 } from "@/lib/notion-profile";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
@@ -13,7 +15,14 @@ export async function GET(req: NextRequest) {
     const owner = session?.user?.ownerName || searchParams.get("owner") || "Esther";
 
     const logs = await fetchWeightLogs(owner);
-    return NextResponse.json({ logs });
+    return NextResponse.json(
+      { logs },
+      {
+        headers: {
+          "Cache-Control": "private, no-cache, no-store, must-revalidate",
+        },
+      }
+    );
   } catch (error) {
     console.error("API error fetching weight logs:", error);
     return NextResponse.json(

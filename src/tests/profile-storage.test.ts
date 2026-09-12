@@ -54,7 +54,10 @@ describe("Profile & Progress Client Logic (Notion API backed, zero localStorage)
       } as any);
 
       const profile = await fetchClientProfile("Esther");
-      expect(globalThis.fetch).toHaveBeenCalledWith("/api/notion/profile?owner=Esther");
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "/api/notion/profile?owner=Esther",
+        expect.objectContaining({ cache: "no-store" })
+      );
       expect(profile).toEqual(mockProfile);
     });
 

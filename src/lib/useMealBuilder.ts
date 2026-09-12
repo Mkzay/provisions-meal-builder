@@ -279,6 +279,65 @@ export function useMealBuilder(owner: string = "Esther") {
     }
   };
 
+  const handleAddBulkSupplies = async (inputs: AddSupplyInput[]) => {
+    if (!inputs.length) return;
+    let nextCatalogue = { ...catalogue };
+    const now = Date.now();
+    const newIngredients: Ingredient[] = [];
+    const newReadyMeals: ReadyMeal[] = [];
+
+    inputs.forEach((input, index) => {
+      const supplyOwner = input.owner || owner;
+      if (input.kind === "ingredient") {
+        newIngredients.push({
+          id: `ing-${now}-${index}`,
+          name: input.name,
+          mealTypes: input.mealTypes,
+          role: input.role || "Main",
+          owner: supplyOwner,
+          available: true,
+        });
+      } else {
+        newReadyMeals.push({
+          id: `ready-${now}-${index}`,
+          name: input.name,
+          mealTypes: input.mealTypes,
+          owner: supplyOwner,
+          available: true,
+        });
+      }
+    });
+
+    if (newIngredients.length) {
+      nextCatalogue = {
+        ...nextCatalogue,
+        ingredients: [...newIngredients, ...nextCatalogue.ingredients],
+      };
+    }
+    if (newReadyMeals.length) {
+      nextCatalogue = {
+        ...nextCatalogue,
+        readyMeals: [...newReadyMeals, ...nextCatalogue.readyMeals],
+      };
+    }
+
+    setCatalogue(nextCatalogue);
+    saveCachedCatalogue(nextCatalogue, owner);
+
+    await Promise.allSettled(
+      inputs.map((inp) => {
+        const supplyInput = { ...inp, owner: inp.owner || owner };
+        return fetch("/api/notion/supplies", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(supplyInput),
+        }).catch(() => {
+          queueOfflineMutation("supplies", supplyInput);
+        });
+      })
+    );
+  };
+
   return {
     catalogue,
     isClientReady,
@@ -317,6 +376,7 @@ export function useMealBuilder(owner: string = "Esther") {
     handleSubmitLeftoverDecision,
     handleQuickAddStaples,
     handleAddSupply,
+    handleAddBulkSupplies,
   };
 }
 

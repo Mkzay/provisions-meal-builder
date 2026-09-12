@@ -3,6 +3,7 @@
 import { Check } from "@/components/icons";
 import {
   fetchClientProfile,
+  getClientProfileCached,
   getCurrentOwner,
   getDefaultGoalForOwner,
   saveClientProfile,
@@ -52,13 +53,28 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
   onSaved,
 }) => {
   const owner = propOwner || getCurrentOwner();
+  const cachedInitial = getClientProfileCached(owner);
   const [selectedGoal, setSelectedGoal] = useState<UserGoal>(() =>
-    getDefaultGoalForOwner(owner)
+    cachedInitial?.goal || getDefaultGoalForOwner(owner)
   );
   const [heightUnit, setHeightUnit] = useState<"cm" | "ft">("cm");
-  const [heightCm, setHeightCm] = useState<string>("");
-  const [feet, setFeet] = useState<string>("");
-  const [inches, setInches] = useState<string>("");
+  const [heightCm, setHeightCm] = useState<string>(() =>
+    cachedInitial?.height ? String(cachedInitial.height) : ""
+  );
+  const [feet, setFeet] = useState<string>(() => {
+    if (cachedInitial?.height) {
+      const totalIn = Math.round(cachedInitial.height / 2.54);
+      return String(Math.floor(totalIn / 12));
+    }
+    return "";
+  });
+  const [inches, setInches] = useState<string>(() => {
+    if (cachedInitial?.height) {
+      const totalIn = Math.round(cachedInitial.height / 2.54);
+      return String(totalIn % 12);
+    }
+    return "";
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
@@ -112,16 +128,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
             const totalIn = Math.round(cmVal / 2.54);
             setFeet(String(Math.floor(totalIn / 12)));
             setInches(String(totalIn % 12));
-          } else {
-            setHeightCm("");
-            setFeet("");
-            setInches("");
           }
-        } else {
-          setSelectedGoal(getDefaultGoalForOwner(owner));
-          setHeightCm("");
-          setFeet("");
-          setInches("");
         }
       })
       .finally(() => {

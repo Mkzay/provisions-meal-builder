@@ -86,6 +86,7 @@ export default function MealBuilderPage() {
     handleSubmitLeftoverDecision,
     handleQuickAddStaples,
     handleAddSupply,
+    handleAddBulkSupplies,
   } = useMealBuilder(owner);
 
   const [isStaplesDrawerOpen, setIsStaplesDrawerOpen] = useState(false);
@@ -321,6 +322,7 @@ export default function MealBuilderPage() {
         isOpen={isAddSupplyOpen}
         onClose={() => setIsAddSupplyOpen(false)}
         onAddSupply={handleAddSupply}
+        onAddBulkSupplies={handleAddBulkSupplies}
         owner={owner}
       />
 

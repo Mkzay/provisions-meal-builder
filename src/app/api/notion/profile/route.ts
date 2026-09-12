@@ -3,6 +3,8 @@ import { fetchMealProfile, saveMealProfile } from "@/lib/notion-profile";
 import { UserGoal } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
@@ -10,7 +12,14 @@ export async function GET(req: NextRequest) {
     const owner = session?.user?.ownerName || searchParams.get("owner") || "Esther";
 
     const profile = await fetchMealProfile(owner);
-    return NextResponse.json({ profile });
+    return NextResponse.json(
+      { profile },
+      {
+        headers: {
+          "Cache-Control": "private, no-cache, no-store, must-revalidate",
+        },
+      }
+    );
   } catch (error) {
     console.error("API error fetching meal profile:", error);
     return NextResponse.json(
