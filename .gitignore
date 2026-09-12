@@ -36,3 +36,4 @@ PRODUCT.md
 
 # testing
 coverage/
+*.tsbuildinfo

@@ -14,7 +14,7 @@ import {
 } from "@/components/icons";
 import { CulinaryBackdropSvg } from "@/components/CulinaryBackdropSvg";
 import { ProvisionsLogo } from "@/components/ProvisionsLogo";
-import { motion } from "framer-motion";
+import { motion, TargetAndTransition } from "framer-motion";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useState } from "react";
@@ -32,8 +32,19 @@ const WONKY_LETTERS = [
   { char: "N", rotate: "-rotate-6", bg: "bg-[#FEF08A]", textColor: "text-amber-950", delay: 0.36 },
 ];
 
+interface StickerItem {
+  id: string;
+  label: string;
+  shortLabel: string;
+  icon: React.ReactNode;
+  bg: string;
+  textColor: string;
+  pos: string;
+  floatAnim: TargetAndTransition;
+}
+
 // Floating Culinary Stickers (responsive on mobile & desktop)
-const STICKERS = [
+const STICKERS: StickerItem[] = [
   {
     id: "pot",
     label: "Fresh Provisions",
