@@ -77,6 +77,10 @@ describe("Component import integrity", () => {
     await import("../components/AddSupplyBulkTab");
   });
 
+  it("imports AddSupplyFooter", async () => {
+    await import("../components/AddSupplyFooter");
+  });
+
   it("imports MealProfileModal", async () => {
     await import("../components/MealProfileModal");
   });

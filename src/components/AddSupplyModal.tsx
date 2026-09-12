@@ -2,16 +2,17 @@
 
 import {
   BowlFood,
-  CheckFat,
   CookingPot,
   Package,
   Plus,
   X,
 } from "@/components/icons";
+import { ClassifiedBulkItem, inferIngredientRole } from "@/lib/culinary-classifier";
 import { AddSupplyInput, IngredientRole, MealType } from "@/lib/types";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AddSupplyBulkTab } from "./AddSupplyBulkTab";
+import { AddSupplyFooter } from "./AddSupplyFooter";
 import { AddSupplySingleTab } from "./AddSupplySingleTab";
 
 interface AddSupplyModalProps {
@@ -33,6 +34,7 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
   const [kind, setKind] = useState<"ingredient" | "ready_meal">("ingredient");
   const [name, setName] = useState("");
   const [bulkText, setBulkText] = useState("");
+  const [classifiedItems, setClassifiedItems] = useState<ClassifiedBulkItem[]>([]);
   const [role, setRole] = useState<IngredientRole>("Main");
   const [selectedMealTypes, setSelectedMealTypes] = useState<MealType[]>([
     "Lunch",
@@ -44,12 +46,40 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
 
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  const parsedBulkItems = useMemo(() => {
-    return bulkText
+  // Sync bulkText with classifiedItems, preserving manual role overrides
+  useEffect(() => {
+    const rawNames = bulkText
       .split(/[\n,]+/)
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
+
+    setClassifiedItems((prev) => {
+      const prevMap = new Map(prev.map((it) => [it.name.toLowerCase(), it.role]));
+      return rawNames.map((itemName, idx) => ({
+        id: `bulk-${idx}-${itemName.toLowerCase()}`,
+        name: itemName,
+        role: prevMap.get(itemName.toLowerCase()) || inferIngredientRole(itemName),
+      }));
+    });
   }, [bulkText]);
+
+  const handleUpdateRole = (id: string, newRole: IngredientRole) => {
+    setClassifiedItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, role: newRole } : item))
+    );
+  };
+
+  const handleRemoveBulkItem = (id: string) => {
+    const itemToRemove = classifiedItems.find((it) => it.id === id);
+    if (!itemToRemove) return;
+    setClassifiedItems((prev) => prev.filter((it) => it.id !== id));
+    const updated = bulkText
+      .split(/[\n,]+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0 && s.toLowerCase() !== itemToRemove.name.toLowerCase())
+      .join("\n");
+    setBulkText(updated);
+  };
 
   const toggleMealType = (mt: MealType) => {
     if (selectedMealTypes.includes(mt)) {
@@ -95,15 +125,23 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
   };
 
   const handleAddBulk = async () => {
-    if (parsedBulkItems.length === 0 || isSubmitting) return;
+    if (classifiedItems.length === 0 || isSubmitting) return;
     setIsSubmitting(true);
-    const inputs: AddSupplyInput[] = parsedBulkItems.map((itemName) => ({
-      kind,
-      name: itemName,
-      role: kind === "ingredient" ? role : undefined,
-      mealTypes: selectedMealTypes,
-      owner,
-    }));
+    const inputs: AddSupplyInput[] =
+      kind === "ingredient"
+        ? classifiedItems.map((item) => ({
+            kind: "ingredient",
+            name: item.name,
+            role: item.role,
+            mealTypes: selectedMealTypes,
+            owner,
+          }))
+        : classifiedItems.map((item) => ({
+            kind: "ready_meal",
+            name: item.name,
+            mealTypes: selectedMealTypes,
+            owner,
+          }));
 
     try {
       if (onAddBulkSupplies) {
@@ -117,6 +155,7 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
       setTimeout(() => {
         setSuccess(false);
         setBulkText("");
+        setClassifiedItems([]);
         onClose();
       }, 950);
     } catch (err) {
@@ -135,7 +174,7 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -161,10 +200,10 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
           transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
           className="relative w-full max-w-lg max-h-[92dvh] sm:max-h-[88vh] flex flex-col bg-[#FAF8F5] border-[2.5px] border-stone-900 rounded-t-[28px] sm:rounded-3xl shadow-brutal-lg overflow-hidden"
         >
-          {/* Mobile Bottom Sheet Pull Bar */}
+          {/* Mobile Pull Bar */}
           <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto mt-2.5 mb-0.5 shrink-0" />
 
-          {/* Pinned Header */}
+          {/* Header */}
           <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b-2 border-stone-900 shrink-0 bg-[#FAF8F5]">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-emerald-300 border-2 border-stone-900 shadow-brutal-sm flex items-center justify-center text-stone-900 shrink-0">
@@ -198,7 +237,7 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
             {/* Scrollable Form Body */}
             <div className="flex-1 overflow-y-auto no-scrollbar modal-scroll-contain p-5 sm:p-6 space-y-4 min-h-0">
-              {/* Single vs Bulk Mode Toggle */}
+              {/* Single vs Bulk Toggle */}
               <div className="grid grid-cols-2 gap-2 p-1 bg-stone-200 border-2 border-stone-900 rounded-2xl shadow-brutal-sm">
                 <button
                   type="button"
@@ -226,7 +265,7 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
                 </button>
               </div>
 
-              {/* Kind Selector Tabs */}
+              {/* Kind Selector */}
               <div className="grid grid-cols-2 gap-2 p-1.5 bg-stone-100 border-2 border-stone-900 rounded-2xl shadow-brutal-sm">
                 <button
                   type="button"
@@ -270,80 +309,25 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
                 <AddSupplyBulkTab
                   bulkText={bulkText}
                   setBulkText={setBulkText}
-                  parsedBulkItems={parsedBulkItems}
+                  items={classifiedItems}
+                  onUpdateRole={handleUpdateRole}
+                  onRemoveItem={handleRemoveBulkItem}
                   kind={kind}
-                  role={role}
-                  setRole={setRole}
                   selectedMealTypes={selectedMealTypes}
                   toggleMealType={toggleMealType}
                 />
               )}
             </div>
 
-            {/* Pinned Action Footer */}
-            <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 bg-stone-100/95 shrink-0 flex items-center justify-between gap-2.5 safe-area-bottom">
-              <button
-                type="button"
-                onClick={onClose}
-                className="min-h-[44px] px-3.5 py-2.5 rounded-xl border-2 border-stone-900 bg-white font-bold text-xs text-stone-700 hover:bg-stone-100 transition-all"
-              >
-                Cancel
-              </button>
-
-              <div className="flex items-center gap-2">
-                {tabMode === "single" ? (
-                  <>
-                    <button
-                      type="button"
-                      disabled={isSubmitting || !name.trim()}
-                      onClick={() => handleAddSingle(true)}
-                      className="min-h-[44px] inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border-2 border-stone-900 font-black text-xs bg-amber-300 hover:bg-amber-200 text-stone-900 shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
-                    >
-                      <Plus size={15} weight="bold" />
-                      <span>Add & Next</span>
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting || !name.trim()}
-                      className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-stone-900 font-black text-xs bg-emerald-400 hover:bg-emerald-300 text-stone-900 shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
-                    >
-                      {success ? (
-                        <>
-                          <CheckFat size={16} weight="fill" />
-                          <span>Added!</span>
-                        </>
-                      ) : (
-                        <span>Add to Kitchen</span>
-                      )}
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || parsedBulkItems.length === 0}
-                    className="min-h-[44px] inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl border-2 border-stone-900 font-black text-xs bg-emerald-400 hover:bg-emerald-300 text-stone-900 shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
-                  >
-                    {success ? (
-                      <>
-                        <CheckFat size={16} weight="fill" />
-                        <span>Added All!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Package size={16} weight="bold" />
-                        <span>
-                          {isSubmitting
-                            ? "Adding..."
-                            : `Add ${parsedBulkItems.length || ""} Item${
-                                parsedBulkItems.length === 1 ? "" : "s"
-                              }`}
-                        </span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
-            </div>
+            <AddSupplyFooter
+              onClose={onClose}
+              tabMode={tabMode}
+              isSubmitting={isSubmitting}
+              name={name}
+              itemsCount={classifiedItems.length}
+              success={success}
+              onAddSingle={handleAddSingle}
+            />
           </form>
         </motion.div>
       </div>

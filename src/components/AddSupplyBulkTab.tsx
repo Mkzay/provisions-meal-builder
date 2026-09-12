@@ -1,90 +1,135 @@
 "use client";
 
+import { ClassifiedBulkItem } from "@/lib/culinary-classifier";
 import { IngredientRole, MealType } from "@/lib/types";
 import React from "react";
 
 interface AddSupplyBulkTabProps {
   bulkText: string;
   setBulkText: (v: string) => void;
-  parsedBulkItems: string[];
+  items: ClassifiedBulkItem[];
+  onUpdateRole: (id: string, newRole: IngredientRole) => void;
+  onRemoveItem: (id: string) => void;
   kind: "ingredient" | "ready_meal";
-  role: IngredientRole;
-  setRole: (r: IngredientRole) => void;
   selectedMealTypes: MealType[];
   toggleMealType: (mt: MealType) => void;
 }
 
+const ROLES: { role: IngredientRole; label: string; short: string; activeColor: string }[] = [
+  { role: "Main", label: "Carb / Base", short: "Carb", activeColor: "bg-amber-300 text-stone-900" },
+  { role: "Protein", label: "Protein", short: "Protein", activeColor: "bg-rose-300 text-stone-900" },
+  { role: "Supplementary", label: "Side / Extra", short: "Side", activeColor: "bg-emerald-300 text-stone-900" },
+];
+
 export const AddSupplyBulkTab: React.FC<AddSupplyBulkTabProps> = ({
   bulkText,
   setBulkText,
-  parsedBulkItems,
+  items,
+  onUpdateRole,
+  onRemoveItem,
   kind,
-  role,
-  setRole,
   selectedMealTypes,
   toggleMealType,
 }) => {
+  const mainCount = items.filter((i) => i.role === "Main").length;
+  const proteinCount = items.filter((i) => i.role === "Protein").length;
+  const sideCount = items.filter((i) => i.role === "Supplementary").length;
+
   return (
     <div className="space-y-4">
+      {/* Multiline Input */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label className="text-xs font-bold uppercase tracking-wider text-stone-700 block">
-            Item List (1 per line or comma-separated)
+            Paste Items (one per line or comma-separated)
           </label>
-          {parsedBulkItems.length > 0 && (
-            <span className="text-xs font-black text-amber-900 bg-amber-200 px-2 py-0.5 rounded-md border border-stone-900">
-              {parsedBulkItems.length} item{parsedBulkItems.length === 1 ? "" : "s"} detected
+          {items.length > 0 && (
+            <span className="text-xs font-black text-stone-900 bg-amber-200 px-2 py-0.5 rounded-md border border-stone-900">
+              {items.length} detected
             </span>
           )}
         </div>
         <textarea
-          rows={4}
+          rows={3}
           required
-          placeholder={`e.g.\nGreek Yogurt\nSalmon Fillet\nBananas\nEggs\n(Or comma-separated: Milk, Oats, Avocado)`}
+          placeholder={
+            kind === "ingredient"
+              ? "e.g. Rice, Chicken Breast, Eggs, Avocado, Plantain, Greek Yogurt"
+              : "e.g. Smoky Jollof, Chicken Curry, Lasagna, Beef Stew"
+          }
           value={bulkText}
           onChange={(e) => setBulkText(e.target.value)}
           className="w-full bg-white border-2 border-stone-900 rounded-xl px-3.5 py-2.5 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-brutal-sm resize-none"
         />
-        {parsedBulkItems.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 pt-1 max-h-24 overflow-y-auto no-scrollbar p-2 bg-stone-100 border-2 border-dashed border-stone-300 rounded-xl">
-            {parsedBulkItems.map((item, idx) => (
-              <span
-                key={idx}
-                className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-white text-stone-800 border border-stone-800 shadow-xs"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
-      {/* Role selector for pantry items */}
-      {kind === "ingredient" && (
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-stone-700 block">
-            Default Role
-          </label>
-          <div className="grid grid-cols-3 gap-2">
-            {(["Main", "Protein", "Supplementary"] as IngredientRole[]).map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setRole(r)}
-                className={`min-h-[42px] py-2 px-2 flex items-center justify-center text-center rounded-xl border-2 border-stone-900 text-xs font-bold transition-all whitespace-nowrap ${
-                  role === r
-                    ? "bg-amber-300 text-stone-900 shadow-brutal-sm -translate-y-0.5"
-                    : "bg-white text-stone-700 hover:bg-stone-50"
-                }`}
+      {/* Auto-Classification & 1-Click Overrides for Ingredients */}
+      {kind === "ingredient" && items.length > 0 && (
+        <div className="space-y-2">
+          {/* Category Count Summaries */}
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[11px] font-black uppercase tracking-wider text-stone-600">
+              Auto-Sorted Roles (Tap to adjust)
+            </span>
+            <div className="flex items-center gap-1.5 text-[10px] font-black">
+              <span className="px-1.5 py-0.5 rounded bg-amber-200 text-stone-900 border border-stone-800">
+                {mainCount} Carb
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-rose-200 text-stone-900 border border-stone-800">
+                {proteinCount} Protein
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-emerald-200 text-stone-900 border border-stone-800">
+                {sideCount} Side
+              </span>
+            </div>
+          </div>
+
+          {/* Interactive Item Row Chips with 1-Click Role Switch */}
+          <div className="max-h-44 overflow-y-auto no-scrollbar space-y-1.5 p-2 bg-stone-100 border-2 border-stone-900 rounded-2xl">
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between gap-2 p-1.5 bg-white border-2 border-stone-900 rounded-xl shadow-brutal-xs"
               >
-                {r === "Main" ? "Carb / Base" : r === "Protein" ? "Protein" : "Side / Extra"}
-              </button>
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <span className="text-xs font-bold text-stone-900 truncate pl-1">
+                    {item.name}
+                  </span>
+                </div>
+
+                {/* 1-Click Role Selector Pills */}
+                <div className="flex items-center gap-1 shrink-0">
+                  {ROLES.map(({ role, short, activeColor }) => (
+                    <button
+                      key={role}
+                      type="button"
+                      onClick={() => onUpdateRole(item.id, role)}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all ${
+                        item.role === role
+                          ? `${activeColor} border border-stone-900 shadow-xs scale-105`
+                          : "bg-stone-100 text-stone-600 hover:text-stone-900 border border-stone-300"
+                      }`}
+                    >
+                      {short}
+                    </button>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() => onRemoveItem(item.id)}
+                    aria-label={`Remove ${item.name}`}
+                    className="p-1 text-stone-400 hover:text-rose-600 font-black text-xs transition-colors ml-0.5"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Meal Types Multi-Select */}
+      {/* Suitable Meals Multi-Select */}
       <div className="space-y-1.5">
         <label className="text-xs font-bold uppercase tracking-wider text-stone-700 block">
           Suitable Meals
