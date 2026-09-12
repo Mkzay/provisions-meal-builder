@@ -145,7 +145,10 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-white border-2 border-stone-900 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-brutal-xs"
             />
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-0.5">
+            <div
+              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
               <button
                 type="button"
                 onClick={() => setStatusFilter("all")}
@@ -186,7 +189,10 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
           </div>
 
           {/* Item List */}
-          <div className="flex-1 overflow-y-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden p-3.5 sm:p-6 min-h-0 space-y-2">
+          <div
+            className="flex-1 overflow-y-auto no-scrollbar p-3.5 sm:p-6 min-h-0 space-y-2"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
             {filteredItems.length === 0 ? (
               <div className="text-center py-10 px-4 bg-white rounded-2xl border-2 border-dashed border-stone-300 space-y-2">
                 <p className="text-sm font-bold text-stone-700">No items found matching your filters.</p>

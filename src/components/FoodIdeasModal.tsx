@@ -121,27 +121,27 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
           <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto mt-2.5 mb-0.5 shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b-2 border-stone-900 shrink-0 bg-[#FAF8F5] gap-3">
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-amber-300 border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm flex items-center justify-center text-stone-900 shrink-0">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b-2 border-stone-900 shrink-0 bg-[#FAF8F5] gap-3">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-300 border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm flex items-center justify-center text-stone-900 shrink-0">
                 <Sparkle size={20} weight="fill" />
               </div>
               <div className="min-w-0 flex-1">
                 <h3
                   id="food-ideas-title"
-                  className="text-base sm:text-xl font-display font-black tracking-tight text-stone-900 truncate"
+                  className="text-base sm:text-xl font-display font-black tracking-tight text-stone-900 leading-snug"
                 >
                   Food Ideas &amp; Inspiration
                 </h3>
-                <p className="text-[11px] sm:text-xs text-stone-600 font-medium truncate">
-                  African &amp; global staples. Tap any staple to restock it into your kitchen.
+                <p className="text-xs text-stone-600 mt-0.5 font-medium leading-normal">
+                  Tap any staple to stock into your kitchen
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
               aria-label="Close food ideas modal"
-              className="p-1.5 sm:p-2 rounded-xl border-2 border-stone-900 bg-white shadow-brutal-xs sm:shadow-brutal-sm hover:bg-stone-100 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all shrink-0"
+              className="p-2 rounded-xl border-2 border-stone-900 bg-white shadow-brutal-xs sm:shadow-brutal-sm hover:bg-stone-100 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all shrink-0"
             >
               <X size={18} weight="bold" />
             </button>
@@ -159,7 +159,10 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
             />
 
             {/* Category Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-0.5">
+            <div
+              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
               {CATEGORIES.map(({ id, label, icon }) => {
                 const isActive = selectedCategory === id;
                 return (
@@ -182,7 +185,10 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
           </div>
 
           {/* Scrollable Ideas Grid */}
-          <div className="flex-1 overflow-y-auto no-scrollbar modal-scroll-contain p-4 sm:p-6 min-h-0 space-y-3">
+          <div
+            className="flex-1 overflow-y-auto no-scrollbar modal-scroll-contain p-4 sm:p-6 min-h-0 space-y-3"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
             {filteredIdeas.length === 0 ? (
               <div className="text-center py-12 px-4 bg-white rounded-2xl border-2 border-dashed border-stone-300">
                 <p className="text-sm font-bold text-stone-600">
