@@ -20,6 +20,7 @@ interface KitchenSidebarProps {
   onSelectReadyMeal: (meal: ReadyMeal) => void;
   onOpenSettings?: () => void;
   onOpenStaples: () => void;
+  onOpenFoodIdeas?: () => void;
 }
 
 export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
@@ -30,6 +31,7 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
   onSelectReadyMeal,
   onOpenSettings,
   onOpenStaples,
+  onOpenFoodIdeas,
 }) => {
   const availableReadyMeals = readyMeals.filter((m) => m.available);
   const availableIngredients = ingredients.filter((i) => i.available);
@@ -67,12 +69,23 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
           </div>
         </div>
 
-        <button
-          onClick={onOpenStaples}
-          className="w-full py-2 px-3 rounded-xl border-2 border-stone-900 bg-amber-100 hover:bg-amber-200 text-xs font-black text-stone-900 transition-all shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px]"
-        >
-          Quick Add Staples
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={onOpenStaples}
+            className="w-full py-2 px-2.5 rounded-xl border-2 border-stone-900 bg-amber-100 hover:bg-amber-200 text-xs font-black text-stone-900 transition-all shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px]"
+          >
+            + Restock
+          </button>
+          {onOpenFoodIdeas && (
+            <button
+              onClick={onOpenFoodIdeas}
+              className="w-full py-2 px-2.5 rounded-xl border-2 border-stone-900 bg-white hover:bg-stone-50 text-xs font-black text-stone-900 transition-all shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] inline-flex items-center justify-center gap-1"
+            >
+              <Sparkle size={13} weight="fill" className="text-amber-600" />
+              <span>Food Ideas</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* In The Fridge Now Card */}

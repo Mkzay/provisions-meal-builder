@@ -81,6 +81,14 @@ describe("Component import integrity", () => {
     await import("../components/AddSupplyFooter");
   });
 
+  it("imports CompanionNoteCard", async () => {
+    await import("../components/CompanionNoteCard");
+  });
+
+  it("imports FoodIdeasModal", async () => {
+    await import("../components/FoodIdeasModal");
+  });
+
   it("imports MealProfileModal", async () => {
     await import("../components/MealProfileModal");
   });

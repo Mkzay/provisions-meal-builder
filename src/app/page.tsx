@@ -2,7 +2,9 @@
 
 import { AddSupplyModal } from "@/components/AddSupplyModal";
 import { AppHeader } from "@/components/AppHeader";
+import { CompanionNoteCard } from "@/components/CompanionNoteCard";
 import { CulinaryCompanion } from "@/components/CulinaryCompanion";
+import { FoodIdeasModal } from "@/components/FoodIdeasModal";
 import { GentleSafetyNet } from "@/components/GentleSafetyNet";
 import { ArrowLeft } from "@/components/icons";
 import { KitchenSidebar } from "@/components/KitchenSidebar";
@@ -35,6 +37,7 @@ export default function MealBuilderPage() {
 
   const [isPersonalHubOpen, setIsPersonalHubOpen] = useState(false);
   const [personalHubTab, setPersonalHubTab] = useState<PersonalHubTab>("profile");
+  const [isFoodIdeasOpen, setIsFoodIdeasOpen] = useState(false);
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
   const [isPromptDismissed, setIsPromptDismissed] = useState<boolean>(() =>
     hasProfilePromptBeenDismissed()
@@ -143,11 +146,21 @@ export default function MealBuilderPage() {
               isCachedFallback={catalogue.isCachedFallback}
               onSelectReadyMeal={handleSelectReadyMeal}
               onOpenStaples={() => setIsStaplesDrawerOpen(true)}
+              onOpenFoodIdeas={() => setIsFoodIdeasOpen(true)}
             />
           </div>
 
           {/* Main Stage: Interactive Decision Orchestrator (Expansive Breathing Room) */}
           <main className="flex-1 w-full min-w-0 max-w-3xl lg:max-w-4xl mx-auto">
+            {/* Mobile / Tablet Cozy Companion Note */}
+            <div className="block xl:hidden mb-4">
+              <CompanionNoteCard
+                mealType={mealType}
+                owner={owner}
+                isDismissible={true}
+              />
+            </div>
+
             {/* Global Step Back Navigation (Always available after selecting a meal type) */}
             {currentStep !== "meal_type" && (
               <div className="mb-4">
@@ -289,6 +302,7 @@ export default function MealBuilderPage() {
               protein={selectedProtein}
               supplementary={selectedSupplementary}
               missingUpgrade={pairingResult?.missingUpgrades?.[0]}
+              owner={owner}
             />
           </div>
         </div>
@@ -323,6 +337,17 @@ export default function MealBuilderPage() {
         onClose={() => setIsAddSupplyOpen(false)}
         onAddSupply={handleAddSupply}
         onAddBulkSupplies={handleAddBulkSupplies}
+        onOpenFoodIdeas={() => setIsFoodIdeasOpen(true)}
+        owner={owner}
+      />
+
+      {/* Food Ideas & Inspiration Catalogue Modal */}
+      <FoodIdeasModal
+        isOpen={isFoodIdeasOpen}
+        onClose={() => setIsFoodIdeasOpen(false)}
+        onAddSupply={handleAddSupply}
+        ingredients={catalogue.ingredients}
+        readyMeals={catalogue.readyMeals}
         owner={owner}
       />
 

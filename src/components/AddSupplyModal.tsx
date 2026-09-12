@@ -20,6 +20,7 @@ interface AddSupplyModalProps {
   onClose: () => void;
   onAddSupply: (input: AddSupplyInput) => Promise<void>;
   onAddBulkSupplies?: (inputs: AddSupplyInput[]) => Promise<void>;
+  onOpenFoodIdeas?: () => void;
   owner?: string;
 }
 
@@ -28,6 +29,7 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
   onClose,
   onAddSupply,
   onAddBulkSupplies,
+  onOpenFoodIdeas,
   owner,
 }) => {
   const [tabMode, setTabMode] = useState<"single" | "bulk">("single");
@@ -220,8 +222,20 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
                 >
                   Restock Kitchen
                 </h3>
-                <p className="text-xs text-stone-600 mt-0.5 font-medium">
-                  Add groceries or meals to {owner ? `${owner}'s` : "your"} kitchen.
+                <p className="text-xs text-stone-600 mt-0.5 font-medium flex items-center gap-1.5 flex-wrap">
+                  <span>Add groceries to {owner ? `${owner}'s` : "your"} kitchen.</span>
+                  {onOpenFoodIdeas && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onOpenFoodIdeas();
+                      }}
+                      className="text-amber-800 font-bold underline hover:text-amber-900 transition-colors"
+                    >
+                      Browse Ideas →
+                    </button>
+                  )}
                 </p>
               </div>
             </div>

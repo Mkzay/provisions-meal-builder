@@ -11,6 +11,7 @@ import {
 } from "@/components/icons";
 import { Ingredient, MealSource, MealType, MissingUpgradeSuggestion, ReadyMeal } from "@/lib/types";
 import React from "react";
+import { CompanionNoteCard } from "./CompanionNoteCard";
 
 interface CulinaryCompanionProps {
   mealType: MealType;
@@ -20,6 +21,7 @@ interface CulinaryCompanionProps {
   protein?: Ingredient;
   supplementary?: Ingredient;
   missingUpgrade?: MissingUpgradeSuggestion;
+  owner?: string;
 }
 
 export const CulinaryCompanion: React.FC<CulinaryCompanionProps> = ({
@@ -30,6 +32,7 @@ export const CulinaryCompanion: React.FC<CulinaryCompanionProps> = ({
   protein,
   supplementary,
   missingUpgrade,
+  owner,
 }) => {
   const getDishTitle = () => {
     if (readyMeal) return readyMeal.name;
@@ -138,20 +141,12 @@ export const CulinaryCompanion: React.FC<CulinaryCompanionProps> = ({
         </div>
       )}
 
-      {/* Thoughtful Care Reminder */}
-      <div className="p-5 rounded-3xl bg-[#FECDD3] border-2 border-stone-900 shadow-brutal space-y-2">
-        <div className="flex items-center gap-2 text-stone-900">
-          <div className="w-7 h-7 rounded-lg bg-white border-2 border-stone-900 flex items-center justify-center text-rose-700 shadow-brutal-sm">
-            <Heart size={16} weight="fill" />
-          </div>
-          <h5 className="font-display font-black text-sm text-stone-900">
-            A Note for You
-          </h5>
-        </div>
-        <p className="text-xs text-stone-800 font-medium leading-relaxed">
-          Eating isn&apos;t a test or a chore. Taking 10 minutes to feed yourself is the kindest thing you can do for your mind and body today.
-        </p>
-      </div>
+      {/* AI-Curated Culinary Companion Note */}
+      <CompanionNoteCard
+        mealType={mealType}
+        owner={owner || "Esther"}
+        isDismissible={false}
+      />
     </aside>
   );
 };
