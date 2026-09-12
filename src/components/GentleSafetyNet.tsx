@@ -16,12 +16,14 @@ import React, { useState } from "react";
 
 interface GentleSafetyNetProps {
   onQuickAddStaples: (selectedIngredients: Ingredient[]) => void;
-  onOpenSettings: () => void;
+  onOpenSettings?: () => void;
+  owner?: string;
 }
 
 export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
   onQuickAddStaples,
   onOpenSettings,
+  owner,
 }) => {
   const [showStaplesDrawer, setShowStaplesDrawer] = useState(false);
   const [selectedStapleIds, setSelectedStapleIds] = useState<string[]>([]);
@@ -125,27 +127,20 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
         </div>
 
         <h3 className="text-2xl sm:text-3xl font-display font-black text-stone-900">
-          Kitchen feeling bare, Esther?
+          Kitchen feeling bare{owner ? `, ${owner}` : ""}?
         </h3>
 
         <p className="text-xs sm:text-sm text-stone-800 font-medium max-w-md mx-auto leading-relaxed">
           No ingredients are marked available right now. That is 100% fine! We don&apos;t want you skipping meals or stressing.
         </p>
 
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="pt-2 flex items-center justify-center">
           <button
             onClick={() => setShowStaplesDrawer(true)}
             className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-stone-900 font-black text-xs sm:text-sm transition-all border-2 border-stone-900 shadow-brutal active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center gap-2"
           >
             <PlusCircle size={18} weight="bold" />
             <span>Quick-Tap Pantry Staples (10s)</span>
-          </button>
-
-          <button
-            onClick={onOpenSettings}
-            className="w-full sm:w-auto px-5 py-3 rounded-2xl border-2 border-stone-900 bg-white hover:bg-stone-100 text-stone-900 font-black text-xs sm:text-sm transition-all shadow-brutal-sm"
-          >
-            Check Notion Sync
           </button>
         </div>
       </div>

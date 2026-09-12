@@ -2,18 +2,16 @@
 
 import {
   Bell,
-  Faders,
   Plus,
   Sparkle,
   User,
-  WifiSlash,
 } from "@/components/icons";
 import { ProvisionsLogo } from "@/components/ProvisionsLogo";
 import React from "react";
 
 interface AppHeaderProps {
   isCachedFallback?: boolean;
-  onOpenSettings: () => void;
+  onOpenSettings?: () => void;
   onResetToHome: () => void;
   onOpenNotifications: () => void;
   onOpenAddSupply: () => void;
@@ -134,31 +132,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <span className="hidden sm:inline">{owner}</span>
               </button>
             )}
-
-            {/* Notion Sync & Settings */}
-            <button
-              onClick={onOpenSettings}
-              aria-label={isCachedFallback ? "Using local kitchen snapshot" : "Live Notion Connected"}
-              className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 h-9 sm:h-10 sm:min-h-[42px] text-xs font-bold px-2.5 sm:px-3 rounded-xl border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0 ${
-                isCachedFallback
-                  ? "bg-amber-100 hover:bg-amber-200 text-stone-900"
-                  : "bg-emerald-100 hover:bg-emerald-200 text-stone-900"
-              }`}
-              title={isCachedFallback ? "Using local kitchen snapshot - open settings" : "Live Notion Connected - open settings"}
-            >
-              {isCachedFallback ? (
-                <WifiSlash size={16} weight="bold" className="text-amber-800" />
-              ) : (
-                <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-emerald-600"></span>
-                </span>
-              )}
-              <span className="hidden md:inline">
-                {isCachedFallback ? "Offline Cache" : "Notion Synced"}
-              </span>
-              <Faders size={15} weight="bold" className="text-stone-700" />
-            </button>
           </div>
         </div>
       </header>

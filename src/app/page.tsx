@@ -12,7 +12,6 @@ import { MealConfirmation } from "@/components/MealConfirmation";
 import { MealTypeSelector } from "@/components/MealTypeSelector";
 import { ModeSelect } from "@/components/ModeSelect";
 import { NotificationModal } from "@/components/NotificationModal";
-import { NotionSettingsModal } from "@/components/NotionSettingsModal";
 import { PairingCustomizer } from "@/components/PairingCustomizer";
 import { PantryStatCard } from "@/components/PantryStatCard";
 import {
@@ -54,8 +53,6 @@ export default function MealBuilderPage() {
   const {
     catalogue,
     isClientReady,
-    isSettingsOpen,
-    setIsSettingsOpen,
     isNotificationOpen,
     setIsNotificationOpen,
     isAddSupplyOpen,
@@ -108,7 +105,6 @@ export default function MealBuilderPage() {
         <AppHeader
           owner={owner}
           isCachedFallback={catalogue.isCachedFallback}
-          onOpenSettings={() => setIsSettingsOpen(true)}
           onResetToHome={handleResetToHome}
           onOpenNotifications={() => setIsNotificationOpen(true)}
           onOpenAddSupply={() => setIsAddSupplyOpen(true)}
@@ -131,7 +127,6 @@ export default function MealBuilderPage() {
               ingredientsCount={catalogue.ingredients.filter((i) => i.available).length}
               isCachedFallback={catalogue.isCachedFallback}
               onOpenAddSupply={() => setIsAddSupplyOpen(true)}
-              onOpenSettings={() => setIsSettingsOpen(true)}
             />
           </div>
         )}
@@ -146,7 +141,6 @@ export default function MealBuilderPage() {
               currentMealType={mealType}
               isCachedFallback={catalogue.isCachedFallback}
               onSelectReadyMeal={handleSelectReadyMeal}
-              onOpenSettings={() => setIsSettingsOpen(true)}
               onOpenStaples={() => setIsStaplesDrawerOpen(true)}
             />
           </div>
@@ -176,8 +170,8 @@ export default function MealBuilderPage() {
                   exit={{ opacity: 0, y: -10 }}
                 >
                   <GentleSafetyNet
+                    owner={owner}
                     onQuickAddStaples={handleQuickAddStaples}
-                    onOpenSettings={() => setIsSettingsOpen(true)}
                   />
                 </motion.div>
               ) : currentStep === "meal_type" ? (
@@ -314,15 +308,6 @@ export default function MealBuilderPage() {
           setIsLeftoverModalOpen(false);
           handleResetToHome();
         }}
-      />
-
-      {/* Notion Settings & Sync Modal */}
-      <NotionSettingsModal
-        isOpen={isSettingsOpen}
-        isCachedFallback={catalogue.isCachedFallback}
-        onClose={() => setIsSettingsOpen(false)}
-        onRefreshCatalogue={handleRefreshCatalogue}
-        onResetSeedData={handleResetSeedData}
       />
 
       {/* Meal Notification Reminders Modal */}

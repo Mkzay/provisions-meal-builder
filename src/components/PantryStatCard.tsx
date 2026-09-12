@@ -4,7 +4,6 @@ import {
   BowlFood,
   CookingPot,
   Plus,
-  WifiSlash,
 } from "@/components/icons";
 import React from "react";
 
@@ -13,7 +12,7 @@ interface PantryStatCardProps {
   ingredientsCount: number;
   isCachedFallback?: boolean;
   onOpenAddSupply: () => void;
-  onOpenSettings: () => void;
+  onOpenSettings?: () => void;
   className?: string;
 }
 
@@ -50,30 +49,10 @@ export const PantryStatCard: React.FC<PantryStatCardProps> = ({
           </div>
         </div>
 
-        <button
-          onClick={onOpenSettings}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black border border-stone-900 shadow-brutal-xs active:scale-95 transition-all shrink-0 ${
-            isCachedFallback
-              ? "bg-amber-100 text-stone-900 hover:bg-amber-200"
-              : "bg-emerald-100 text-stone-900 hover:bg-emerald-200"
-          }`}
-          title="Manage Notion Connection"
-        >
-          {isCachedFallback ? (
-            <>
-              <WifiSlash size={13} weight="bold" className="text-amber-800" />
-              <span>Offline Snapshot</span>
-            </>
-          ) : (
-            <>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
-              </span>
-              <span>Live Notion</span>
-            </>
-          )}
-        </button>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black border border-stone-900 shadow-brutal-xs bg-emerald-100 text-stone-900 shrink-0">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span>{readyMealsCount + ingredientsCount} Ready</span>
+        </div>
       </div>
 
       {/* Two Vibrant Stat Tiles */}

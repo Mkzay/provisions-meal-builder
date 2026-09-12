@@ -8,8 +8,6 @@ import {
   Fire,
   PlusCircle,
   Sparkle,
-  WifiHigh,
-  WifiSlash,
 } from "@/components/icons";
 import { Ingredient, MealType, ReadyMeal } from "@/lib/types";
 import React from "react";
@@ -20,7 +18,7 @@ interface KitchenSidebarProps {
   currentMealType: MealType;
   isCachedFallback?: boolean;
   onSelectReadyMeal: (meal: ReadyMeal) => void;
-  onOpenSettings: () => void;
+  onOpenSettings?: () => void;
   onOpenStaples: () => void;
 }
 
@@ -44,24 +42,9 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
           <span className="text-xs font-black uppercase tracking-wider text-stone-900">
             Your Pantry
           </span>
-          <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black border border-stone-900 ${
-              isCachedFallback
-                ? "bg-amber-100 text-stone-900"
-                : "bg-emerald-100 text-stone-900"
-            }`}
-          >
-            {isCachedFallback ? (
-              <>
-                <WifiSlash size={13} weight="bold" />
-                <span>Cached</span>
-              </>
-            ) : (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-700 animate-pulse" />
-                <span>Live Notion</span>
-              </>
-            )}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black border border-stone-900 bg-emerald-100 text-stone-900">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-700" />
+            <span>Active</span>
           </span>
         </div>
 
@@ -85,10 +68,10 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
         </div>
 
         <button
-          onClick={onOpenSettings}
-          className="w-full py-2 px-3 rounded-xl border-2 border-stone-900 bg-stone-100 hover:bg-stone-200 text-xs font-black text-stone-800 transition-all shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px]"
+          onClick={onOpenStaples}
+          className="w-full py-2 px-3 rounded-xl border-2 border-stone-900 bg-amber-100 hover:bg-amber-200 text-xs font-black text-stone-900 transition-all shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px]"
         >
-          Manage Notion Connection
+          Quick Add Staples
         </button>
       </div>
 
