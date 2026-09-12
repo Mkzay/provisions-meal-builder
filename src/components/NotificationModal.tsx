@@ -33,6 +33,16 @@ const MEAL_TIME_FIELDS: { key: keyof NotificationConfig; label: string; bg: stri
   { key: "dinnerTime", label: "Dinner", bg: "bg-rose-50", iconColor: "text-rose-600" },
 ];
 
+function formatTime12h(time24: string): string {
+  if (!time24) return "12:00 PM";
+  const [hStr, mStr] = time24.split(":");
+  const h = parseInt(hStr, 10);
+  if (isNaN(h)) return time24;
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h % 12 || 12;
+  return `${h12}:${mStr || "00"} ${period}`;
+}
+
 export const NotificationModal: React.FC<NotificationModalProps> = ({
   isOpen,
   onClose,
@@ -295,32 +305,51 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 {MEAL_TIME_FIELDS.map((field) => (
-                  <div key={field.key} className={`p-3 ${field.bg} border-2 border-stone-900 rounded-2xl shadow-brutal-sm`}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-bold text-stone-900">{field.label}</span>
-                      <Sparkle size={14} className={field.iconColor} />
+                  <div key={field.key} className={`p-3 sm:p-3.5 ${field.bg} border-2 border-stone-900 rounded-2xl shadow-brutal-sm flex flex-col justify-between gap-2`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-extrabold text-stone-900">{field.label}</span>
+                      <Sparkle size={13} className={field.iconColor} />
                     </div>
-                    <input
-                      type="time"
-                      value={config[field.key] as string}
-                      onChange={(e) => handleTimeChange(field.key, e.target.value)}
-                      className="w-full bg-white border-2 border-stone-900 rounded-xl px-2 py-1 text-sm font-bold text-stone-900"
-                    />
+                    <div className="relative flex items-center justify-center gap-1.5 py-2 px-3 bg-white border-2 border-stone-900 rounded-xl shadow-xs hover:bg-stone-50 active:translate-y-[1px] cursor-pointer transition-all">
+                      <Clock size={14} weight="bold" className="text-stone-500 shrink-0" />
+                      <span className="text-xs sm:text-sm font-black text-stone-900 tracking-tight">
+                        {formatTime12h(config[field.key] as string)}
+                      </span>
+                      <input
+                        type="time"
+                        value={config[field.key] as string}
+                        onChange={(e) => handleTimeChange(field.key, e.target.value)}
+                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                        aria-label={`${field.label} reminder time`}
+                      />
+                    </div>
                   </div>
                 ))}
 
                 {config.includeGroceryNudges && (
-                  <div className="p-3 bg-stone-100 border-2 border-stone-900 rounded-2xl shadow-brutal-sm col-span-2">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-bold text-stone-900">Market / Restock Prep Window</span>
-                      <Sparkle size={14} className="text-stone-700" />
+                  <div className="p-3.5 bg-stone-100 border-2 border-stone-900 rounded-2xl shadow-brutal-sm col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="space-y-0.5 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-extrabold text-stone-900">Market / Restock Prep Window</span>
+                        <Sparkle size={13} className="text-stone-600 shrink-0" />
+                      </div>
+                      <span className="text-[11px] text-stone-500 font-medium block">
+                        Reminder to review supplies before grocery runs
+                      </span>
                     </div>
-                    <input
-                      type="time"
-                      value={config.groceryReminderTime || "10:30"}
-                      onChange={(e) => handleTimeChange("groceryReminderTime", e.target.value)}
-                      className="w-full bg-white border-2 border-stone-900 rounded-xl px-2 py-1 text-sm font-bold text-stone-900"
-                    />
+                    <div className="relative flex items-center justify-center gap-1.5 py-2 px-3.5 bg-white border-2 border-stone-900 rounded-xl shadow-xs hover:bg-stone-50 active:translate-y-[1px] cursor-pointer transition-all shrink-0">
+                      <Clock size={14} weight="bold" className="text-stone-500 shrink-0" />
+                      <span className="text-xs sm:text-sm font-black text-stone-900 tracking-tight">
+                        {formatTime12h(config.groceryReminderTime || "10:30")}
+                      </span>
+                      <input
+                        type="time"
+                        value={config.groceryReminderTime || "10:30"}
+                        onChange={(e) => handleTimeChange("groceryReminderTime", e.target.value)}
+                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                        aria-label="Market restock reminder time"
+                      />
+                    </div>
                   </div>
                 )}
               </div>

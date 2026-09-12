@@ -11,6 +11,8 @@ describe("Culinary Auto-Classifier", () => {
       expect(inferIngredientRole("Sweet Potato")).toBe("Main");
       expect(inferIngredientRole("Fried Plantains")).toBe("Main");
       expect(inferIngredientRole("Garri")).toBe("Main");
+      expect(inferIngredientRole("Golden Morn")).toBe("Main");
+      expect(inferIngredientRole("Indomie Instant Noodles")).toBe("Main");
     });
 
     it("correctly identifies Proteins", () => {
@@ -21,6 +23,8 @@ describe("Culinary Auto-Classifier", () => {
       expect(inferIngredientRole("Ground Beef")).toBe("Protein");
       expect(inferIngredientRole("Tofu")).toBe("Protein");
       expect(inferIngredientRole("Canned Tuna")).toBe("Protein");
+      expect(inferIngredientRole("Honey Beans")).toBe("Protein");
+      expect(inferIngredientRole("Akara Mix")).toBe("Protein");
     });
 
     it("correctly identifies Sides & Extras (Supplementary)", () => {

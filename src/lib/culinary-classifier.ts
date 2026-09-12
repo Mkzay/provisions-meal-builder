@@ -48,6 +48,8 @@ const PROTEIN_KEYWORDS = new Set([
   "anchovy",
   "prosciutto",
   "meat",
+  "akara",
+  "crayfish",
 ]);
 
 const MAIN_KEYWORDS = new Set([
@@ -59,9 +61,9 @@ const MAIN_KEYWORDS = new Set([
   "macaroni",
   "noodle",
   "noodles",
+  "indomie",
   "ramen",
   "bread",
-  "sourdough",
   "bagel",
   "toast",
   "pita",
@@ -82,6 +84,11 @@ const MAIN_KEYWORDS = new Set([
   "bulgur",
   "corn",
   "maize",
+  "golden",
+  "morn",
+  "custard",
+  "ogi",
+  "akamu",
   "garri",
   "gari",
   "fufu",

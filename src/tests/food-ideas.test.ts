@@ -19,13 +19,20 @@ describe("Food Ideas & Inspiration Catalogue", () => {
     expect(readyMeals.length).toBeGreaterThanOrEqual(3);
   });
 
-  it("includes representative African & Global staples", () => {
+  it("includes representative Nigerian & Global staples without ready-meal proliferation", () => {
     const names = FOOD_IDEAS_CATALOGUE.map((i) => i.name.toLowerCase());
     expect(names.some((n) => n.includes("yam"))).toBe(true);
     expect(names.some((n) => n.includes("plantain"))).toBe(true);
     expect(names.some((n) => n.includes("jollof"))).toBe(true);
-    expect(names.some((n) => n.includes("egg"))).toBe(true);
-    expect(names.some((n) => n.includes("salmon"))).toBe(true);
+    expect(names.some((n) => n.includes("golden morn"))).toBe(true);
+    expect(names.some((n) => n.includes("akara mix"))).toBe(true);
+    expect(names.some((n) => n.includes("honey beans"))).toBe(true);
+    expect(names.some((n) => n.includes("veggies"))).toBe(true);
+    // Sourdough bread must be removed
+    expect(names.some((n) => n.includes("sourdough"))).toBe(false);
+    // Ready meals strictly kept to 4, no new ready made meals added
+    const readyMeals = FOOD_IDEAS_CATALOGUE.filter((i) => i.category === "ReadyMeal");
+    expect(readyMeals.length).toBe(4);
   });
 
   describe("filterFoodIdeas", () => {
