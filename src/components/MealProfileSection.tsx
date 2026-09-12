@@ -8,7 +8,7 @@ import {
   getDefaultGoalForOwner,
   saveClientProfile,
 } from "@/lib/profile-storage";
-import { MealProfile, UserGoal } from "@/lib/types";
+import { MealProfile, NutrientTag, UserGoal } from "@/lib/types";
 import React, { useEffect, useState } from "react";
 
 interface MealProfileSectionProps {
@@ -16,36 +16,18 @@ interface MealProfileSectionProps {
   onSaved?: (profile: MealProfile) => void;
 }
 
-const GOAL_OPTIONS: {
-  goal: UserGoal;
-  label: string;
-  badge: string;
-  description: string;
-}[] = [
-  {
-    goal: "Gain weight",
-    label: "Gain weight",
-    badge: "Default",
-    description: "Hearty, nourishing meals to steadily increase intake and energy.",
-  },
-  {
-    goal: "Eat healthier",
-    label: "Eat healthier",
-    badge: "Balanced",
-    description: "Wholesome foods, vibrant proteins, and consistent daily fuel.",
-  },
-  {
-    goal: "Eat more food generally",
-    label: "Eat more food generally",
-    badge: "Regular Intake",
-    description: "Overcoming meal skipping with low-friction, appetizing plates.",
-  },
-  {
-    goal: "Lose weight",
-    label: "Lose weight",
-    badge: "Paced",
-    description: "Satisfying, mindful meals that leave you light and refreshed.",
-  },
+const NUTRIENT_OPTIONS: { tag: NutrientTag; label: string; icon: string; desc: string }[] = [
+  { tag: "High Fiber", label: "High Fiber", icon: "🌾", desc: "Digestion & steady blood sugar" },
+  { tag: "High Protein", label: "High Protein", icon: "🍗", desc: "Strength & long-lasting satiety" },
+  { tag: "High Carb", label: "High Carb", icon: "⚡", desc: "Immediate fuel & stamina" },
+  { tag: "High Fat", label: "High Fat", icon: "🥑", desc: "Clean cell energy & calm focus" },
+];
+
+const GOAL_OPTIONS: { goal: UserGoal; label: string; badge: string; description: string }[] = [
+  { goal: "Gain weight", label: "Gain weight", badge: "Default", description: "Hearty, nourishing meals to steadily increase intake and energy." },
+  { goal: "Eat healthier", label: "Eat healthier", badge: "Balanced", description: "Wholesome foods, vibrant proteins, and consistent daily fuel." },
+  { goal: "Eat more food generally", label: "Eat more food generally", badge: "Regular Intake", description: "Overcoming meal skipping with low-friction, appetizing plates." },
+  { goal: "Lose weight", label: "Lose weight", badge: "Paced", description: "Satisfying, mindful meals that leave you light and refreshed." },
 ];
 
 export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
@@ -54,27 +36,13 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
 }) => {
   const owner = propOwner || getCurrentOwner();
   const cachedInitial = getClientProfileCached(owner);
-  const [selectedGoal, setSelectedGoal] = useState<UserGoal>(() =>
-    cachedInitial?.goal || getDefaultGoalForOwner(owner)
-  );
+  const [selectedGoal, setSelectedGoal] = useState<UserGoal>(() => cachedInitial?.goal || getDefaultGoalForOwner(owner));
+  const [selectedPriorities, setSelectedPriorities] = useState<NutrientTag[]>(() => cachedInitial?.nutrientPriorities || []);
   const [heightUnit, setHeightUnit] = useState<"cm" | "ft">("cm");
-  const [heightCm, setHeightCm] = useState<string>(() =>
-    cachedInitial?.height ? String(cachedInitial.height) : ""
-  );
-  const [feet, setFeet] = useState<string>(() => {
-    if (cachedInitial?.height) {
-      const totalIn = Math.round(cachedInitial.height / 2.54);
-      return String(Math.floor(totalIn / 12));
-    }
-    return "";
-  });
-  const [inches, setInches] = useState<string>(() => {
-    if (cachedInitial?.height) {
-      const totalIn = Math.round(cachedInitial.height / 2.54);
-      return String(totalIn % 12);
-    }
-    return "";
-  });
+  const [heightCm, setHeightCm] = useState<string>(() => cachedInitial?.height ? String(cachedInitial.height) : "");
+  const initInches = cachedInitial?.height ? Math.round(cachedInitial.height / 2.54) : null;
+  const [feet, setFeet] = useState<string>(() => initInches ? String(Math.floor(initInches / 12)) : "");
+  const [inches, setInches] = useState<string>(() => initInches ? String(initInches % 12) : "");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
@@ -96,22 +64,14 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
     setFeet(val);
     const f = parseInt(val) || 0;
     const i = parseFloat(inches) || 0;
-    if (f > 0 || i > 0) {
-      setHeightCm(String(Math.round((f * 12 + i) * 2.54)));
-    } else {
-      setHeightCm("");
-    }
+    setHeightCm(f > 0 || i > 0 ? String(Math.round((f * 12 + i) * 2.54)) : "");
   };
 
   const handleInchesChange = (val: string) => {
     setInches(val);
     const f = parseInt(feet) || 0;
     const i = parseFloat(val) || 0;
-    if (f > 0 || i > 0) {
-      setHeightCm(String(Math.round((f * 12 + i) * 2.54)));
-    } else {
-      setHeightCm("");
-    }
+    setHeightCm(f > 0 || i > 0 ? String(Math.round((f * 12 + i) * 2.54)) : "");
   };
 
   useEffect(() => {
@@ -122,6 +82,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
         if (!active) return;
         if (existing) {
           setSelectedGoal(existing.goal || getDefaultGoalForOwner(owner));
+          setSelectedPriorities(existing.nutrientPriorities || []);
           if (existing.height) {
             const cmVal = existing.height;
             setHeightCm(String(cmVal));
@@ -138,6 +99,12 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
       active = false;
     };
   }, [owner]);
+
+  const togglePriority = (tag: NutrientTag) => {
+    setSelectedPriorities((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -157,6 +124,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
       owner,
       goal: selectedGoal,
       height: validHeight,
+      nutrientPriorities: selectedPriorities,
     });
 
     setIsSaving(false);
@@ -236,6 +204,56 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                   }`}
                 >
                   {isSelected && <Check size={12} weight="bold" />}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Nutrient Priorities Configuration */}
+      <div className="space-y-2">
+        <div>
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-black uppercase tracking-wider text-stone-900">
+              Nutrient Priorities (Optional)
+            </label>
+            <span className="text-[10px] font-bold text-stone-500">Multi-select</span>
+          </div>
+          <p className="text-xs text-stone-600 mt-0.5">
+            Steers meal suggestions toward pairings that hit these qualities.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {NUTRIENT_OPTIONS.map((item) => {
+            const isSelected = selectedPriorities.includes(item.tag);
+            return (
+              <button
+                key={item.tag}
+                type="button"
+                onClick={() => togglePriority(item.tag)}
+                className={`text-left p-2.5 rounded-xl border-2 border-stone-900 transition-all flex flex-col justify-between ${
+                  isSelected
+                    ? "bg-amber-200 shadow-brutal-xs -translate-y-0.5"
+                    : "bg-white hover:bg-stone-50"
+                }`}
+              >
+                <div className="flex items-center justify-between w-full mb-1">
+                  <span className="text-sm">{item.icon}</span>
+                  <div
+                    className={`w-4 h-4 rounded-md border border-stone-900 flex items-center justify-center ${
+                      isSelected ? "bg-stone-900 text-white" : "bg-white"
+                    }`}
+                  >
+                    {isSelected && <Check size={10} weight="bold" />}
+                  </div>
+                </div>
+                <div className="font-display font-black text-xs text-stone-900 leading-tight">
+                  {item.label}
+                </div>
+                <div className="text-[10px] text-stone-600 font-medium leading-tight mt-0.5">
+                  {item.desc}
                 </div>
               </button>
             );

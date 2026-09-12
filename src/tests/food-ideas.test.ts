@@ -35,6 +35,33 @@ describe("Food Ideas & Inspiration Catalogue", () => {
     expect(readyMeals.length).toBe(4);
   });
 
+  it("includes obscure raw staples: Chia seeds, Fennel seeds, Whole milk, Tiger nuts, Greek yogurt", () => {
+    const names = FOOD_IDEAS_CATALOGUE.map((i) => i.name.toLowerCase());
+    expect(names.some((n) => n.includes("chia"))).toBe(true);
+    expect(names.some((n) => n.includes("fennel"))).toBe(true);
+    expect(names.some((n) => n.includes("milk"))).toBe(true);
+    expect(names.some((n) => n.includes("tiger nuts") || n.includes("ofio"))).toBe(true);
+    expect(names.some((n) => n.includes("greek yogurt"))).toBe(true);
+
+    const chia = FOOD_IDEAS_CATALOGUE.find((i) => i.name.toLowerCase().includes("chia"))!;
+    expect(chia.nutrientTags).toContain("High Fiber");
+    expect(chia.nutrientTags).toContain("High Fat");
+
+    const greekYogurt = FOOD_IDEAS_CATALOGUE.find((i) => i.name.toLowerCase().includes("greek yogurt"))!;
+    expect(greekYogurt.nutrientTags).toContain("High Protein");
+  });
+
+  it("validates that all food ideas have qualitative nutrient tags from allowed set", () => {
+    const validTags = new Set(["High Fiber", "High Protein", "High Carb", "High Fat"]);
+    for (const idea of FOOD_IDEAS_CATALOGUE) {
+      expect(idea.nutrientTags).toBeDefined();
+      expect(Array.isArray(idea.nutrientTags)).toBe(true);
+      for (const tag of idea.nutrientTags!) {
+        expect(validTags.has(tag)).toBe(true);
+      }
+    }
+  });
+
   describe("filterFoodIdeas", () => {
     it("filters by category", () => {
       const proteinsOnly = filterFoodIdeas(FOOD_IDEAS_CATALOGUE, {

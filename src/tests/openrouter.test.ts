@@ -28,9 +28,45 @@ describe("OpenRouter Companion Notes Engine", () => {
       expect(prompt).toContain("Eat healthier");
       expect(prompt).toContain("Dinner");
     });
+
+    it("includes specific nutrient synergy instructions when user priorities are met", () => {
+      const prompt = buildCompanionPrompt({
+        owner: "Esther",
+        goal: "Eat healthier",
+        mealType: "Lunch",
+        nutrientPriorities: ["High Fiber", "High Protein"],
+        matchedNutrientTags: ["High Fiber", "High Protein", "High Carb"],
+        mealTitle: "Honey Beans & Boiled Plantain",
+      });
+      expect(prompt).toContain("Specific nutritional synergy");
+      expect(prompt).toContain("High Fiber and High Protein");
+      expect(prompt).toContain("Honey Beans & Boiled Plantain");
+    });
+
+    it("instructs not to force nutrient mentions when no priorities match", () => {
+      const prompt = buildCompanionPrompt({
+        owner: "Esther",
+        mealType: "Lunch",
+        nutrientPriorities: ["High Fat"],
+        matchedNutrientTags: ["High Carb"],
+      });
+      expect(prompt).toContain("Do NOT force nutrient mentions");
+    });
   });
 
   describe("getDefaultFallbackNote", () => {
+    it("provides specific encouragement when nutrient priorities are hit", () => {
+      const note = getDefaultFallbackNote("Lunch", "Esther", "Eat healthier", [
+        "High Fiber",
+        "High Protein",
+      ]);
+      expect(note).toContain("Good fiber and protein pairing");
+
+      const proteinNote = getDefaultFallbackNote("Lunch", "Esther", "Gain weight", [
+        "High Protein",
+      ]);
+      expect(proteinNote).toContain("protein foundation");
+    });
     it("returns reassuring, non-empty text for all meal types", () => {
       const breakfast = getDefaultFallbackNote("Breakfast", "Esther", "Gain weight");
       const lunch = getDefaultFallbackNote("Lunch", "Esther", "Gain weight");

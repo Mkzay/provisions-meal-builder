@@ -45,6 +45,8 @@ export async function saveMealProfile(profile: {
   owner: string;
   goal: UserGoal;
   height?: number;
+  nutrientPriorities?: import("./types").NutrientTag[];
+  mealsPerDay?: number;
 }): Promise<{ success: boolean; profile: MealProfile }> {
   const notion = getNotionClient();
   const profileDbId = process.env.NOTION_PROFILE_DB_ID;
@@ -56,6 +58,8 @@ export async function saveMealProfile(profile: {
         owner: profile.owner,
         goal: profile.goal,
         height: profile.height,
+        nutrientPriorities: profile.nutrientPriorities,
+        mealsPerDay: profile.mealsPerDay,
         updatedAt: new Date().toISOString(),
       },
     };
@@ -89,6 +93,8 @@ export async function saveMealProfile(profile: {
           owner: profile.owner,
           goal: profile.goal,
           height: profile.height,
+          nutrientPriorities: profile.nutrientPriorities,
+          mealsPerDay: profile.mealsPerDay,
           updatedAt: new Date().toISOString(),
         },
       };
@@ -108,6 +114,8 @@ export async function saveMealProfile(profile: {
         owner: profile.owner,
         goal: profile.goal,
         height: profile.height,
+        nutrientPriorities: profile.nutrientPriorities,
+        mealsPerDay: profile.mealsPerDay,
         updatedAt: new Date().toISOString(),
       },
     };
@@ -119,6 +127,8 @@ export async function saveMealProfile(profile: {
         owner: profile.owner,
         goal: profile.goal,
         height: profile.height,
+        nutrientPriorities: profile.nutrientPriorities,
+        mealsPerDay: profile.mealsPerDay,
         updatedAt: new Date().toISOString(),
       },
     };

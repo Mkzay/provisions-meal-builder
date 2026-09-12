@@ -14,6 +14,8 @@ import React, { useEffect, useState } from "react";
 interface CompanionNoteCardProps {
   mealType: MealType;
   owner: string;
+  tags?: import("@/lib/types").NutrientTag[];
+  mealTitle?: string;
   className?: string;
   isDismissible?: boolean;
 }
@@ -44,6 +46,8 @@ const THEMES: Record<MealType, { bg: string; iconBg: string; text: string }> = {
 export const CompanionNoteCard: React.FC<CompanionNoteCardProps> = ({
   mealType,
   owner,
+  tags,
+  mealTitle,
   className = "",
   isDismissible = true,
 }) => {
@@ -58,7 +62,7 @@ export const CompanionNoteCard: React.FC<CompanionNoteCardProps> = ({
 
     if (!dismissed) {
       setIsLoading(true);
-      fetchClientCompanionNote(owner, mealType)
+      fetchClientCompanionNote(owner, mealType, false, tags, mealTitle)
         .then((text) => {
           if (active) {
             setNote(text);
@@ -73,7 +77,7 @@ export const CompanionNoteCard: React.FC<CompanionNoteCardProps> = ({
     return () => {
       active = false;
     };
-  }, [mealType, owner]);
+  }, [mealType, owner, tags?.join(","), mealTitle]);
 
   const handleDismiss = () => {
     dismissNoteForMealWindow(mealType);

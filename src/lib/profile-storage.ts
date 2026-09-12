@@ -85,12 +85,16 @@ export async function saveClientProfile(profile: {
   owner?: string;
   goal: UserGoal;
   height?: number;
+  nutrientPriorities?: import("./types").NutrientTag[];
+  mealsPerDay?: number;
 }): Promise<{ success: boolean; profile: MealProfile }> {
   const targetOwner = profile.owner || getCurrentOwner();
   const optimisticProfile: MealProfile = {
     owner: targetOwner,
     goal: profile.goal,
     height: profile.height,
+    nutrientPriorities: profile.nutrientPriorities,
+    mealsPerDay: profile.mealsPerDay,
     updatedAt: new Date().toISOString(),
   };
 
@@ -106,6 +110,8 @@ export async function saveClientProfile(profile: {
         owner: targetOwner,
         goal: profile.goal,
         height: profile.height,
+        nutrientPriorities: profile.nutrientPriorities,
+        mealsPerDay: profile.mealsPerDay,
       }),
     });
 

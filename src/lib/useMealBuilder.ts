@@ -1,35 +1,15 @@
 import { getDefaultMealTypeByHour, getAvailableMains, getAvailableReadyMeals } from "./flow-logic";
-import {
-  applyOptimisticLeftover,
-  loadCachedCatalogue,
-  queueOfflineMutation,
-  saveCachedCatalogue,
-} from "./offline-storage";
+import { applyOptimisticLeftover, loadCachedCatalogue, queueOfflineMutation, saveCachedCatalogue } from "./offline-storage";
 import { findBestPairings } from "./pairings";
+import { suggestNutrientAwareCombo } from "./nutrient-curation";
+import { getClientProfileCached } from "./profile-storage";
 import { SEED_CATALOGUE } from "./seed-data";
-import {
-  AddSupplyInput,
-  EMPTY_CATALOGUE,
-  Ingredient,
-  KitchenCatalogue,
-  LeftoverDecision,
-  MealLogEntry,
-  MealSource,
-  MealType,
-  PairingResult,
-  ReadyMeal,
-} from "./types";
+import { AddSupplyInput, EMPTY_CATALOGUE, Ingredient, KitchenCatalogue, LeftoverDecision, MealLogEntry, MealSource, MealType, NutrientTag, PairingResult, ReadyMeal } from "./types";
 import { useEffect, useState } from "react";
 
-export type FlowStep =
-  | "meal_type"
-  | "ready_meal"
-  | "mode_select"
-  | "manual_pick"
-  | "pairing"
-  | "confirm";
+export type FlowStep = "meal_type" | "ready_meal" | "mode_select" | "manual_pick" | "pairing" | "confirm";
 
-export function useMealBuilder(owner: string = "User") {
+export function useMealBuilder(owner: string = "User", nutrientPriorities?: NutrientTag[]) {
   const [catalogue, setCatalogue] = useState<KitchenCatalogue>(EMPTY_CATALOGUE);
   const [isClientReady, setIsClientReady] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -133,14 +113,19 @@ export function useMealBuilder(owner: string = "User") {
 
   const handleSuggestForMe = () => {
     if (availableMains.length === 0) return;
-    const randomMain =
-      availableMains[Math.floor(Math.random() * availableMains.length)];
-    setSelectedMain(randomMain);
+    const activePriorities = nutrientPriorities || getClientProfileCached(owner)?.nutrientPriorities;
+    const combo = suggestNutrientAwareCombo({
+      availableMains,
+      allIngredients: catalogue.ingredients,
+      mealType,
+      nutrientPriorities: activePriorities,
+    });
+    if (!combo) return;
 
-    const pairings = findBestPairings(randomMain, catalogue.ingredients, mealType);
-    setPairingResult(pairings);
-    setSelectedProtein(pairings.recommendedProtein);
-    setSelectedSupplementary(pairings.recommendedSupplementary);
+    setSelectedMain(combo.main);
+    setPairingResult(combo.pairings);
+    setSelectedProtein(combo.protein);
+    setSelectedSupplementary(combo.supplementary);
     setSelectedSource("Built");
     setSelectedReadyMeal(undefined);
     setCurrentStep("pairing");

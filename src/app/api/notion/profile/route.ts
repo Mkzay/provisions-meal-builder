@@ -39,6 +39,13 @@ export async function POST(req: NextRequest) {
       typeof body.height === "number" && !isNaN(body.height) && body.height > 0
         ? body.height
         : undefined;
+    const nutrientPriorities = Array.isArray(body.nutrientPriorities)
+      ? body.nutrientPriorities
+      : undefined;
+    const mealsPerDay =
+      typeof body.mealsPerDay === "number" && body.mealsPerDay > 0
+        ? body.mealsPerDay
+        : undefined;
 
     if (!goal) {
       return NextResponse.json(
@@ -51,6 +58,8 @@ export async function POST(req: NextRequest) {
       owner,
       goal,
       height,
+      nutrientPriorities,
+      mealsPerDay,
     });
 
     return NextResponse.json(result);

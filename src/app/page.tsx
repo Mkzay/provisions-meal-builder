@@ -292,6 +292,7 @@ export default function MealBuilderPage() {
                       }
                     }}
                     isLogging={isLogging}
+                    owner={owner}
                   />
                 </motion.div>
               ) : null}

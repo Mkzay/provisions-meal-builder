@@ -1,9 +1,12 @@
-import { MealType, UserGoal } from "./types";
+import { MealType, NutrientTag, UserGoal } from "./types";
 
 export interface CompanionPromptInput {
   owner: string;
   goal?: UserGoal;
   mealType: MealType;
+  nutrientPriorities?: NutrientTag[];
+  matchedNutrientTags?: NutrientTag[];
+  mealTitle?: string;
   apiKey?: string;
   model?: string;
 }
@@ -36,8 +39,27 @@ const FALLBACK_NOTES: Record<MealType, string[]> = {
 export function getDefaultFallbackNote(
   mealType: MealType,
   owner?: string,
-  _goal?: UserGoal
+  _goal?: UserGoal,
+  hitPriorities?: NutrientTag[]
 ): string {
+  if (hitPriorities && hitPriorities.length > 0) {
+    if (hitPriorities.includes("High Fiber") && hitPriorities.includes("High Protein")) {
+      return "Good fiber and protein pairing here—giving you steady digestion and long-lasting energy throughout your day.";
+    }
+    if (hitPriorities.includes("High Protein")) {
+      return "Solid protein foundation in this plate to support your strength and keep you comfortably satisfied.";
+    }
+    if (hitPriorities.includes("High Fiber")) {
+      return "Great natural fiber coverage here, keeping your digestion happy and energy pacing smooth.";
+    }
+    if (hitPriorities.includes("High Fat") && hitPriorities.includes("High Protein")) {
+      return "Rich healthy fats and clean protein to keep hunger quiet and nourish your body with calm focus.";
+    }
+    if (hitPriorities.includes("High Carb")) {
+      return "A comforting anchor carb to refuel your body and keep your daily mental clarity steady.";
+    }
+  }
+
   const notes = FALLBACK_NOTES[mealType] || FALLBACK_NOTES.Lunch;
   // Deterministic pick based on today's date so it changes daily even offline
   const dayOfYear = Math.floor(
@@ -52,17 +74,30 @@ export function getDefaultFallbackNote(
 }
 
 export function buildCompanionPrompt(input: CompanionPromptInput): string {
-  const { owner, goal, mealType } = input;
+  const { owner, goal, mealType, nutrientPriorities, matchedNutrientTags, mealTitle } = input;
   const goalText = goal ? `Their current health/eating goal is "${goal}".` : "";
+  const mealContext = mealTitle ? `The meal is: "${mealTitle}".` : `The user is currently deciding what to eat for ${mealType}.`;
+
+  const hitPriorities = (nutrientPriorities || []).filter((p) =>
+    matchedNutrientTags?.includes(p)
+  );
+
+  let nutrientInstruction = "";
+  if (hitPriorities.length > 0) {
+    const priorityList = hitPriorities.join(" and ");
+    nutrientInstruction = `\n- Specific nutritional synergy: This meal covers their stated priority for ${priorityList}. Mention this specifically and honestly (e.g. "good fiber and protein pairing here" or how this combo provides steady energy). Keep it grounded and true, not a generic compliment. Do NOT mention any nutrients that are not present.`;
+  } else {
+    nutrientInstruction = `\n- Keep the encouragement warm, grounded, and kind. Do NOT force nutrient mentions that aren't accurate.`;
+  }
 
   return `You are Provisions, a warm, compassionate culinary companion and personal food mentor for ${owner}. ${goalText}
-The user is currently deciding what to eat for ${mealType}.
+${mealContext}
 
-Write a single, thoughtful note for ${owner} about eating ${mealType}.
+Write a single, thoughtful note for ${owner} about this meal.
 Guidelines:
 - 1 to 2 sentences maximum (approx 25-45 words).
 - Tone: Grounded, compassionate, encouraging, zero diet culture, zero calorie counting, zero shame.
-- Focus on how nourishing food brings sustained energy, mental clarity, and body kindness.
+- Focus on how nourishing food brings sustained energy, mental clarity, and body kindness.${nutrientInstruction}
 - Tailor the encouragement to ${mealType} and their goal of ${goal || "eating well"}.
 - Do NOT use markdown bolding, hashtags, bullet points, or quotation marks. Output plain text only.`;
 }
@@ -70,9 +105,12 @@ Guidelines:
 export async function fetchOpenRouterNote(input: CompanionPromptInput): Promise<string> {
   const apiKey = input.apiKey || process.env.OPENROUTER_API_KEY;
   const model = input.model || process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+  const hitPriorities = (input.nutrientPriorities || []).filter((p) =>
+    input.matchedNutrientTags?.includes(p)
+  );
 
   if (!apiKey) {
-    return getDefaultFallbackNote(input.mealType, input.owner, input.goal);
+    return getDefaultFallbackNote(input.mealType, input.owner, input.goal, hitPriorities);
   }
 
   const prompt = buildCompanionPrompt(input);
@@ -107,14 +145,14 @@ export async function fetchOpenRouterNote(input: CompanionPromptInput): Promise<
 
     if (!response.ok) {
       console.warn(`OpenRouter returned status ${response.status}. Using fallback note.`);
-      return getDefaultFallbackNote(input.mealType, input.owner, input.goal);
+      return getDefaultFallbackNote(input.mealType, input.owner, input.goal, hitPriorities);
     }
 
     const data = await response.json();
     const rawContent = data?.choices?.[0]?.message?.content?.trim();
 
     if (!rawContent) {
-      return getDefaultFallbackNote(input.mealType, input.owner, input.goal);
+      return getDefaultFallbackNote(input.mealType, input.owner, input.goal, hitPriorities);
     }
 
     // Clean any accidental markdown quotes or leading/trailing quotation marks
@@ -122,6 +160,6 @@ export async function fetchOpenRouterNote(input: CompanionPromptInput): Promise<
   } catch (error) {
     clearTimeout(timeoutId);
     console.warn("OpenRouter note generation failed. Using graceful fallback:", error);
-    return getDefaultFallbackNote(input.mealType, input.owner, input.goal);
+    return getDefaultFallbackNote(input.mealType, input.owner, input.goal, hitPriorities);
   }
 }

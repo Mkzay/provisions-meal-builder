@@ -10,6 +10,8 @@ import {
   Sparkle,
 } from "@/components/icons";
 import { Ingredient, MealSource, MealType, MissingUpgradeSuggestion, ReadyMeal } from "@/lib/types";
+import { getComboNutrientTags } from "@/lib/nutrient-curation";
+import { getClientProfileCached } from "@/lib/profile-storage";
 import React from "react";
 import { CompanionNoteCard } from "./CompanionNoteCard";
 
@@ -62,6 +64,12 @@ export const CulinaryCompanion: React.FC<CulinaryCompanionProps> = ({
     return "Combining an anchor carb with a wholesome protein helps regulate blood sugar and keeps you feeling satisfied for hours.";
   };
 
+  const comboTags = getComboNutrientTags(mainIngredient, protein, supplementary, readyMeal);
+  const cachedProfile = getClientProfileCached(owner || "User");
+  const hitPriorities = (cachedProfile?.nutrientPriorities || []).filter((p) =>
+    comboTags.includes(p)
+  );
+
   return (
     <aside className="w-full lg:w-76 xl:w-80 space-y-4 shrink-0">
       {/* Live Plate Card */}
@@ -70,9 +78,16 @@ export const CulinaryCompanion: React.FC<CulinaryCompanionProps> = ({
           <span className="text-xs font-black uppercase tracking-wider text-stone-900">
             Current Plate
           </span>
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-white text-stone-900 border border-stone-900 shadow-brutal-sm">
-            {mealType}
-          </span>
+          <div className="flex items-center gap-1.5">
+            {hitPriorities.length > 0 && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-300 text-stone-900 border border-stone-900 shadow-2xs">
+                ✓ {hitPriorities.join(" & ")}
+              </span>
+            )}
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-white text-stone-900 border border-stone-900 shadow-brutal-sm">
+              {mealType}
+            </span>
+          </div>
         </div>
 
         <div>
@@ -145,6 +160,8 @@ export const CulinaryCompanion: React.FC<CulinaryCompanionProps> = ({
       <CompanionNoteCard
         mealType={mealType}
         owner={owner || "User"}
+        tags={comboTags}
+        mealTitle={getDishTitle()}
         isDismissible={false}
       />
     </aside>

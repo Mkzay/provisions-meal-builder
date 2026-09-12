@@ -11,6 +11,8 @@ import {
 } from "@/components/icons";
 import { getFirstStepKickoff } from "@/lib/pairings";
 import { Ingredient, MealSource, MealType, ReadyMeal } from "@/lib/types";
+import { getComboNutrientTags } from "@/lib/nutrient-curation";
+import { getClientProfileCached } from "@/lib/profile-storage";
 import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
@@ -25,6 +27,7 @@ interface MealConfirmationProps {
   onConfirmAndLog: () => void;
   onBack: () => void;
   isLogging?: boolean;
+  owner?: string;
 }
 
 export const MealConfirmation: React.FC<MealConfirmationProps> = ({
@@ -37,8 +40,15 @@ export const MealConfirmation: React.FC<MealConfirmationProps> = ({
   onConfirmAndLog,
   onBack,
   isLogging = false,
+  owner,
 }) => {
   const [hasConfirmed, setHasConfirmed] = useState(false);
+
+  const comboTags = getComboNutrientTags(mainIngredient, protein, supplementary, readyMeal);
+  const cachedProfile = getClientProfileCached(owner || "User");
+  const hitPriorities = (cachedProfile?.nutrientPriorities || []).filter((p) =>
+    comboTags.includes(p)
+  );
 
   const getMealTitle = () => {
     if (readyMeal) return readyMeal.name;
@@ -117,6 +127,12 @@ export const MealConfirmation: React.FC<MealConfirmationProps> = ({
             {getMealTitle()}
           </h3>
 
+          {hitPriorities.length > 0 && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-300 border-2 border-stone-900 text-xs font-black text-stone-900 mt-2.5 shadow-brutal-sm">
+              <span>⭐ Covers your {hitPriorities.join(" & ")} priority</span>
+            </div>
+          )}
+
           <p className="text-xs sm:text-sm text-stone-800 font-medium mt-2.5 max-w-sm mx-auto leading-relaxed">
             Everything is set. Sit down, nourish your body, and take your time.
           </p>
@@ -142,6 +158,19 @@ export const MealConfirmation: React.FC<MealConfirmationProps> = ({
               </span>
             )}
           </div>
+
+          {comboTags.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3">
+              {comboTags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-0.5 rounded-lg bg-white/90 text-stone-800 text-[10px] font-extrabold border border-stone-900/40 shadow-2xs"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

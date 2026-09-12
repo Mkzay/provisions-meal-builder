@@ -4,6 +4,7 @@ import {
   MealLogEntry,
   MealProfile,
   MealType,
+  NutrientTag,
   ReadyMeal,
   UserGoal,
   WeightLogEntry,
@@ -60,6 +61,10 @@ export function parseNotionIngredient(page: any): Ingredient | null {
       props.Owner?.rich_text?.[0]?.plain_text ||
       "Esther";
 
+    // Nutrient Tags
+    const rawNutrients = props["Nutrient Tags"]?.multi_select || props.NutrientTags?.multi_select || [];
+    const nutrientTags: NutrientTag[] = rawNutrients.map((n: any) => n.name).filter(Boolean);
+
     return {
       id: page.id,
       name,
@@ -67,6 +72,7 @@ export function parseNotionIngredient(page: any): Ingredient | null {
       role,
       available,
       owner,
+      ...(nutrientTags.length > 0 ? { nutrientTags } : {}),
     };
   } catch (err) {
     console.error("Error parsing Notion ingredient:", err);
@@ -114,12 +120,17 @@ export function parseNotionReadyMeal(page: any): ReadyMeal | null {
       props.Owner?.rich_text?.[0]?.plain_text ||
       "Esther";
 
+    // Nutrient Tags
+    const rawNutrients = props["Nutrient Tags"]?.multi_select || props.NutrientTags?.multi_select || [];
+    const nutrientTags: NutrientTag[] = rawNutrients.map((n: any) => n.name).filter(Boolean);
+
     return {
       id: page.id,
       name,
       mealTypes,
       available,
       owner,
+      ...(nutrientTags.length > 0 ? { nutrientTags } : {}),
     };
   } catch (err) {
     console.error("Error parsing Notion ready meal:", err);
@@ -189,30 +200,10 @@ export function buildNewReadyMealProperties(
   owner: string = "Esther"
 ): Record<string, any> {
   return {
-    Name: {
-      title: [
-        {
-          text: {
-            content: name,
-          },
-        },
-      ],
-    },
-    "Meal Type": {
-      multi_select: [
-        {
-          name: mealType,
-        },
-      ],
-    },
-    Available: {
-      checkbox: true,
-    },
-    Owner: {
-      select: {
-        name: owner,
-      },
-    },
+    Name: { title: [{ text: { content: name } }] },
+    "Meal Type": { multi_select: [{ name: mealType }] },
+    Available: { checkbox: true },
+    Owner: { select: { name: owner } },
   };
 }
 
@@ -227,30 +218,27 @@ export function parseNotionMealProfile(page: any): MealProfile | null {
     const props = page.properties;
     if (!props) return null;
 
-    const owner =
-      props.Owner?.select?.name ||
-      props.Owner?.rich_text?.[0]?.plain_text ||
-      "Esther";
-
+    const owner = props.Owner?.select?.name || props.Owner?.rich_text?.[0]?.plain_text || "Esther";
     const goalName = props.Goal?.select?.name || props.goal?.select?.name;
     const goal: UserGoal =
-      goalName === "Lose weight" ||
-      goalName === "Eat healthier" ||
-      goalName === "Eat more food generally"
+      goalName === "Lose weight" || goalName === "Eat healthier" || goalName === "Eat more food generally"
         ? goalName
         : "Gain weight";
 
     const heightVal = props.Height?.number ?? props.height?.number;
-    const height =
-      typeof heightVal === "number" && !isNaN(heightVal) && heightVal > 0
-        ? heightVal
-        : undefined;
+    const height = typeof heightVal === "number" && !isNaN(heightVal) && heightVal > 0 ? heightVal : undefined;
+    const rawPriorities = props["Nutrient Priorities"]?.multi_select || props.NutrientPriorities?.multi_select || [];
+    const nutrientPriorities: NutrientTag[] = rawPriorities.map((p: any) => p.name).filter(Boolean);
+    const mealsVal = props["Meals Per Day"]?.number ?? props.MealsPerDay?.number;
+    const mealsPerDay = typeof mealsVal === "number" && !isNaN(mealsVal) && mealsVal > 0 ? mealsVal : undefined;
 
     return {
       id: page.id,
       owner,
       goal,
       height,
+      ...(nutrientPriorities.length > 0 ? { nutrientPriorities } : {}),
+      ...(mealsPerDay ? { mealsPerDay } : {}),
       updatedAt: page.last_edited_time || new Date().toISOString(),
     };
   } catch (err) {
@@ -263,37 +251,29 @@ export function buildMealProfileProperties(profile: {
   owner: string;
   goal: UserGoal;
   height?: number;
+  nutrientPriorities?: NutrientTag[];
+  mealsPerDay?: number;
 }): Record<string, any> {
   const properties: Record<string, any> = {
-    Name: {
-      title: [
-        {
-          text: {
-            content: `${profile.owner}'s Meal Profile`,
-          },
-        },
-      ],
-    },
-    Owner: {
-      select: {
-        name: profile.owner,
-      },
-    },
-    Goal: {
-      select: {
-        name: profile.goal,
-      },
-    },
+    Name: { title: [{ text: { content: `${profile.owner}'s Meal Profile` } }] },
+    Owner: { select: { name: profile.owner } },
+    Goal: { select: { name: profile.goal } },
   };
 
   if (typeof profile.height === "number" && !isNaN(profile.height) && profile.height > 0) {
-    properties.Height = {
-      number: profile.height,
-    };
+    properties.Height = { number: profile.height };
   } else {
-    properties.Height = {
-      number: null,
+    properties.Height = { number: null };
+  }
+
+  if (profile.nutrientPriorities && profile.nutrientPriorities.length > 0) {
+    properties["Nutrient Priorities"] = {
+      multi_select: profile.nutrientPriorities.map((name) => ({ name })),
     };
+  }
+
+  if (typeof profile.mealsPerDay === "number" && profile.mealsPerDay > 0) {
+    properties["Meals Per Day"] = { number: profile.mealsPerDay };
   }
 
   return properties;
@@ -310,23 +290,12 @@ export function parseNotionWeightLog(page: any): WeightLogEntry | null {
     const props = page.properties;
     if (!props) return null;
 
-    const owner =
-      props.Owner?.select?.name ||
-      props.Owner?.rich_text?.[0]?.plain_text ||
-      "Esther";
-
-    const date =
-      props.Date?.date?.start ||
-      page.created_time?.slice(0, 10) ||
-      new Date().toISOString().slice(0, 10);
-
+    const owner = props.Owner?.select?.name || props.Owner?.rich_text?.[0]?.plain_text || "Esther";
+    const date = props.Date?.date?.start || page.created_time?.slice(0, 10) || new Date().toISOString().slice(0, 10);
     const weightVal = props.Weight?.number ?? props.weight?.number;
     if (typeof weightVal !== "number" || isNaN(weightVal)) return null;
 
-    const titleText =
-      props.Name?.title?.[0]?.plain_text ||
-      props.Name?.title?.[0]?.text?.content ||
-      "";
+    const titleText = props.Name?.title?.[0]?.plain_text || props.Name?.title?.[0]?.text?.content || "";
     const unit: "kg" | "lbs" = titleText.toLowerCase().includes("lbs") ? "lbs" : "kg";
 
     return {
@@ -352,27 +321,9 @@ export function buildWeightLogProperties(entry: {
   const roundedWeight = Math.round(entry.weight * 100) / 100;
   const unitLabel = entry.unit === "lbs" ? "lbs" : "kg";
   return {
-    Name: {
-      title: [
-        {
-          text: {
-            content: `${roundedWeight} ${unitLabel} - ${entry.date}`,
-          },
-        },
-      ],
-    },
-    Owner: {
-      select: {
-        name: entry.owner,
-      },
-    },
-    Date: {
-      date: {
-        start: entry.date,
-      },
-    },
-    Weight: {
-      number: roundedWeight,
-    },
+    Name: { title: [{ text: { content: `${roundedWeight} ${unitLabel} - ${entry.date}` } }] },
+    Owner: { select: { name: entry.owner } },
+    Date: { date: { start: entry.date } },
+    Weight: { number: roundedWeight },
   };
 }

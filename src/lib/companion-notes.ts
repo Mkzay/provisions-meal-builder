@@ -68,36 +68,45 @@ export function clearNoteDismissal(mealType: MealType): void {
 export async function fetchClientCompanionNote(
   owner: string,
   mealType: MealType,
-  forceRefresh = false
+  forceRefresh = false,
+  tags?: import("./types").NutrientTag[],
+  mealTitle?: string
 ): Promise<string> {
-  if (!forceRefresh) {
+  const hasSpecificContext = Boolean((tags && tags.length > 0) || mealTitle);
+  if (!forceRefresh && !hasSpecificContext) {
     const cached = getCachedCompanionNote(owner, mealType);
     if (cached) return cached;
   }
 
   try {
-    const res = await fetch(
-      `/api/companion?owner=${encodeURIComponent(owner)}&mealType=${encodeURIComponent(
-        mealType
-      )}`,
-      {
-        cache: "no-store",
-      }
-    );
+    const params = new URLSearchParams({
+      owner,
+      mealType,
+    });
+    if (tags && tags.length > 0) {
+      params.set("tags", tags.join(","));
+    }
+    if (mealTitle) {
+      params.set("mealTitle", mealTitle);
+    }
+
+    const res = await fetch(`/api/companion?${params.toString()}`, {
+      cache: "no-store",
+    });
 
     if (!res.ok) {
-      const fallback = getDefaultFallbackNote(mealType, owner);
-      setCachedCompanionNote(owner, mealType, fallback);
+      const fallback = getDefaultFallbackNote(mealType, owner, undefined, tags);
+      if (!hasSpecificContext) setCachedCompanionNote(owner, mealType, fallback);
       return fallback;
     }
 
     const data = await res.json();
-    const note = data?.note || getDefaultFallbackNote(mealType, owner);
-    setCachedCompanionNote(owner, mealType, note);
+    const note = data?.note || getDefaultFallbackNote(mealType, owner, undefined, tags);
+    if (!hasSpecificContext) setCachedCompanionNote(owner, mealType, note);
     return note;
   } catch {
-    const fallback = getDefaultFallbackNote(mealType, owner);
-    setCachedCompanionNote(owner, mealType, fallback);
+    const fallback = getDefaultFallbackNote(mealType, owner, undefined, tags);
+    if (!hasSpecificContext) setCachedCompanionNote(owner, mealType, fallback);
     return fallback;
   }
 }

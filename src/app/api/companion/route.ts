@@ -13,12 +13,19 @@ export async function GET(req: NextRequest) {
 
     const owner = searchParams.get("owner") || session?.user?.ownerName || session?.user?.name || "User";
     const mealType = (searchParams.get("mealType") as MealType) || "Lunch";
+    const rawTags = searchParams.get("tags");
+    const matchedNutrientTags = rawTags
+      ? (rawTags.split(",").map((t) => t.trim()).filter(Boolean) as import("@/lib/types").NutrientTag[])
+      : undefined;
+    const mealTitle = searchParams.get("mealTitle") || undefined;
 
-    // Fetch user goal to tailor the note
+    // Fetch user goal and nutrient priorities to tailor the note
     let goal = undefined;
+    let nutrientPriorities = undefined;
     try {
       const profile = await fetchMealProfile(owner);
       goal = profile?.goal;
+      nutrientPriorities = profile?.nutrientPriorities;
     } catch {
       // Ignore if profile lookup fails
     }
@@ -27,6 +34,9 @@ export async function GET(req: NextRequest) {
       owner,
       goal,
       mealType,
+      nutrientPriorities,
+      matchedNutrientTags,
+      mealTitle,
     });
 
     return NextResponse.json(

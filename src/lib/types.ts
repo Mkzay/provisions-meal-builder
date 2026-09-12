@@ -2,6 +2,8 @@ export type MealType = "Breakfast" | "Lunch" | "Dinner" | "Snack";
 
 export type IngredientRole = "Main" | "Protein" | "Supplementary";
 
+export type NutrientTag = "High Fiber" | "High Protein" | "High Carb" | "High Fat";
+
 export interface Ingredient {
   id: string;
   name: string;
@@ -9,6 +11,7 @@ export interface Ingredient {
   role: IngredientRole;
   owner: string;
   available: boolean;
+  nutrientTags?: NutrientTag[];
 }
 
 export interface ReadyMeal {
@@ -17,6 +20,7 @@ export interface ReadyMeal {
   mealTypes: MealType[];
   owner: string;
   available: boolean;
+  nutrientTags?: NutrientTag[];
 }
 
 export type MealSource = "Ready Meal" | "Built";
@@ -141,6 +145,8 @@ export interface MealProfile {
   owner: string;
   goal: UserGoal;
   height?: number; // Number in Notion Database 4
+  nutrientPriorities?: NutrientTag[];
+  mealsPerDay?: number;
   updatedAt?: string;
 }
 

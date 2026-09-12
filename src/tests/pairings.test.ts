@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  getComboNutrientTags,
+  suggestNutrientAwareCombo,
+} from "../lib/nutrient-curation";
+import {
   findBestPairings,
   getCleanUpFootprint,
   getFirstStepKickoff,
@@ -176,5 +180,156 @@ describe("Culinary Pairing Logic", () => {
 
     expect(getFirstStepKickoff(bread)).toContain("butter knife");
     expect(getFirstStepKickoff(yam)).toContain("pot with water");
+  });
+});
+
+describe("Nutrient Curation Engine", () => {
+  const nutrientIngredients: Ingredient[] = [
+    {
+      id: "oats",
+      name: "Rolled Oats",
+      role: "Main",
+      mealTypes: ["Breakfast"],
+      owner: "Esther",
+      available: true,
+      nutrientTags: ["High Fiber", "High Carb"],
+    },
+    {
+      id: "toast",
+      name: "White Bread",
+      role: "Main",
+      mealTypes: ["Breakfast"],
+      owner: "Esther",
+      available: true,
+      nutrientTags: ["High Carb"],
+    },
+    {
+      id: "greek-yogurt",
+      name: "Greek Yogurt",
+      role: "Protein",
+      mealTypes: ["Breakfast"],
+      owner: "Esther",
+      available: true,
+      nutrientTags: ["High Protein"],
+    },
+    {
+      id: "egg",
+      name: "Boiled Egg",
+      role: "Protein",
+      mealTypes: ["Breakfast"],
+      owner: "Esther",
+      available: true,
+      nutrientTags: ["High Protein", "High Fat"],
+    },
+    {
+      id: "chia",
+      name: "Chia Seeds",
+      role: "Supplementary",
+      mealTypes: ["Breakfast"],
+      owner: "Esther",
+      available: true,
+      nutrientTags: ["High Fiber", "High Fat"],
+    },
+  ];
+
+  it("combines and deduplicates nutrient tags across assembled combo", () => {
+    const main = nutrientIngredients.find((i) => i.id === "oats")!;
+    const protein = nutrientIngredients.find((i) => i.id === "greek-yogurt")!;
+    const side = nutrientIngredients.find((i) => i.id === "chia")!;
+
+    const tags = getComboNutrientTags(main, protein, side);
+    expect(tags).toContain("High Fiber");
+    expect(tags).toContain("High Carb");
+    expect(tags).toContain("High Protein");
+    expect(tags).toContain("High Fat");
+    expect(new Set(tags).size).toBe(tags.length);
+  });
+
+  it("prefers combos covering user nutrient priorities", () => {
+    // Only oats has high fiber among mains, and no fiber side is provided
+    const ingredientsWithoutSide = nutrientIngredients.filter((i) => i.role !== "Supplementary");
+    const mains = ingredientsWithoutSide.filter((i) => i.role === "Main");
+    const result = suggestNutrientAwareCombo({
+      availableMains: mains,
+      allIngredients: ingredientsWithoutSide,
+      mealType: "Breakfast",
+      nutrientPriorities: ["High Fiber", "High Protein"],
+    });
+
+    expect(result).toBeDefined();
+    expect(result?.main.name).toBe("Rolled Oats");
+    expect(result?.matchedPriorities).toContain("High Fiber");
+    expect(result?.matchedPriorities).toContain("High Protein");
+  });
+
+  it("breaks ties with culinary affinity when priority coverage is equal", () => {
+    // Toast with Fresh Egg (affinity match) vs Toast with another protein
+    const breadAndProteins: Ingredient[] = [
+      {
+        id: "bread",
+        name: "Sliced Bread",
+        role: "Main",
+        mealTypes: ["Breakfast"],
+        owner: "Esther",
+        available: true,
+        nutrientTags: ["High Carb"],
+      },
+      {
+        id: "egg",
+        name: "Fresh Eggs",
+        role: "Protein",
+        mealTypes: ["Breakfast"],
+        owner: "Esther",
+        available: true,
+        nutrientTags: ["High Protein"],
+      },
+      {
+        id: "tofu",
+        name: "Steamed Tofu",
+        role: "Protein",
+        mealTypes: ["Breakfast"],
+        owner: "Esther",
+        available: true,
+        nutrientTags: ["High Protein"],
+      },
+    ];
+
+    const result = suggestNutrientAwareCombo({
+      availableMains: [breadAndProteins[0]],
+      allIngredients: breadAndProteins,
+      mealType: "Breakfast",
+      nutrientPriorities: ["High Protein"],
+    });
+
+    expect(result).toBeDefined();
+    expect(result?.main.name).toBe("Sliced Bread");
+    expect(result?.protein?.name).toBe("Fresh Eggs");
+  });
+
+  it("falls back cleanly to standard affinity combo when nutrient priorities are empty", () => {
+    const mains = nutrientIngredients.filter((i) => i.role === "Main");
+    const result = suggestNutrientAwareCombo({
+      availableMains: mains,
+      allIngredients: nutrientIngredients,
+      mealType: "Breakfast",
+      nutrientPriorities: [],
+    });
+
+    expect(result).toBeDefined();
+    expect(result?.matchedPriorities).toHaveLength(0);
+  });
+
+  it("never returns null or blocks suggestions when priorities cannot be satisfied", () => {
+    const toastOnly = [nutrientIngredients.find((i) => i.id === "toast")!];
+    const result = suggestNutrientAwareCombo({
+      availableMains: toastOnly,
+      allIngredients: toastOnly,
+      mealType: "Breakfast",
+      nutrientPriorities: ["High Protein", "High Fat"],
+    });
+
+    expect(result).toBeDefined();
+    expect(result?.main.name).toBe("White Bread");
+    expect(result?.matchedPriorities).toHaveLength(0);
   });
 });
