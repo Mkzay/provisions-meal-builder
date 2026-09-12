@@ -65,6 +65,7 @@ export interface LeftoverDecision {
   protein?: string;
   supplementary?: string;
   mealType: MealType;
+  owner?: string;
 }
 
 export interface LeftoverActionResult {
@@ -119,6 +120,7 @@ export interface AddSupplyInput {
   role?: IngredientRole;
   mealTypes: MealType[];
   notes?: string;
+  owner?: string;
 }
 
 export type UserGoal =

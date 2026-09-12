@@ -9,7 +9,6 @@ import {
   WifiSlash,
 } from "@/components/icons";
 import { ProvisionsLogo } from "@/components/ProvisionsLogo";
-import { getCurrentOwner } from "@/lib/profile-storage";
 import React from "react";
 
 interface AppHeaderProps {
@@ -21,6 +20,7 @@ interface AppHeaderProps {
   onOpenPersonalHub?: (initialTab?: "profile" | "progress") => void;
   onOpenProfile?: () => void;
   onOpenProgressLog?: () => void;
+  owner?: string;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -32,8 +32,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onOpenPersonalHub,
   onOpenProfile,
   onOpenProgressLog,
+  owner: propOwner,
 }) => {
-  const owner = getCurrentOwner();
+  const owner = propOwner || "Esther";
 
   const getGreeting = () => {
     const hour = new Date().getHours();

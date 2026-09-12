@@ -1,14 +1,9 @@
 import { MealProfile, UserGoal, WeightLogEntry } from "./types";
 
 /**
- * Returns the configured instance owner, defaulting to Esther.
- * When expanding to other standalone instances (e.g. Victor), setting NEXT_PUBLIC_APP_OWNER
- * isolates data cleanly without multi-user picker complexity.
+ * Fallback instance owner name when no authenticated session owner is specified.
  */
 export function getCurrentOwner(): string {
-  if (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_APP_OWNER) {
-    return process.env.NEXT_PUBLIC_APP_OWNER.trim();
-  }
   return "Esther";
 }
 

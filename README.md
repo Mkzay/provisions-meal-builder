@@ -34,12 +34,13 @@ Deciding what to cook when tired or hungry feels like a mountain. When that fric
 | Framework | [Next.js 15](https://nextjs.org/) (App Router) |
 | Language | TypeScript |
 | Styling | Tailwind CSS 3 |
+| Authentication | [Auth.js (NextAuth v5)](https://authjs.dev/) with bcrypt |
+| Database (Auth) | [Neon Postgres](https://neon.tech/) (`users` table) |
+| Database (Meals) | [Notion API](https://developers.notion.com/) (5 databases as backend) |
 | Animation | Framer Motion |
 | Icons | Phosphor Icons |
-| Database | [Notion API](https://developers.notion.com/) (3 databases as backend) |
-| Local Storage | Profile, weight log, and notification preferences |
 | Testing | Vitest |
-| Deployment | Vercel (recommended) |
+| Deployment | Vercel |
 
 ---
 
@@ -115,16 +116,22 @@ npm install
 cp .env.example .env.local
 ```
 
-Fill in your Notion credentials:
+Fill in your credentials:
 
 ```env
+# Notion Databases
 NOTION_API_KEY=secret_your_integration_token
 NOTION_INGREDIENTS_DB_ID=your_32_char_database_id
 NOTION_READY_MEALS_DB_ID=your_32_char_database_id
 NOTION_MEAL_LOG_DB_ID=your_32_char_database_id
 NOTION_PROFILE_DB_ID=your_32_char_database_id
 NOTION_PROGRESS_LOG_DB_ID=your_32_char_database_id
-NEXT_PUBLIC_APP_OWNER=Esther
+
+# Neon Postgres (Auth)
+POSTGRES_URL=postgresql://user:pass@ep-example.neon.tech/neondb?sslmode=require
+
+# NextAuth / Auth.js
+AUTH_SECRET=your_generated_32_char_secret_key
 ```
 
 > If omitted, the app runs in offline demo mode with realistic seed data.
@@ -163,9 +170,23 @@ npm start
 
 Every push to `main` triggers automatic production deployments.
 
-### Multi-Instance Support
+### User Management & Multi-Owner Access
 
-Each deployment is a single-owner instance. Set `NEXT_PUBLIC_APP_OWNER` to customize the owner name. Different instances can share the same Notion databases (filtered by the `Owner` property) or use completely separate workspaces.
+Accounts are managed directly by the administrator via the CLI script against Neon Postgres:
+
+```bash
+# Initialize users table (idempotent)
+node scripts/init-db.mjs
+
+# Create or update an authorized user account:
+node scripts/create-user.mjs <username> <password> <owner_name>
+
+# Example:
+node scripts/create-user.mjs esther secret123 Esther
+node scripts/create-user.mjs mkzay secret456 Mkzay
+```
+
+When a user logs in, their authenticated session automatically scopes all meal queries, catalogue items, goals, weight logs, and leftovers to their designated owner identity.
 
 ---
 

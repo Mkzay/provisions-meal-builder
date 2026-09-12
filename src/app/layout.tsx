@@ -1,8 +1,9 @@
+import { SessionWrapper } from "@/components/SessionWrapper";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Provisions — Meal Decider for Esther",
+  title: "Provisions — Kitchen Decider",
   description: "Vibrant, low-effort kitchen decider that removes the mental wall around eating.",
   manifest: "/manifest.json",
   appleWebApp: {
@@ -41,7 +42,7 @@ export default function RootLayout({
         />
       </head>
       <body className="h-full flex flex-col bg-background text-foreground safe-area-bottom safe-area-top selection:bg-saffron-200 selection:text-foreground">
-        {children}
+        <SessionWrapper>{children}</SessionWrapper>
         <script
           dangerouslySetInnerHTML={{
             __html: `

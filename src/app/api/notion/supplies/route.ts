@@ -1,15 +1,23 @@
-﻿import { addSupplyToNotion } from "@/lib/notion";
+import { auth } from "@/auth";
+import { addSupplyToNotion } from "@/lib/notion";
 import { AddSupplyInput } from "@/lib/types";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
     const body = (await request.json()) as AddSupplyInput;
     if (!body || !body.name || !body.kind) {
       return NextResponse.json(
         { error: "Invalid payload: name and kind are required" },
         { status: 400 }
       );
+    }
+
+    if (session?.user?.ownerName) {
+      body.owner = session.user.ownerName;
+    } else if (!body.owner) {
+      body.owner = "Esther";
     }
 
     const result = await addSupplyToNotion(body);

@@ -55,7 +55,7 @@ export function resolveLeftoverAction(
       newReadyMeal: {
         name: suggestedName,
         mealType: decision.mealType,
-        owner: "Esther",
+        owner: decision.owner || "Esther",
         available: true,
       },
     };

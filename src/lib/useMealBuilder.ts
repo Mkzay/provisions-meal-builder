@@ -18,7 +18,6 @@ import {
   PairingResult,
   ReadyMeal,
 } from "./types";
-import { getCurrentOwner } from "./profile-storage";
 import { useEffect, useState } from "react";
 
 export type FlowStep =
@@ -29,7 +28,7 @@ export type FlowStep =
   | "pairing"
   | "confirm";
 
-export function useMealBuilder() {
+export function useMealBuilder(owner: string = "Esther") {
   const [catalogue, setCatalogue] = useState<KitchenCatalogue>(SEED_CATALOGUE);
   const [isClientReady, setIsClientReady] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -183,7 +182,7 @@ export function useMealBuilder() {
       readyMealId: selectedReadyMeal?.id,
       readyMeal: selectedReadyMeal?.name,
       hadLeftovers: false,
-      owner: getCurrentOwner(),
+      owner,
     };
 
     try {
@@ -201,17 +200,18 @@ export function useMealBuilder() {
   };
 
   const handleSubmitLeftoverDecision = async (decision: LeftoverDecision) => {
-    const updated = applyOptimisticLeftover(catalogue, decision);
+    const payload = { ...decision, owner: decision.owner || owner };
+    const updated = applyOptimisticLeftover(catalogue, payload);
     setCatalogue(updated);
 
     try {
       await fetch("/api/notion/leftovers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(decision),
+        body: JSON.stringify(payload),
       });
     } catch {
-      queueOfflineMutation("leftovers", decision);
+      queueOfflineMutation("leftovers", payload);
     }
   };
 
@@ -234,6 +234,7 @@ export function useMealBuilder() {
   };
 
   const handleAddSupply = async (input: AddSupplyInput) => {
+    const supplyInput = { ...input, owner: input.owner || owner };
     let nextCatalogue = { ...catalogue };
 
     if (input.kind === "ingredient") {
@@ -242,7 +243,7 @@ export function useMealBuilder() {
         name: input.name,
         mealTypes: input.mealTypes,
         role: input.role || "Main",
-        owner: "Esther",
+        owner,
         available: true,
       };
       nextCatalogue = {
@@ -254,7 +255,7 @@ export function useMealBuilder() {
         id: `ready-${Date.now()}`,
         name: input.name,
         mealTypes: input.mealTypes,
-        owner: "Esther",
+        owner,
         available: true,
       };
       nextCatalogue = {
@@ -270,10 +271,10 @@ export function useMealBuilder() {
       await fetch("/api/notion/supplies", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
+        body: JSON.stringify(supplyInput),
       });
     } catch {
-      queueOfflineMutation("supplies", input);
+      queueOfflineMutation("supplies", supplyInput);
     }
   };
 

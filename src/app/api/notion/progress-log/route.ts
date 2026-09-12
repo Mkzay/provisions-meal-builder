@@ -1,15 +1,16 @@
+import { auth } from "@/auth";
 import {
   addWeightLogEntry,
   deleteWeightLogEntry,
   fetchWeightLogs,
 } from "@/lib/notion-profile";
-import { getCurrentOwner } from "@/lib/profile-storage";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
+    const session = await auth();
     const { searchParams } = new URL(req.url);
-    const owner = searchParams.get("owner") || getCurrentOwner();
+    const owner = session?.user?.ownerName || searchParams.get("owner") || "Esther";
 
     const logs = await fetchWeightLogs(owner);
     return NextResponse.json({ logs });
@@ -24,8 +25,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
     const body = await req.json();
-    const owner = body.owner || getCurrentOwner();
+    const owner = session?.user?.ownerName || body.owner || "Esther";
     const date = body.date || new Date().toISOString().slice(0, 10);
     const weight = typeof body.weight === "number" ? body.weight : parseFloat(body.weight);
 

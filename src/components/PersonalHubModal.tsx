@@ -1,11 +1,11 @@
 "use client";
 
-import { Scales, User, X } from "@/components/icons";
+import { Scales, SignOut, User, X } from "@/components/icons";
 import { MealProfileSection } from "@/components/MealProfileSection";
 import { ProgressLogSection } from "@/components/ProgressLogSection";
-import { getCurrentOwner } from "@/lib/profile-storage";
 import { MealProfile } from "@/lib/types";
 import { AnimatePresence, motion } from "framer-motion";
+import { signOut } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 
 export type PersonalHubTab = "profile" | "progress";
@@ -15,6 +15,7 @@ interface PersonalHubModalProps {
   initialTab?: PersonalHubTab;
   onClose: () => void;
   onProfileSaved?: (profile: MealProfile) => void;
+  owner?: string;
 }
 
 export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
@@ -22,8 +23,9 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
   initialTab = "profile",
   onClose,
   onProfileSaved,
+  owner: propOwner,
 }) => {
-  const owner = getCurrentOwner();
+  const owner = propOwner || "Esther";
   const [activeTab, setActiveTab] = useState<PersonalHubTab>(initialTab);
 
   useEffect(() => {
@@ -141,17 +143,28 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
           </div>
 
           {/* Pinned Footer */}
-          <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 bg-stone-100/90 shrink-0 flex items-center justify-between gap-3 safe-area-bottom">
-            <span className="text-[11px] font-bold text-stone-500">
-              {owner}&apos;s instance · No calorie counting
-            </span>
+          <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 bg-stone-100/90 shrink-0 flex items-center justify-between gap-2 sm:gap-3 safe-area-bottom">
             <button
               type="button"
-              onClick={onClose}
-              className="px-6 py-2.5 rounded-xl font-bold text-xs bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-sm hover:bg-stone-800 transition-all"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs bg-rose-100 hover:bg-rose-200 text-rose-900 border-2 border-stone-900 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none transition-all"
+              title="Sign out of current account"
             >
-              Done
+              <SignOut size={14} weight="bold" />
+              <span>Sign Out</span>
             </button>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="hidden sm:inline text-[11px] font-bold text-stone-500">
+                {owner}&apos;s instance · No calorie counting
+              </span>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-sm hover:bg-stone-800 transition-all"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </motion.div>
       </div>

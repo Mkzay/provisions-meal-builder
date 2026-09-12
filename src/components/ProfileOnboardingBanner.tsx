@@ -1,17 +1,19 @@
 "use client";
 
 import { Sparkle, User, X } from "@/components/icons";
-import { getCurrentOwner, setProfilePromptDismissed } from "@/lib/profile-storage";
+import { setProfilePromptDismissed } from "@/lib/profile-storage";
 import React, { useState } from "react";
 
 interface ProfileOnboardingBannerProps {
   onOpenProfile: () => void;
+  owner?: string;
 }
 
 export const ProfileOnboardingBanner: React.FC<ProfileOnboardingBannerProps> = ({
   onOpenProfile,
+  owner: propOwner,
 }) => {
-  const owner = getCurrentOwner();
+  const owner = propOwner || "Esther";
   const [isDismissed, setIsDismissed] = useState(false);
 
   const handleDismiss = () => {

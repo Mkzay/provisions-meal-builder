@@ -1,8 +1,8 @@
 import { SEED_CATALOGUE } from "./seed-data";
 import { AddSupplyInput, KitchenCatalogue, LeftoverDecision, MealLogEntry, ReadyMeal } from "./types";
 
-const CATALOGUE_CACHE_KEY = "esther_meal_builder_catalogue_v1";
-const OFFLINE_OUTBOX_KEY = "esther_meal_builder_outbox_v1";
+const CATALOGUE_CACHE_KEY = "provisions_catalogue_cache_v1";
+const OFFLINE_OUTBOX_KEY = "provisions_offline_outbox_v1";
 
 export function loadCachedCatalogue(): KitchenCatalogue {
   if (typeof window === "undefined") {

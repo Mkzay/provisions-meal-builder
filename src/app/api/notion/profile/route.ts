@@ -1,12 +1,13 @@
+import { auth } from "@/auth";
 import { fetchMealProfile, saveMealProfile } from "@/lib/notion-profile";
-import { getCurrentOwner } from "@/lib/profile-storage";
 import { UserGoal } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
+    const session = await auth();
     const { searchParams } = new URL(req.url);
-    const owner = searchParams.get("owner") || getCurrentOwner();
+    const owner = session?.user?.ownerName || searchParams.get("owner") || "Esther";
 
     const profile = await fetchMealProfile(owner);
     return NextResponse.json({ profile });
@@ -21,8 +22,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
     const body = await req.json();
-    const owner = body.owner || getCurrentOwner();
+    const owner = session?.user?.ownerName || body.owner || "Esther";
     const goal = body.goal as UserGoal;
     const height =
       typeof body.height === "number" && !isNaN(body.height) && body.height > 0

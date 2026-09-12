@@ -27,9 +27,13 @@ import {
 } from "@/lib/profile-storage";
 import { useMealBuilder } from "@/lib/useMealBuilder";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 
 export default function MealBuilderPage() {
+  const { data: session } = useSession();
+  const owner = session?.user?.ownerName || "Esther";
+
   const [isPersonalHubOpen, setIsPersonalHubOpen] = useState(false);
   const [personalHubTab, setPersonalHubTab] = useState<PersonalHubTab>("profile");
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
@@ -38,10 +42,10 @@ export default function MealBuilderPage() {
   );
 
   useEffect(() => {
-    fetchClientProfile().then((p) => {
+    fetchClientProfile(owner).then((p) => {
       setHasProfile(!!p);
     });
-  }, []);
+  }, [owner]);
 
   const handleOpenPersonalHub = (tab: PersonalHubTab = "profile") => {
     setPersonalHubTab(tab);
@@ -85,7 +89,7 @@ export default function MealBuilderPage() {
     handleSubmitLeftoverDecision,
     handleQuickAddStaples,
     handleAddSupply,
-  } = useMealBuilder();
+  } = useMealBuilder(owner);
 
   const [isStaplesDrawerOpen, setIsStaplesDrawerOpen] = useState(false);
 
@@ -102,6 +106,7 @@ export default function MealBuilderPage() {
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* Top Header */}
         <AppHeader
+          owner={owner}
           isCachedFallback={catalogue.isCachedFallback}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onResetToHome={handleResetToHome}
@@ -113,6 +118,7 @@ export default function MealBuilderPage() {
         {/* Soft, non-blocking onboarding banner when no profile has been saved yet */}
         {currentStep === "meal_type" && !hasProfile && !isPromptDismissed && (
           <ProfileOnboardingBanner
+            owner={owner}
             onOpenProfile={() => handleOpenPersonalHub("profile")}
           />
         )}
@@ -336,6 +342,7 @@ export default function MealBuilderPage() {
       <PersonalHubModal
         isOpen={isPersonalHubOpen}
         initialTab={personalHubTab}
+        owner={owner}
         onClose={() => setIsPersonalHubOpen(false)}
         onProfileSaved={() => {
           setHasProfile(true);

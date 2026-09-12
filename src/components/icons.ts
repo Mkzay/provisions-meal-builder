@@ -53,4 +53,5 @@ export { User } from "@phosphor-icons/react/dist/ssr/User";
 export { Scales } from "@phosphor-icons/react/dist/ssr/Scales";
 export { ChartLineUp } from "@phosphor-icons/react/dist/ssr/ChartLineUp";
 export { TrashSimple } from "@phosphor-icons/react/dist/ssr/TrashSimple";
+export { SignOut } from "@phosphor-icons/react/dist/ssr/SignOut";
 

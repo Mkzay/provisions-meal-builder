@@ -1,9 +1,11 @@
+import { auth } from "@/auth";
 import { handleLeftoverDecision } from "@/lib/notion";
 import { LeftoverDecision } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
     const body = (await req.json()) as LeftoverDecision;
 
     if (!body || body.hadLeftovers === undefined || !body.source) {
@@ -11,6 +13,12 @@ export async function POST(req: NextRequest) {
         { error: "Invalid leftover decision payload" },
         { status: 400 }
       );
+    }
+
+    if (session?.user?.ownerName) {
+      body.owner = session.user.ownerName;
+    } else if (!body.owner) {
+      body.owner = "Esther";
     }
 
     const result = await handleLeftoverDecision(body);
