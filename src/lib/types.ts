@@ -60,6 +60,7 @@ export interface PairingResult {
   recommendedProtein?: Ingredient;
   availableProteins: Ingredient[];
   recommendedSupplementary?: Ingredient;
+  recommendedSupplementaries?: Ingredient[];
   availableSupplementary: Ingredient[];
   missingUpgrades?: MissingUpgradeSuggestion[];
 }

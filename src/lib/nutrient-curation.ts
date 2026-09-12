@@ -1,4 +1,4 @@
-import { findMatchingDishBlueprint, isCookingOil } from "./dish-blueprints";
+import { findMatchingDishBlueprint, isCookingOil, isSideCompatibleWithBase } from "./dish-blueprints";
 import { findBestPairings, getSuggestedComboName } from "./pairings";
 import { Ingredient, MealType, NutrientTag, PairingResult, ReadyMeal } from "./types";
 
@@ -99,9 +99,11 @@ export function suggestNutrientAwareCombo(
     const proteinOptions: (Ingredient | undefined)[] =
       availableProteins.length > 0 ? availableProteins : [undefined];
 
-    // Build supplementary options: test recommended first, plus others
-    const suppOptions: (Ingredient | undefined)[] =
-      availableSupplementary.length > 0 ? availableSupplementary : [undefined];
+    // Build supplementary options: test compatible sides only, plus undefined (no side)
+    const compatibleSupp = availableSupplementary.filter((s) =>
+      isSideCompatibleWithBase(s, main, mealType)
+    );
+    const suppOptions: (Ingredient | undefined)[] = [undefined, ...compatibleSupp];
 
     for (const prot of proteinOptions) {
       for (const supp of suppOptions) {
@@ -165,9 +167,14 @@ export function suggestNutrientAwareCombo(
   // Order available list in pairings so the selected ones appear first
   const inStock = allIngredients.filter((i) => i.available);
   const bp = findMatchingDishBlueprint(chosen.main, inStock, mealType);
+  const chosenSides = chosen.supplementary
+    ? (chosen.pairings.recommendedSupplementaries && chosen.pairings.recommendedSupplementaries.some((s) => s.id === chosen.supplementary?.id)
+        ? chosen.pairings.recommendedSupplementaries
+        : [chosen.supplementary])
+    : [];
   const dishName = bp
-    ? bp.generateTitle(chosen.main, chosen.protein, chosen.supplementary ? [chosen.supplementary] : [])
-    : getSuggestedComboName(chosen.main, chosen.protein, chosen.supplementary);
+    ? bp.generateTitle(chosen.main, chosen.protein, chosenSides)
+    : getSuggestedComboName(chosen.main, chosen.protein, chosenSides);
 
   const customizedPairings: PairingResult = {
     ...chosen.pairings,
@@ -175,6 +182,7 @@ export function suggestNutrientAwareCombo(
     culinaryNote: bp?.culinaryNote || chosen.pairings.culinaryNote,
     recommendedProtein: chosen.protein,
     recommendedSupplementary: chosen.supplementary,
+    recommendedSupplementaries: chosenSides,
     availableProteins: chosen.protein
       ? [
           chosen.protein,

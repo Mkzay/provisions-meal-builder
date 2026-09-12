@@ -40,7 +40,11 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
     pairingResult.recommendedProtein
   );
   const [selectedSupplementaries, setSelectedSupplementaries] = useState<Ingredient[]>(() =>
-    pairingResult.recommendedSupplementary ? [pairingResult.recommendedSupplementary] : []
+    pairingResult.recommendedSupplementaries && pairingResult.recommendedSupplementaries.length > 0
+      ? pairingResult.recommendedSupplementaries
+      : pairingResult.recommendedSupplementary
+      ? [pairingResult.recommendedSupplementary]
+      : []
   );
   const [isChangingProtein, setIsChangingProtein] = useState(false);
   const [isChangingSides, setIsChangingSides] = useState(false);

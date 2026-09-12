@@ -1,4 +1,9 @@
-import { findMatchingDishBlueprint, isCookingOil } from "./dish-blueprints";
+import {
+  findMatchingDishBlueprint,
+  gatherMatchingSides,
+  isCookingOil,
+  isSideCompatibleWithBase,
+} from "./dish-blueprints";
 import { Ingredient, MealType, PairingResult } from "./types";
 
 interface AffinityRule {
@@ -49,17 +54,19 @@ export function findBestPairings(
       ing.mealTypes.includes(mealType)
   );
 
-  // Available supplementary for this meal type (excluding raw cooking oils)
+  // Available supplementary for this meal type (excluding raw cooking oils and incompatible sides)
   const availableSupplementary = allIngredients.filter(
     (ing) =>
       ing.role === "Supplementary" &&
       ing.available &&
       ing.mealTypes.includes(mealType) &&
-      !isCookingOil(ing)
+      !isCookingOil(ing) &&
+      isSideCompatibleWithBase(ing, main, mealType)
   );
 
   let recommendedProtein: Ingredient | undefined;
   let recommendedSupplementary: Ingredient | undefined;
+  let recommendedSides: Ingredient[] = [];
 
   // 1. Try matching authentic culinary dish blueprint from available stock
   const inStock = allIngredients.filter((i) => i.available);
@@ -73,14 +80,9 @@ export function findBestPairings(
         break;
       }
     }
-    if (blueprint.preferredSidePatterns) {
-      for (const pat of blueprint.preferredSidePatterns) {
-        const match = availableSupplementary.find((s) => pat.test(s.name));
-        if (match) {
-          recommendedSupplementary = match;
-          break;
-        }
-      }
+    recommendedSides = gatherMatchingSides(blueprint, availableSupplementary);
+    if (recommendedSides.length > 0) {
+      recommendedSupplementary = recommendedSides[0];
     }
   }
 
@@ -106,20 +108,19 @@ export function findBestPairings(
         );
         if (match) {
           recommendedSupplementary = match;
+          recommendedSides = [match];
           break;
         }
       }
     }
   }
 
-  // 3. Ultimate Fallbacks if preferred was unavailable
+  // 3. Fallback for protein only if preferred was unavailable (proteins ground the dish)
   if (!recommendedProtein && availableProteins.length > 0) {
     recommendedProtein = availableProteins[0];
   }
 
-  if (!recommendedSupplementary && availableSupplementary.length > 0) {
-    recommendedSupplementary = availableSupplementary[0];
-  }
+  // NOTE: No forced fallback for sides! A dish like Boiled Yam & Fish or Amala & Stew is complete with 0 sides.
 
   // Sort available proteins so the recommended one comes first
   const sortedProteins = [...availableProteins].sort((a, b) => {
@@ -187,8 +188,8 @@ export function findBestPairings(
   }
 
   const dishName = blueprint
-    ? blueprint.generateTitle(main, recommendedProtein, recommendedSupplementary ? [recommendedSupplementary] : [])
-    : getSuggestedComboName(main, recommendedProtein, recommendedSupplementary);
+    ? blueprint.generateTitle(main, recommendedProtein, recommendedSides)
+    : getSuggestedComboName(main, recommendedProtein, recommendedSides);
 
   return {
     dishName,
@@ -196,6 +197,7 @@ export function findBestPairings(
     recommendedProtein,
     availableProteins: sortedProteins,
     recommendedSupplementary,
+    recommendedSupplementaries: recommendedSides,
     availableSupplementary: sortedSupplementary,
     missingUpgrades: missingUpgrades.slice(0, 2),
   };
