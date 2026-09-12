@@ -332,4 +332,29 @@ describe("Nutrient Curation Engine", () => {
     expect(result?.main.name).toBe("White Bread");
     expect(result?.matchedPriorities).toHaveLength(0);
   });
+
+  it("formats multi-select supplementary sides cleanly in getSuggestedComboName", () => {
+    const oats: Ingredient = { id: "1", name: "Oatmeal", role: "Main", mealTypes: ["Breakfast"], owner: "User", available: true };
+    const egg: Ingredient = { id: "2", name: "Boiled Egg", role: "Protein", mealTypes: ["Breakfast"], owner: "User", available: true };
+    const chia: Ingredient = { id: "3", name: "Chia Seeds", role: "Supplementary", mealTypes: ["Breakfast"], owner: "User", available: true };
+    const milk: Ingredient = { id: "4", name: "Whole Milk", role: "Supplementary", mealTypes: ["Breakfast"], owner: "User", available: true };
+    const banana: Ingredient = { id: "5", name: "Fresh Banana", role: "Supplementary", mealTypes: ["Breakfast"], owner: "User", available: true };
+
+    expect(getSuggestedComboName(oats, egg, chia)).toBe("Oatmeal & Boiled Egg with Chia Seeds");
+    expect(getSuggestedComboName(oats, egg, [chia, milk])).toBe("Oatmeal & Boiled Egg with Chia Seeds & Whole Milk");
+    expect(getSuggestedComboName(oats, egg, [chia, milk, banana])).toBe("Oatmeal & Boiled Egg with Chia Seeds, Whole Milk & Fresh Banana");
+  });
+
+  it("aggregates nutrient tags across multiple supplementary sides", () => {
+    const oats: Ingredient = { id: "1", name: "Oatmeal", role: "Main", mealTypes: ["Breakfast"], owner: "User", available: true, nutrientTags: ["High Fiber", "High Carb"] };
+    const egg: Ingredient = { id: "2", name: "Boiled Egg", role: "Protein", mealTypes: ["Breakfast"], owner: "User", available: true, nutrientTags: ["High Protein"] };
+    const chia: Ingredient = { id: "3", name: "Chia Seeds", role: "Supplementary", mealTypes: ["Breakfast"], owner: "User", available: true, nutrientTags: ["High Fat", "High Fiber"] };
+    const milk: Ingredient = { id: "4", name: "Whole Milk", role: "Supplementary", mealTypes: ["Breakfast"], owner: "User", available: true, nutrientTags: ["High Fat", "High Protein"] };
+
+    const tags = getComboNutrientTags(oats, egg, [chia, milk]);
+    expect(tags).toContain("High Fiber");
+    expect(tags).toContain("High Carb");
+    expect(tags).toContain("High Protein");
+    expect(tags).toContain("High Fat");
+  });
 });

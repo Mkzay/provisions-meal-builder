@@ -9,7 +9,7 @@ import {
   ForkKnife,
   Sparkle,
 } from "@/components/icons";
-import { getFirstStepKickoff } from "@/lib/pairings";
+import { getFirstStepKickoff, getSuggestedComboName } from "@/lib/pairings";
 import { Ingredient, MealSource, MealType, ReadyMeal } from "@/lib/types";
 import { getComboNutrientTags } from "@/lib/nutrient-curation";
 import { getClientProfileCached } from "@/lib/profile-storage";
@@ -24,6 +24,7 @@ interface MealConfirmationProps {
   mainIngredient?: Ingredient;
   protein?: Ingredient;
   supplementary?: Ingredient;
+  supplementaries?: Ingredient[];
   onConfirmAndLog: () => void;
   onBack: () => void;
   isLogging?: boolean;
@@ -37,6 +38,7 @@ export const MealConfirmation: React.FC<MealConfirmationProps> = ({
   mainIngredient,
   protein,
   supplementary,
+  supplementaries,
   onConfirmAndLog,
   onBack,
   isLogging = false,
@@ -44,7 +46,14 @@ export const MealConfirmation: React.FC<MealConfirmationProps> = ({
 }) => {
   const [hasConfirmed, setHasConfirmed] = useState(false);
 
-  const comboTags = getComboNutrientTags(mainIngredient, protein, supplementary, readyMeal);
+  const allSupps: Ingredient[] =
+    supplementaries && supplementaries.length > 0
+      ? supplementaries
+      : supplementary
+      ? [supplementary]
+      : [];
+
+  const comboTags = getComboNutrientTags(mainIngredient, protein, allSupps, readyMeal);
   const cachedProfile = getClientProfileCached(owner || "User");
   const hitPriorities = (cachedProfile?.nutrientPriorities || []).filter((p) =>
     comboTags.includes(p)
@@ -53,15 +62,16 @@ export const MealConfirmation: React.FC<MealConfirmationProps> = ({
   const getMealTitle = () => {
     if (readyMeal) return readyMeal.name;
     if (!mainIngredient) return "Wholesome Meal";
-    let title = mainIngredient.name;
-    if (protein) title += ` & ${protein.name}`;
-    if (supplementary) title += ` with ${supplementary.name}`;
-    return title;
+    return getSuggestedComboName(
+      mainIngredient.name,
+      protein?.name,
+      allSupps.map((s) => s.name)
+    );
   };
 
   const kickoffStep = readyMeal
     ? "Take your container from the fridge and warm it up in a pot or microwave."
-    : getFirstStepKickoff(mainIngredient, protein, supplementary);
+    : getFirstStepKickoff(mainIngredient, protein, allSupps);
 
   const handleConfirm = () => {
     setHasConfirmed(true);
@@ -151,12 +161,15 @@ export const MealConfirmation: React.FC<MealConfirmationProps> = ({
                 <span>{protein.name}</span>
               </span>
             )}
-            {supplementary && (
-              <span className="px-3.5 py-2 rounded-2xl bg-white border-2 border-stone-900 text-xs font-black text-stone-900 shadow-brutal-sm flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-400 border border-stone-900" />
-                <span>{supplementary.name}</span>
+            {allSupps.map((supp) => (
+              <span
+                key={supp.id}
+                className="px-3.5 py-2 rounded-2xl bg-white border-2 border-stone-900 text-xs font-black text-stone-900 shadow-brutal-sm flex items-center gap-1.5"
+              >
+                <span className="w-2.5 h-2.5 rounded-full bg-purple-400 border border-stone-900" />
+                <span>{supp.name}</span>
               </span>
-            )}
+            ))}
           </div>
 
           {comboTags.length > 0 && (

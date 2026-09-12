@@ -160,7 +160,7 @@ export function buildMealLogProperties(entry: MealLogEntry): Record<string, any>
     },
     Owner: {
       select: {
-        name: entry.owner || "Esther",
+        name: entry.owner || "User",
       },
     },
   };
@@ -178,7 +178,11 @@ export function buildMealLogProperties(entry: MealLogEntry): Record<string, any>
     };
   }
 
-  if (entry.supplementaryId) {
+  if (entry.supplementaryIds && entry.supplementaryIds.length > 0) {
+    properties.Supplementary = {
+      relation: entry.supplementaryIds.map((id) => ({ id })),
+    };
+  } else if (entry.supplementaryId) {
     properties.Supplementary = {
       relation: [{ id: entry.supplementaryId }],
     };

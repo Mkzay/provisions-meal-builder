@@ -10,7 +10,7 @@ import {
   Plant,
   Sparkle,
 } from "@/components/icons";
-import { Ingredient } from "@/lib/types";
+import { Ingredient, NutrientTag } from "@/lib/types";
 import { motion } from "framer-motion";
 import React from "react";
 
@@ -27,13 +27,19 @@ export const MainIngredientGrid: React.FC<MainIngredientGridProps> = ({
 }) => {
   const getIngredientVisual = (name: string) => {
     const lower = name.toLowerCase();
+    if (lower.includes("amala") || lower.includes("fufu") || lower.includes("garri") || lower.includes("semo") || lower.includes("tuwo") || lower.includes("wheat")) {
+      return {
+        icon: <BowlFood size={26} weight="duotone" className="text-amber-900" />,
+        bg: "bg-orange-200",
+      };
+    }
     if (lower.includes("cracker") || lower.includes("biscuit") || lower.includes("cookie") || lower.includes("snack")) {
       return {
         icon: <Cookie size={26} weight="duotone" className="text-purple-800" />,
         bg: "bg-purple-200",
       };
     }
-    if (lower.includes("yogurt") || lower.includes("fruit") || lower.includes("berry")) {
+    if (lower.includes("yogurt") || lower.includes("fruit") || lower.includes("berry") || lower.includes("oat")) {
       return {
         icon: <BowlFood size={26} weight="duotone" className="text-pink-800" />,
         bg: "bg-pink-200",
@@ -45,7 +51,7 @@ export const MainIngredientGrid: React.FC<MainIngredientGridProps> = ({
         bg: "bg-amber-200",
       };
     }
-    if (lower.includes("yam") || lower.includes("potato")) {
+    if (lower.includes("yam") || lower.includes("potato") || lower.includes("plantain") || lower.includes("cassava") || lower.includes("cocoyam")) {
       return {
         icon: <Plant size={26} weight="duotone" className="text-emerald-800" />,
         bg: "bg-emerald-200",
@@ -69,6 +75,45 @@ export const MainIngredientGrid: React.FC<MainIngredientGridProps> = ({
     };
   };
 
+  const renderMicroTags = (tags?: NutrientTag[]) => {
+    if (!tags || tags.length === 0) return null;
+    return (
+      <div className="flex flex-wrap items-center justify-center gap-1 mt-1.5">
+        {tags.map((t) => {
+          if (t === "High Fiber") {
+            return (
+              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-800/40">
+                🌾 Fiber
+              </span>
+            );
+          }
+          if (t === "High Protein") {
+            return (
+              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-sky-100 text-sky-900 border border-sky-800/40">
+                🍗 Protein
+              </span>
+            );
+          }
+          if (t === "High Carb") {
+            return (
+              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-800/40">
+                ⚡ Carb
+              </span>
+            );
+          }
+          if (t === "High Fat") {
+            return (
+              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-rose-100 text-rose-900 border border-rose-800/40">
+                🥑 Fat
+              </span>
+            );
+          }
+          return null;
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between">
@@ -80,7 +125,7 @@ export const MainIngredientGrid: React.FC<MainIngredientGridProps> = ({
           <span>Back to modes</span>
         </button>
         <span className="text-xs font-black px-2.5 py-1 rounded-full bg-emerald-200 text-stone-900 border-2 border-stone-900 shadow-brutal-sm">
-          {mains.length} {mains.length === 1 ? "main available" : "mains available"}
+          {mains.length} {mains.length === 1 ? "base available" : "bases available"}
         </span>
       </div>
 
@@ -89,7 +134,7 @@ export const MainIngredientGrid: React.FC<MainIngredientGridProps> = ({
           What are you craving?
         </h3>
         <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
-          Pick your anchor main ingredient. We&apos;ll automatically match the proteins and sides next.
+          Pick your anchor base. We&apos;ll automatically match wholesome proteins, greens, and sides next.
         </p>
       </div>
 
@@ -108,16 +153,17 @@ export const MainIngredientGrid: React.FC<MainIngredientGridProps> = ({
                 }
                 onSelectMain(main);
               }}
-              className="flex flex-col items-center justify-center p-5 min-h-[130px] rounded-3xl border-2 border-stone-900 bg-white shadow-brutal-sm hover:shadow-brutal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 transition-all text-center group active:translate-x-[1px] active:translate-y-[1px]"
+              className="flex flex-col items-center justify-center p-4 sm:p-5 min-h-[135px] rounded-3xl border-2 border-stone-900 bg-white shadow-brutal-sm hover:shadow-brutal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 transition-all text-center group active:translate-x-[1px] active:translate-y-[1px]"
             >
               <div
-                className={`w-13 h-13 rounded-2xl ${visual.bg} border-2 border-stone-900 flex items-center justify-center mb-3 shadow-brutal-sm group-hover:scale-105 transition-transform`}
+                className={`w-13 h-13 rounded-2xl ${visual.bg} border-2 border-stone-900 flex items-center justify-center mb-2.5 shadow-brutal-sm group-hover:scale-105 transition-transform`}
               >
                 {visual.icon}
               </div>
               <span className="font-display font-black text-stone-900 text-sm sm:text-base leading-snug">
                 {main.name}
               </span>
+              {renderMicroTags(main.nutrientTags)}
             </motion.button>
           );
         })}

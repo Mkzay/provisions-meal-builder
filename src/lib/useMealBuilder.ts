@@ -26,6 +26,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
   const [selectedMain, setSelectedMain] = useState<Ingredient | undefined>();
   const [selectedProtein, setSelectedProtein] = useState<Ingredient | undefined>();
   const [selectedSupplementary, setSelectedSupplementary] = useState<Ingredient | undefined>();
+  const [selectedSupplementaries, setSelectedSupplementaries] = useState<Ingredient[]>([]);
   const [pairingResult, setPairingResult] = useState<PairingResult | null>(null);
 
   const [isLeftoverModalOpen, setIsLeftoverModalOpen] = useState(false);
@@ -85,6 +86,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     setSelectedMain(undefined);
     setSelectedProtein(undefined);
     setSelectedSupplementary(undefined);
+    setSelectedSupplementaries([]);
     setPairingResult(null);
   };
 
@@ -126,6 +128,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     setPairingResult(combo.pairings);
     setSelectedProtein(combo.protein);
     setSelectedSupplementary(combo.supplementary);
+    setSelectedSupplementaries(combo.supplementary ? [combo.supplementary] : []);
     setSelectedSource("Built");
     setSelectedReadyMeal(undefined);
     setCurrentStep("pairing");
@@ -141,6 +144,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     setPairingResult(pairings);
     setSelectedProtein(pairings.recommendedProtein);
     setSelectedSupplementary(pairings.recommendedSupplementary);
+    setSelectedSupplementaries(pairings.recommendedSupplementary ? [pairings.recommendedSupplementary] : []);
     setSelectedSource("Built");
     setSelectedReadyMeal(undefined);
     setCurrentStep("pairing");
@@ -149,16 +153,27 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
   const handleConfirmCombo = (
     main: Ingredient,
     protein?: Ingredient,
-    supplementary?: Ingredient
+    supplementary?: Ingredient | Ingredient[]
   ) => {
     setSelectedMain(main);
     setSelectedProtein(protein);
-    setSelectedSupplementary(supplementary);
+    if (Array.isArray(supplementary)) {
+      setSelectedSupplementaries(supplementary);
+      setSelectedSupplementary(supplementary[0]);
+    } else {
+      setSelectedSupplementary(supplementary);
+      setSelectedSupplementaries(supplementary ? [supplementary] : []);
+    }
     setCurrentStep("confirm");
   };
 
   const handleConfirmAndLog = async () => {
     setIsLogging(true);
+
+    const primarySupp = selectedSupplementaries[0] || selectedSupplementary;
+    const allSuppNames = selectedSupplementaries.length > 0
+      ? selectedSupplementaries.map((s) => s.name).join(", ")
+      : selectedSupplementary?.name;
 
     const entry: MealLogEntry = {
       date: new Date().toISOString(),
@@ -168,8 +183,10 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
       mainIngredient: selectedMain?.name,
       proteinId: selectedProtein?.id,
       protein: selectedProtein?.name,
-      supplementaryId: selectedSupplementary?.id,
-      supplementary: selectedSupplementary?.name,
+      supplementaryId: primarySupp?.id,
+      supplementary: allSuppNames,
+      supplementaryIds: selectedSupplementaries.map((s) => s.id),
+      supplementaries: selectedSupplementaries,
       readyMealId: selectedReadyMeal?.id,
       readyMeal: selectedReadyMeal?.name,
       hadLeftovers: false,
@@ -337,46 +354,18 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
   };
 
   return {
-    catalogue,
-    isClientReady,
-    isSettingsOpen,
-    setIsSettingsOpen,
-    isNotificationOpen,
-    setIsNotificationOpen,
-    isAddSupplyOpen,
-    setIsAddSupplyOpen,
-    mealType,
-    currentStep,
-    setCurrentStep,
-    selectedSource,
-    selectedReadyMeal,
-    selectedMain,
-    selectedProtein,
-    selectedSupplementary,
-    pairingResult,
-    isLeftoverModalOpen,
-    setIsLeftoverModalOpen,
-    isLogging,
-    availableReadyMeals,
-    availableMains,
-    totalAvailableInMealType,
-    handleRefreshCatalogue,
-    handleResetSeedData,
-    handleResetToHome,
-    handleSelectMealType,
-    handleSelectReadyMeal,
-    handleBypassReadyMeal,
-    handleSuggestForMe,
-    handleManualPickMode,
-    handleSelectMain,
-    handleConfirmCombo,
-    handleConfirmAndLog,
-    handleSubmitLeftoverDecision,
-    handleQuickAddStaples,
-    handleAddSupply,
-    handleAddBulkSupplies,
-    handleToggleAvailability,
-    handleDeleteSupply,
+    catalogue, isClientReady, isSettingsOpen, setIsSettingsOpen,
+    isNotificationOpen, setIsNotificationOpen, isAddSupplyOpen, setIsAddSupplyOpen,
+    mealType, currentStep, setCurrentStep, selectedSource,
+    selectedReadyMeal, selectedMain, selectedProtein, selectedSupplementary,
+    selectedSupplementaries, setSelectedSupplementaries, pairingResult,
+    isLeftoverModalOpen, setIsLeftoverModalOpen, isLogging,
+    availableReadyMeals, availableMains, totalAvailableInMealType,
+    handleRefreshCatalogue, handleResetSeedData, handleResetToHome,
+    handleSelectMealType, handleSelectReadyMeal, handleBypassReadyMeal,
+    handleSuggestForMe, handleManualPickMode, handleSelectMain,
+    handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision,
+    handleQuickAddStaples, handleAddSupply, handleAddBulkSupplies,
+    handleToggleAvailability, handleDeleteSupply,
   };
 }
-

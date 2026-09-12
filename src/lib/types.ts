@@ -35,6 +35,8 @@ export interface MealLogEntry {
   protein?: string;
   supplementaryId?: string;
   supplementary?: string;
+  supplementaryIds?: string[];
+  supplementaries?: Ingredient[];
   readyMealId?: string;
   readyMeal?: string;
   date: string;

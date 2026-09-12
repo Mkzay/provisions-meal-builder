@@ -15,12 +15,12 @@ const DEFAULT_MODEL = "google/gemini-2.0-flash-exp:free";
 
 const FALLBACK_NOTES: Record<MealType, string[]> = {
   Breakfast: [
-    "A warm, anchor carb and a touch of protein gives your mind and body steady clarity to start the morning peacefully.",
+    "A warm anchor base and wholesome protein give your mind and body steady clarity to start the morning peacefully.",
     "Morning meals don't need to be elaborate to be nourishing. A simple warm plate is an act of gentle kindness to yourself.",
     "Fueling up before the rush of the day keeps your energy grounded and steady all through the morning.",
   ],
   Lunch: [
-    "Midday fuel time. Pairing an anchor carb with cooked protein keeps your focus sharp and prevents that 3 PM slump.",
+    "Midday fuel time. Pairing an anchor base with cooked protein keeps your focus sharp and prevents that 3 PM slump.",
     "Take 10 minutes to step away and feed yourself. Nourishment isn't an interruption to your day—it's what powers it.",
     "A comforting, balanced plate right now gives you sustained fuel without feeling heavy.",
   ],
@@ -56,7 +56,7 @@ export function getDefaultFallbackNote(
       return "Rich healthy fats and clean protein to keep hunger quiet and nourish your body with calm focus.";
     }
     if (hitPriorities.includes("High Carb")) {
-      return "A comforting anchor carb to refuel your body and keep your daily mental clarity steady.";
+      return "A comforting anchor base to refuel your body and keep your daily mental clarity steady.";
     }
   }
 

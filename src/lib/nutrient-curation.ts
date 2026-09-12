@@ -23,13 +23,17 @@ export interface SuggestedNutrientComboResult {
 export function getComboNutrientTags(
   main?: Ingredient,
   protein?: Ingredient,
-  supplementary?: Ingredient,
+  supplementary?: Ingredient | Ingredient[],
   readyMeal?: ReadyMeal
 ): NutrientTag[] {
   const set = new Set<NutrientTag>();
   (main?.nutrientTags || []).forEach((t) => set.add(t));
   (protein?.nutrientTags || []).forEach((t) => set.add(t));
-  (supplementary?.nutrientTags || []).forEach((t) => set.add(t));
+  if (Array.isArray(supplementary)) {
+    supplementary.forEach((s) => (s?.nutrientTags || []).forEach((t) => set.add(t)));
+  } else if (supplementary) {
+    (supplementary.nutrientTags || []).forEach((t) => set.add(t));
+  }
   (readyMeal?.nutrientTags || []).forEach((t) => set.add(t));
   return Array.from(set);
 }

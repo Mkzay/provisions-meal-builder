@@ -32,9 +32,9 @@ interface FoodIdeasModalProps {
 
 const CATEGORIES: { id: FoodCategory | "All"; label: string; icon: React.ReactNode }[] = [
   { id: "All", label: "All Ideas", icon: <Sparkle size={14} weight="bold" /> },
-  { id: "Base", label: "Bases & Carbs", icon: <BowlFood size={14} weight="bold" /> },
-  { id: "Protein", label: "Proteins", icon: <Egg size={14} weight="bold" /> },
-  { id: "Side", label: "Sides & Extras", icon: <Plant size={14} weight="bold" /> },
+  { id: "Base", label: "Anchor Bases", icon: <BowlFood size={14} weight="bold" /> },
+  { id: "Protein", label: "Protein Sources", icon: <Egg size={14} weight="bold" /> },
+  { id: "Side", label: "Greens, Sides & Fats", icon: <Plant size={14} weight="bold" /> },
   { id: "ReadyMeal", label: "Ready Meals", icon: <CookingPot size={14} weight="bold" /> },
 ];
 
@@ -222,7 +222,7 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                           </h4>
                           <div className="flex items-center gap-1 shrink-0">
                             <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md border border-stone-900 bg-stone-100 text-stone-800">
-                              {idea.kind === "ready_meal" ? "Ready Meal" : idea.role}
+                              {idea.kind === "ready_meal" ? "Ready Meal" : idea.role === "Main" ? "Anchor Base" : idea.role === "Protein" ? "Protein" : "Greens & Sides"}
                             </span>
                             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white text-stone-500 border border-stone-300">
                               {idea.origin}
@@ -233,6 +233,19 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                         <p className="text-xs text-stone-600 mt-1 leading-relaxed line-clamp-2">
                           {idea.description}
                         </p>
+
+                        {idea.nutrientTags && idea.nutrientTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {idea.nutrientTags.map((nt) => (
+                              <span
+                                key={nt}
+                                className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-100 text-stone-700 border border-stone-300"
+                              >
+                                {nt}
+                              </span>
+                            ))}
+                          </div>
+                        )}
 
                         <p className="text-[11px] font-bold text-stone-800 bg-amber-50/80 p-2 rounded-lg border border-amber-200 mt-2">
                           💡 <span className="font-black text-amber-950">Pair Idea:</span> {idea.combos}

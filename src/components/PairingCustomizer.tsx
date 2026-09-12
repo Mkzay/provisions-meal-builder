@@ -1,21 +1,21 @@
 "use client";
 
 import {
+  ArrowRight,
+  Check,
+  Egg,
+  ForkKnife,
+  Grains,
+  Sparkle,
+} from "@/components/icons";
+import { MissingUpgradesCard } from "@/components/MissingUpgradesCard";
+import { getComboNutrientTags } from "@/lib/nutrient-curation";
+import {
   getCleanUpFootprint,
   getPrepTimeEstimate,
   getSuggestedComboName,
 } from "@/lib/pairings";
-import { Ingredient, MealType, PairingResult } from "@/lib/types";
-import {
-  ArrowRight,
-  Check,
-  Egg,
-  Fish,
-  ForkKnife,
-  Grains,
-  Plus,
-  Sparkle,
-} from "@/components/icons";
+import { Ingredient, MealType, NutrientTag, PairingResult } from "@/lib/types";
 import React, { useState } from "react";
 
 interface PairingCustomizerProps {
@@ -23,7 +23,7 @@ interface PairingCustomizerProps {
   mealType: MealType;
   pairingResult: PairingResult;
   onChangeMain: () => void;
-  onConfirmCombo: (main: Ingredient, protein?: Ingredient, supplementary?: Ingredient) => void;
+  onConfirmCombo: (main: Ingredient, protein?: Ingredient, supplementary?: Ingredient | Ingredient[]) => void;
   onQuickRestockUpgrade?: (name: string, role: "Main" | "Protein" | "Supplementary") => void;
 }
 
@@ -38,63 +38,105 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
   const [selectedProtein, setSelectedProtein] = useState<Ingredient | undefined>(
     pairingResult.recommendedProtein
   );
-  const [selectedSupplementary, setSelectedSupplementary] = useState<Ingredient | undefined>(
-    pairingResult.recommendedSupplementary
+  const [selectedSupplementaries, setSelectedSupplementaries] = useState<Ingredient[]>(() =>
+    pairingResult.recommendedSupplementary ? [pairingResult.recommendedSupplementary] : []
   );
-
-  const [restockedIds, setRestockedIds] = useState<string[]>([]);
 
   const previewName = getSuggestedComboName(
     selectedMain.name,
     selectedProtein?.name,
-    selectedSupplementary?.name
+    selectedSupplementaries.map((s) => s.name)
+  );
+
+  const comboTags = getComboNutrientTags(
+    selectedMain,
+    selectedProtein,
+    selectedSupplementaries
   );
 
   const handleConfirm = () => {
     if (typeof window !== "undefined" && window.navigator?.vibrate) {
       window.navigator.vibrate(15);
     }
-    onConfirmCombo(selectedMain, selectedProtein, selectedSupplementary);
+    onConfirmCombo(selectedMain, selectedProtein, selectedSupplementaries);
+  };
+
+  const renderMicroTags = (tags?: NutrientTag[]) => {
+    if (!tags || tags.length === 0) return null;
+    return (
+      <div className="flex items-center gap-1 flex-wrap mt-0.5">
+        {tags.map((tag) => {
+          let badge = "bg-stone-100 text-stone-700 border-stone-300";
+          let icon = "•";
+          if (tag === "High Fiber") {
+            badge = "bg-emerald-100 text-emerald-900 border-emerald-300";
+            icon = "🌾";
+          } else if (tag === "High Protein") {
+            badge = "bg-amber-100 text-amber-900 border-amber-300";
+            icon = "🍗";
+          } else if (tag === "High Fat") {
+            badge = "bg-rose-100 text-rose-900 border-rose-300";
+            icon = "🥑";
+          } else if (tag === "High Carb") {
+            badge = "bg-sky-100 text-sky-900 border-sky-300";
+            icon = "⚡";
+          }
+          return (
+            <span
+              key={tag}
+              className={`text-[9px] font-black uppercase tracking-tight px-1.5 py-0.5 rounded border ${badge}`}
+            >
+              {icon} {tag.replace("High ", "")}
+            </span>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
     <div className="w-full space-y-6">
-      {/* Anchor Main Overview Header */}
+      {/* Anchor Base Overview Header */}
       <div className="flex items-center justify-between p-5 sm:p-6 bg-[#FEF08A] rounded-3xl border-2 border-stone-900 shadow-brutal">
         <div className="flex items-center gap-3.5">
-          <div className="w-13 h-13 rounded-2xl bg-white border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-sm">
+          <div className="w-13 h-13 rounded-2xl bg-white border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-sm shrink-0">
             <Grains size={28} weight="duotone" className="text-amber-800" />
           </div>
           <div>
             <span className="text-[11px] font-black uppercase tracking-wider text-stone-900 bg-white/80 px-2 py-0.5 rounded-md border border-stone-900/40 inline-block mb-1">
-              Anchor Main
+              Anchor Base
             </span>
-            <h4 className="text-xl sm:text-2xl font-display font-black text-stone-900">
+            <h4 className="text-xl sm:text-2xl font-display font-black text-stone-900 leading-tight">
               {selectedMain.name}
             </h4>
+            {renderMicroTags(selectedMain.nutrientTags)}
           </div>
         </div>
 
         <button
           onClick={onChangeMain}
-          className="text-xs font-black text-stone-900 py-2 px-3.5 rounded-xl bg-white border-2 border-stone-900 shadow-brutal-sm hover:bg-stone-100 transition-all active:translate-x-[1px] active:translate-y-[1px]"
+          className="text-xs font-black text-stone-900 py-2 px-3.5 rounded-xl bg-white border-2 border-stone-900 shadow-brutal-sm hover:bg-stone-100 transition-all active:translate-x-[1px] active:translate-y-[1px] shrink-0"
         >
-          Change Main
+          Change Base
         </button>
       </div>
 
-      {/* Protein Pairing Section */}
+      {/* Protein Source Section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-emerald-200 border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-sm">
               <Egg size={18} weight="duotone" />
             </div>
-            <h4 className="font-display font-black text-base text-stone-900">
-              Pair with Protein
-            </h4>
+            <div>
+              <h4 className="font-display font-black text-base text-stone-900 leading-none">
+                Protein Source
+              </h4>
+              <p className="text-[11px] text-stone-600 font-medium mt-0.5">
+                Satiety &amp; strength • 1-tap selection
+              </p>
+            </div>
           </div>
-          <span className="text-xs font-bold text-stone-600">1-tap swap</span>
         </div>
 
         {pairingResult.availableProteins.length === 0 ? (
@@ -116,53 +158,74 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
                     }
                     setSelectedProtein(isSelected ? undefined : protein);
                   }}
-                  className={`flex items-center gap-2 py-2.5 px-4 rounded-2xl text-sm font-black border-2 border-stone-900 transition-all ${
+                  className={`flex flex-col items-start gap-1 py-2 px-3.5 rounded-2xl border-2 border-stone-900 transition-all text-left ${
                     isSelected
                       ? "bg-amber-300 text-stone-900 shadow-brutal-sm -translate-y-0.5"
                       : "bg-white hover:bg-stone-50 text-stone-900 shadow-xs"
                   }`}
                 >
-                  {isRecommended && !isSelected && (
-                    <Sparkle size={16} weight="fill" className="text-amber-500" />
-                  )}
-                  {isSelected && <Check size={16} weight="bold" />}
-                  <span>{protein.name}</span>
+                  <div className="flex items-center gap-1.5 text-sm font-black">
+                    {isRecommended && !isSelected && (
+                      <Sparkle size={15} weight="fill" className="text-amber-500" />
+                    )}
+                    {isSelected && <Check size={15} weight="bold" />}
+                    <span>{protein.name}</span>
+                  </div>
+                  {renderMicroTags(protein.nutrientTags)}
                 </button>
               );
             })}
 
-            {/* Option to deselect protein */}
             <button
               onClick={() => setSelectedProtein(undefined)}
-              className="py-2.5 px-3.5 rounded-2xl text-xs font-black border-2 border-stone-900 transition-all bg-stone-100 hover:bg-stone-200 text-stone-900 shadow-brutal-sm hover:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+              className="py-2.5 px-3.5 rounded-2xl text-xs font-black border-2 border-stone-900 transition-all bg-stone-100 hover:bg-stone-200 text-stone-900 shadow-brutal-sm hover:shadow-none active:translate-x-0.5 active:translate-y-0.5 self-center"
             >
-              None (Main only)
+              None (Base only)
             </button>
           </div>
         )}
       </div>
 
-      {/* Supplementary / Sides Section */}
+      {/* Greens, Accents & Nourishing Sides Section */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-purple-200 border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-sm">
               <ForkKnife size={18} weight="duotone" />
             </div>
-            <h4 className="font-display font-black text-base text-stone-900">
-              Add a Side or Sauce (Optional)
-            </h4>
+            <div>
+              <h4 className="font-display font-black text-base text-stone-900 leading-none">
+                Greens, Accents &amp; Nourishing Sides
+              </h4>
+              <p className="text-[11px] text-stone-600 font-medium mt-0.5">
+                Fiber, clean fats &amp; flavor • Multi-select
+              </p>
+            </div>
           </div>
+          {selectedSupplementaries.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-200 text-purple-900 border border-stone-900 shadow-xs">
+                {selectedSupplementaries.length} selected
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedSupplementaries([])}
+                className="text-[11px] font-black text-stone-600 hover:text-stone-900 underline"
+              >
+                Clear
+              </button>
+            </div>
+          )}
         </div>
 
         {pairingResult.availableSupplementary.length === 0 ? (
           <p className="text-xs text-stone-600 italic px-1 font-medium">
-            No supplementary sides available for {mealType}.
+            No greens or sides currently available for {mealType}.
           </p>
         ) : (
           <div className="flex flex-wrap gap-2.5">
             {pairingResult.availableSupplementary.map((side) => {
-              const isSelected = selectedSupplementary?.id === side.id;
+              const isSelected = selectedSupplementaries.some((s) => s.id === side.id);
 
               return (
                 <button
@@ -171,111 +234,39 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
                     if (typeof window !== "undefined" && window.navigator?.vibrate) {
                       window.navigator.vibrate(8);
                     }
-                    setSelectedSupplementary(isSelected ? undefined : side);
+                    setSelectedSupplementaries((prev) =>
+                      prev.some((s) => s.id === side.id)
+                        ? prev.filter((s) => s.id !== side.id)
+                        : [...prev, side]
+                    );
                   }}
-                  className={`flex items-center gap-2 py-2.5 px-4 rounded-2xl text-sm font-black border-2 border-stone-900 transition-all ${
+                  className={`flex flex-col items-start gap-1 py-2 px-3.5 rounded-2xl border-2 border-stone-900 transition-all text-left ${
                     isSelected
                       ? "bg-purple-300 text-stone-900 shadow-brutal-sm -translate-y-0.5"
                       : "bg-white hover:bg-stone-50 text-stone-900 shadow-xs"
                   }`}
                 >
-                  {isSelected && <Check size={16} weight="bold" />}
-                  <span>{side.name}</span>
+                  <div className="flex items-center gap-1.5 text-sm font-black">
+                    {isSelected && <Check size={15} weight="bold" />}
+                    <span>{side.name}</span>
+                  </div>
+                  {renderMicroTags(side.nutrientTags)}
                 </button>
               );
             })}
-
-            {selectedSupplementary && (
-              <button
-                onClick={() => setSelectedSupplementary(undefined)}
-                className="text-xs font-black text-stone-700 hover:text-stone-900 py-2 px-3 underline underline-offset-2"
-              >
-                Clear side
-              </button>
-            )}
           </div>
         )}
       </div>
 
-      {/* Optional Smart Missing Upgrade Suggestions */}
-      {pairingResult.missingUpgrades && pairingResult.missingUpgrades.length > 0 && (
-        <div className="space-y-3 pt-2">
-          <div className="flex items-center gap-2 px-1">
-            <div className="w-8 h-8 rounded-xl bg-amber-300 border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-sm">
-              <Sparkle size={18} weight="fill" className="text-amber-800" />
-            </div>
-            <div>
-              <h4 className="font-display font-black text-base text-stone-900 leading-tight">
-                Upgrade Ideas for Next Time
-              </h4>
-              <p className="text-[11px] text-stone-600 font-medium">
-                Not currently in your kitchen, but would make this meal more balanced.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3">
-            {pairingResult.missingUpgrades.map((upgrade) => {
-              const isRestocked = restockedIds.includes(upgrade.id);
-              return (
-                <div
-                  key={upgrade.id}
-                  className="p-4 rounded-3xl bg-[#FEF9C3] border-2 border-stone-900 shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-display font-black text-sm text-stone-900">
-                        {upgrade.name}
-                      </span>
-                      <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white border border-stone-900 text-stone-800 shadow-xs">
-                        {upgrade.role === "Protein" ? "Protein Boost" : "Fiber & Texture"}
-                      </span>
-                    </div>
-                    <p className="text-xs text-stone-700 font-medium leading-relaxed">
-                      {upgrade.reason}
-                    </p>
-                  </div>
-
-                  {onQuickRestockUpgrade && (
-                    <button
-                      type="button"
-                      disabled={isRestocked}
-                      onClick={() => {
-                        if (typeof window !== "undefined" && window.navigator?.vibrate) {
-                          window.navigator.vibrate(12);
-                        }
-                        onQuickRestockUpgrade(upgrade.name, upgrade.role);
-                        setRestockedIds((prev) => [...prev, upgrade.id]);
-                      }}
-                      className={`shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl font-black text-xs border-2 border-stone-900 transition-all ${
-                        isRestocked
-                          ? "bg-emerald-300 text-stone-900 cursor-default"
-                          : "bg-white hover:bg-stone-50 text-stone-900 shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none"
-                      }`}
-                    >
-                      {isRestocked ? (
-                        <>
-                          <Check size={14} weight="bold" />
-                          <span>Restocked!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Plus size={14} weight="bold" />
-                          <span>Restock to Kitchen</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {/* Smart Missing Upgrade Suggestions Card */}
+      <MissingUpgradesCard
+        upgrades={pairingResult.missingUpgrades || []}
+        onQuickRestockUpgrade={onQuickRestockUpgrade}
+      />
 
       {/* Plate Summary & Action Bar */}
       <div className="pt-5 border-t-2 border-stone-900/20 space-y-4">
-        <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#D1FAE5] border-2 border-stone-900 shadow-brutal-sm space-y-2">
+        <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#D1FAE5] border-2 border-stone-900 shadow-brutal-sm space-y-2.5">
           <div className="flex items-center justify-between gap-2">
             <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-stone-800 bg-white/80 px-2.5 py-0.5 rounded-full border border-stone-900/30 inline-block">
               Current Plate
@@ -287,17 +278,29 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
           <div className="text-sm sm:text-base font-bold text-stone-900 leading-snug">
             {previewName}
           </div>
+          {comboTags.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+              {comboTags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-0.5 rounded-lg bg-white/90 text-stone-800 text-[10px] font-extrabold border border-stone-900/40 shadow-2xs"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
           <div className="flex items-center gap-2 flex-wrap pt-1">
             <span className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-lg bg-white/80 border border-stone-900/40 text-stone-800 shadow-xs">
-              {getPrepTimeEstimate(selectedMain, selectedProtein, selectedSupplementary)}
+              {getPrepTimeEstimate(selectedMain, selectedProtein, selectedSupplementaries)}
             </span>
             <span className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-lg bg-white/80 border border-stone-900/40 text-stone-800 shadow-xs">
-              {getCleanUpFootprint(selectedMain, selectedProtein, selectedSupplementary)}
+              {getCleanUpFootprint(selectedMain, selectedProtein, selectedSupplementaries)}
             </span>
           </div>
         </div>
 
-        {(selectedProtein || selectedSupplementary) && (
+        {(selectedProtein || selectedSupplementaries.length > 0) && (
           <button
             type="button"
             onClick={() => {
@@ -305,11 +308,11 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
                 window.navigator.vibrate(8);
               }
               setSelectedProtein(undefined);
-              setSelectedSupplementary(undefined);
+              setSelectedSupplementaries([]);
             }}
             className="w-full py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 font-bold text-xs border border-stone-900/40 transition-all text-center"
           >
-            Just the main is plenty today (Skip pairings)
+            Just the base is plenty today (Skip pairings)
           </button>
         )}
 
@@ -317,7 +320,7 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
           onClick={handleConfirm}
           className="w-full py-4 px-6 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-stone-900 font-black text-base border-2 border-stone-900 shadow-brutal hover:shadow-brutal-hover active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center justify-center gap-2.5"
         >
-          <span>Looks Delicious · Confirm</span>
+          <span>Looks Delicious · Confirm Plate</span>
           <ArrowRight size={18} weight="bold" />
         </button>
       </div>

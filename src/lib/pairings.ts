@@ -48,9 +48,9 @@ const AFFINITY_RULES: AffinityRule[] = [
     preferredSupplementary: ["hot tea", "sliced avocado", "apple slices"],
   },
   {
-    mainPattern: /yogurt|fruit|apple|banana|berry/i,
-    preferredProteins: ["granola", "peanut butter", "mixed nuts"],
-    preferredSupplementary: ["honey", "berries", "sliced almonds", "hot tea"],
+    mainPattern: /amala|fufu|tuwo|garri|eba|semovita|wheat/i,
+    preferredProteins: ["goat meat", "beef stew", "catfish", "croaker", "smoked fish", "stockfish", "panla"],
+    preferredSupplementary: ["ewedu", "okra", "ugu", "bitterleaf", "efo shoko", "waterleaf", "iru", "palm oil"],
   },
 ];
 
@@ -62,48 +62,13 @@ interface MissingUpgradeKnowledge {
 }
 
 const UPGRADE_KNOWLEDGE: MissingUpgradeKnowledge[] = [
-  {
-    mainPattern: /oats|oatmeal/i,
-    suggestedName: "Crisp Apple",
-    role: "Supplementary",
-    reason: "Fresh apple slices add crisp texture, natural sweetness, and dietary fiber to make warm oats deeply satisfying.",
-  },
-  {
-    mainPattern: /oats|oatmeal/i,
-    suggestedName: "Greek Yogurt / Peanut Butter",
-    role: "Protein",
-    reason: "A scoop of yogurt or peanut butter introduces creamy protein to keep your morning focus steady until lunch.",
-  },
-  {
-    mainPattern: /rice|jollof|basmati/i,
-    suggestedName: "Fresh Baby Spinach / Greens",
-    role: "Supplementary",
-    reason: "Leafy greens provide essential vitamins, iron, and a crisp, clean contrast to rich stew and hearty rice.",
-  },
-  {
-    mainPattern: /yam|plantain/i,
-    suggestedName: "Egg Sauce / Fresh Eggs",
-    role: "Protein",
-    reason: "Quality protein and healthy fats balance dense carbohydrates and prevent late-morning blood sugar spikes.",
-  },
-  {
-    mainPattern: /bread|toast/i,
-    suggestedName: "Sliced Avocado",
-    role: "Supplementary",
-    reason: "Healthy fats from avocado turn quick toasted bread into a long-lasting, brain-boosting meal.",
-  },
-  {
-    mainPattern: /pasta|spaghetti|noodle/i,
-    suggestedName: "Fresh Baby Spinach / Extra Egg",
-    role: "Supplementary",
-    reason: "Tossing in a handful of greens or an egg turns a quick bowl into a complete, balanced dinner.",
-  },
-  {
-    mainPattern: /cracker|biscuit|snack/i,
-    suggestedName: "Crisp Apple Slices",
-    role: "Supplementary",
-    reason: "Pairing crunchy crackers with fresh fruit provides steady hydration and fiber instead of an energy crash.",
-  },
+  { mainPattern: /oats|oatmeal/i, suggestedName: "Crisp Apple", role: "Supplementary", reason: "Fresh apple slices add crisp texture and dietary fiber to warm oats." },
+  { mainPattern: /oats|oatmeal/i, suggestedName: "Greek Yogurt / Peanut Butter", role: "Protein", reason: "A scoop of yogurt or peanut butter introduces creamy protein for morning focus." },
+  { mainPattern: /rice|jollof|basmati/i, suggestedName: "Fresh Baby Spinach / Greens", role: "Supplementary", reason: "Leafy greens provide essential vitamins and a clean contrast to rich stew and rice." },
+  { mainPattern: /yam|plantain/i, suggestedName: "Egg Sauce / Fresh Eggs", role: "Protein", reason: "Quality protein and healthy fats balance dense carbs and prevent energy crashes." },
+  { mainPattern: /bread|toast/i, suggestedName: "Sliced Avocado", role: "Supplementary", reason: "Healthy fats from avocado turn toasted bread into a sustained, brain-boosting plate." },
+  { mainPattern: /pasta|spaghetti|noodle/i, suggestedName: "Fresh Baby Spinach / Extra Egg", role: "Supplementary", reason: "Tossing in a handful of greens or an egg turns a quick bowl into a complete meal." },
+  { mainPattern: /cracker|biscuit|snack/i, suggestedName: "Crisp Apple Slices", role: "Supplementary", reason: "Pairing crunchy crackers with fresh fruit provides steady hydration and fiber." },
 ];
 
 export function findBestPairings(
@@ -241,11 +206,13 @@ export function findBestPairings(
 }
 
 export function getSuggestedComboName(
-  mainName: string,
-  proteinName?: string,
-  supplementaryName?: string
+  main: string | { name: string },
+  protein?: string | { name: string },
+  supplementary?: string | { name: string } | (string | { name: string })[]
 ): string {
-  if (!proteinName && !supplementaryName) {
+  const mainName = typeof main === "string" ? main : main?.name || "";
+  const proteinName = typeof protein === "string" ? protein : protein?.name;
+  if (!proteinName && !supplementary) {
     return mainName;
   }
 
@@ -254,9 +221,20 @@ export function getSuggestedComboName(
     base = `${mainName} & ${proteinName}`;
   }
 
-  if (supplementaryName) {
-    // Clean up supplementary name (e.g. "Dodo (Fried Plantain)" -> "Dodo")
-    const cleanSupp = supplementaryName.split("(")[0].trim();
+  if (Array.isArray(supplementary)) {
+    const valid = supplementary
+      .map((s) => (typeof s === "string" ? s : s?.name || ""))
+      .filter(Boolean)
+      .map((n) => n.split("(")[0].trim());
+    if (valid.length === 0) return base;
+    if (valid.length === 1) return `${base} with ${valid[0]}`;
+    if (valid.length === 2) return `${base} with ${valid[0]} & ${valid[1]}`;
+    return `${base} with ${valid.slice(0, -1).join(", ")} & ${valid[valid.length - 1]}`;
+  }
+
+  if (supplementary) {
+    const suppName = typeof supplementary === "string" ? supplementary : supplementary.name;
+    const cleanSupp = suppName.split("(")[0].trim();
     return `${base} with ${cleanSupp}`;
   }
 
@@ -269,11 +247,15 @@ export function getSuggestedComboName(
 export function getPrepTimeEstimate(
   main?: Ingredient,
   protein?: Ingredient,
-  supplementary?: Ingredient
+  supplementary?: Ingredient | Ingredient[]
 ): string {
   if (!main) return "⚡ 2–3 min assembly";
 
-  const allNames = [main.name, protein?.name, supplementary?.name]
+  const suppStr = Array.isArray(supplementary)
+    ? supplementary.map((s) => s.name).join(" ")
+    : supplementary?.name || "";
+
+  const allNames = [main.name, protein?.name, suppStr]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -306,11 +288,15 @@ export function getPrepTimeEstimate(
 export function getCleanUpFootprint(
   main?: Ingredient,
   protein?: Ingredient,
-  supplementary?: Ingredient
+  supplementary?: Ingredient | Ingredient[]
 ): string {
   if (!main) return "🥣 No Pots (Assemble & Eat)";
 
-  const allNames = [main.name, protein?.name, supplementary?.name]
+  const suppStr = Array.isArray(supplementary)
+    ? supplementary.map((s) => s.name).join(" ")
+    : supplementary?.name || "";
+
+  const allNames = [main.name, protein?.name, suppStr]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
@@ -323,10 +309,14 @@ export function getCleanUpFootprint(
     return "🥣 No Pots (Plate & Eat)";
   }
 
+  const hasCookedSupp = Array.isArray(supplementary)
+    ? supplementary.some((s) => /dodo|egg sauce|gravy/.test(s.name.toLowerCase()))
+    : supplementary && /dodo|egg sauce|gravy/.test(supplementary.name.toLowerCase());
+
   const cookedCount = [
     /yam|potato|plantain|rice|pasta|oats|noodles/.test(main.name.toLowerCase()),
     protein && /fresh eggs|fried egg|egg sauce|chicken|beef stew/.test(protein.name.toLowerCase()),
-    supplementary && /dodo|egg sauce|gravy/.test(supplementary.name.toLowerCase()),
+    hasCookedSupp,
   ].filter(Boolean).length;
 
   if (cookedCount >= 2) {
@@ -342,7 +332,7 @@ export function getCleanUpFootprint(
 export function getFirstStepKickoff(
   main?: Ingredient,
   protein?: Ingredient,
-  supplementary?: Ingredient
+  supplementary?: Ingredient | Ingredient[]
 ): string {
   if (!main) return "Grab a plate and head to the counter.";
 

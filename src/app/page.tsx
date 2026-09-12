@@ -56,44 +56,18 @@ export default function MealBuilderPage() {
     setIsPersonalHubOpen(true);
   };
   const {
-    catalogue,
-    isClientReady,
-    isNotificationOpen,
-    setIsNotificationOpen,
-    isAddSupplyOpen,
-    setIsAddSupplyOpen,
-    mealType,
-    currentStep,
-    setCurrentStep,
-    selectedSource,
-    selectedReadyMeal,
-    selectedMain,
-    selectedProtein,
-    selectedSupplementary,
-    pairingResult,
-    isLeftoverModalOpen,
-    setIsLeftoverModalOpen,
-    isLogging,
-    availableReadyMeals,
-    availableMains,
-    totalAvailableInMealType,
-    handleRefreshCatalogue,
-    handleResetSeedData,
-    handleResetToHome,
-    handleSelectMealType,
-    handleSelectReadyMeal,
-    handleBypassReadyMeal,
-    handleSuggestForMe,
-    handleManualPickMode,
-    handleSelectMain,
-    handleConfirmCombo,
-    handleConfirmAndLog,
-    handleSubmitLeftoverDecision,
-    handleQuickAddStaples,
-    handleAddSupply,
-    handleAddBulkSupplies,
-    handleToggleAvailability,
-    handleDeleteSupply,
+    catalogue, isClientReady, isNotificationOpen, setIsNotificationOpen,
+    isAddSupplyOpen, setIsAddSupplyOpen, mealType, currentStep, setCurrentStep,
+    selectedSource, selectedReadyMeal, selectedMain, selectedProtein,
+    selectedSupplementary, selectedSupplementaries, pairingResult,
+    isLeftoverModalOpen, setIsLeftoverModalOpen, isLogging,
+    availableReadyMeals, availableMains, totalAvailableInMealType,
+    handleRefreshCatalogue, handleResetSeedData, handleResetToHome,
+    handleSelectMealType, handleSelectReadyMeal, handleBypassReadyMeal,
+    handleSuggestForMe, handleManualPickMode, handleSelectMain,
+    handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision,
+    handleQuickAddStaples, handleAddSupply, handleAddBulkSupplies,
+    handleToggleAvailability, handleDeleteSupply,
   } = useMealBuilder(owner);
 
   const [isStaplesDrawerOpen, setIsStaplesDrawerOpen] = useState(false);
@@ -283,6 +257,7 @@ export default function MealBuilderPage() {
                     mainIngredient={selectedMain}
                     protein={selectedProtein}
                     supplementary={selectedSupplementary}
+                    supplementaries={selectedSupplementaries}
                     onConfirmAndLog={handleConfirmAndLog}
                     onBack={() => {
                       if (selectedSource === "Ready Meal") {
@@ -308,6 +283,7 @@ export default function MealBuilderPage() {
               mainIngredient={selectedMain}
               protein={selectedProtein}
               supplementary={selectedSupplementary}
+              supplementaries={selectedSupplementaries}
               missingUpgrade={pairingResult?.missingUpgrades?.[0]}
               owner={owner}
             />
