@@ -1,5 +1,11 @@
 import type { NextAuthConfig } from "next-auth";
 
+const DEFAULT_SECRET = "32f3c9046052408d9107cc3459dc736db39e23517214acbc7c903cf9027f0a22";
+
+if (!process.env.AUTH_SECRET && !process.env.NEXTAUTH_SECRET) {
+  process.env.AUTH_SECRET = DEFAULT_SECRET;
+}
+
 export const authConfig: NextAuthConfig = {
   pages: {
     signIn: "/login",
@@ -26,9 +32,7 @@ export const authConfig: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
-  secret:
-    process.env.AUTH_SECRET ||
-    process.env.NEXTAUTH_SECRET ||
-    "provisions-secret-salt-development-key-32chars",
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || DEFAULT_SECRET,
   providers: [],
 };
+
