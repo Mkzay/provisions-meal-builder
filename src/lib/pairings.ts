@@ -14,31 +14,35 @@ interface AffinityRule {
 
 const AFFINITY_RULES: AffinityRule[] = [
   { mainPattern: /rice|jollof|basmati/i, preferredProteins: ["beef stew", "stew", "fried / grilled chicken", "chicken", "fresh eggs", "fried egg", "canned sardines"], preferredSupplementary: ["dodo", "fried plantain", "steamed spinach", "sliced avocado", "gravy"] },
-  { mainPattern: /yam/i, preferredProteins: ["fresh eggs", "fried egg", "egg sauce", "beef stew", "canned sardines"], preferredSupplementary: ["egg sauce", "tomato gravy", "dodo", "sliced avocado", "hot tea"] },
+  { mainPattern: /yam/i, preferredProteins: ["fresh eggs", "fried egg", "beef stew", "canned sardines", "croaker"], preferredSupplementary: ["sliced tomatoes & onions", "dodo", "fried plantain", "steamed spinach", "sliced avocado"] },
   { mainPattern: /bread|toast/i, preferredProteins: ["fresh eggs", "fried egg", "canned sardines", "baked beans"], preferredSupplementary: ["hot tea", "hot tea / cocoa", "sliced avocado", "butter"] },
   { mainPattern: /pasta|spaghetti|noodles/i, preferredProteins: ["beef stew", "canned sardines", "fresh eggs", "chicken"], preferredSupplementary: ["sliced avocado", "steamed spinach", "dodo"] },
-  { mainPattern: /potato|sweet potato/i, preferredProteins: ["fresh eggs", "egg sauce", "beef stew", "chicken"], preferredSupplementary: ["egg sauce", "sliced avocado", "hot tea"] },
+  { mainPattern: /potato|sweet potato/i, preferredProteins: ["fresh eggs", "beef stew", "chicken"], preferredSupplementary: ["sliced tomatoes & onions", "sliced avocado"] },
   { mainPattern: /oats|oatmeal/i, preferredProteins: ["fresh eggs"], preferredSupplementary: ["hot tea", "hot tea / cocoa", "sliced avocado"] },
-  { mainPattern: /plantain/i, preferredProteins: ["fresh eggs", "fried egg", "beef stew", "chicken"], preferredSupplementary: ["egg sauce", "hot tea", "sliced avocado"] },
+  { mainPattern: /plantain/i, preferredProteins: ["fresh eggs", "fried egg", "beef stew", "chicken"], preferredSupplementary: ["sliced tomatoes & onions", "sliced avocado"] },
   { mainPattern: /cracker|biscuit|snack|cookie|wafer/i, preferredProteins: ["peanut butter", "canned sardines", "fresh eggs", "cheese"], preferredSupplementary: ["hot tea", "sliced avocado", "apple slices"] },
   { mainPattern: /amala|fufu|tuwo|garri|eba|semovita|wheat/i, preferredProteins: ["goat meat", "beef stew", "catfish", "croaker", "smoked fish", "stockfish", "panla"], preferredSupplementary: ["ewedu", "okra", "ugu", "bitterleaf", "efo shoko", "waterleaf", "iru"] },
 ];
 
 interface MissingUpgradeKnowledge {
   mainPattern: RegExp;
+  itemPattern: RegExp;
   suggestedName: string;
   role: "Protein" | "Supplementary";
   reason: string;
 }
 
 const UPGRADE_KNOWLEDGE: MissingUpgradeKnowledge[] = [
-  { mainPattern: /oats|oatmeal/i, suggestedName: "Crisp Apple", role: "Supplementary", reason: "Fresh apple slices add crisp texture and dietary fiber to warm oats." },
-  { mainPattern: /oats|oatmeal/i, suggestedName: "Greek Yogurt / Peanut Butter", role: "Protein", reason: "A scoop of yogurt or peanut butter introduces creamy protein for morning focus." },
-  { mainPattern: /rice|jollof|basmati/i, suggestedName: "Fresh Baby Spinach / Greens", role: "Supplementary", reason: "Leafy greens provide essential vitamins and a clean contrast to rich stew and rice." },
-  { mainPattern: /yam|plantain/i, suggestedName: "Egg Sauce / Fresh Eggs", role: "Protein", reason: "Quality protein and healthy fats balance dense carbs and prevent energy crashes." },
-  { mainPattern: /bread|toast/i, suggestedName: "Sliced Avocado", role: "Supplementary", reason: "Healthy fats from avocado turn toasted bread into a sustained, brain-boosting plate." },
-  { mainPattern: /pasta|spaghetti|noodle/i, suggestedName: "Fresh Baby Spinach / Extra Egg", role: "Supplementary", reason: "Tossing in a handful of greens or an egg turns a quick bowl into a complete meal." },
-  { mainPattern: /cracker|biscuit|snack/i, suggestedName: "Crisp Apple Slices", role: "Supplementary", reason: "Pairing crunchy crackers with fresh fruit provides steady hydration and fiber." },
+  { mainPattern: /oats|oatmeal|custard/i, itemPattern: /apple|banana|berry|fruit/i, suggestedName: "Fresh Fruit (Banana / Apple)", role: "Supplementary", reason: "Fresh apple slices add crisp texture, natural sweetness, and dietary fiber." },
+  { mainPattern: /oats|oatmeal|custard/i, itemPattern: /chia|flax/i, suggestedName: "Chia Seeds", role: "Supplementary", reason: "Adds healthy omega-3 fats and steady digestion to warm morning grains." },
+  { mainPattern: /rice|jollof|basmati/i, itemPattern: /plantain|dodo/i, suggestedName: "Ripe Plantains (Dodo)", role: "Supplementary", reason: "Sweet golden dodo provides the classic pairing with rice and savory stew." },
+  { mainPattern: /rice|jollof|basmati/i, itemPattern: /spinach|greens|cabbage|salad/i, suggestedName: "Fresh Greens / Spinach", role: "Supplementary", reason: "Leafy greens provide essential micronutrients and clean contrast to rich stew." },
+  { mainPattern: /yam|plantain|potato/i, itemPattern: /egg/i, suggestedName: "Fresh Eggs", role: "Protein", reason: "Pair with tomatoes and onions to make authentic, savory egg sauce." },
+  { mainPattern: /yam|plantain|potato/i, itemPattern: /tomato|pepper|onion/i, suggestedName: "Sliced Tomatoes & Onions", role: "Supplementary", reason: "Simmer with your fresh eggs to make authentic, spiced egg sauce." },
+  { mainPattern: /bread|toast/i, itemPattern: /egg/i, suggestedName: "Fresh Eggs", role: "Protein", reason: "Fluffy scrambled or fried eggs turn toasted bread into a complete meal." },
+  { mainPattern: /bread|toast/i, itemPattern: /avocado/i, suggestedName: "Sliced Avocado", role: "Supplementary", reason: "Healthy fats from avocado provide sustained mental clarity and fuel." },
+  { mainPattern: /pasta|spaghetti|noodle/i, itemPattern: /egg/i, suggestedName: "Fresh Eggs", role: "Protein", reason: "Boiled or fried eggs add quick, high-quality protein to your pasta." },
+  { mainPattern: /pasta|spaghetti|noodle/i, itemPattern: /tomato|onion/i, suggestedName: "Sliced Tomatoes & Onions", role: "Supplementary", reason: "Aromatic reduction transforms plain pasta into savory Jollof." },
 ];
 
 export function findBestPairings(
@@ -140,18 +144,19 @@ export function findBestPairings(
 
   const matchingUpgrades = UPGRADE_KNOWLEDGE.filter((uk) => uk.mainPattern.test(main.name));
   for (const up of matchingUpgrades) {
-    const searchTarget = up.suggestedName.toLowerCase().split("/")[0].trim();
-    const alreadyAvailable = allIngredients.some(
-      (ing) => ing.available && ing.name.toLowerCase().includes(searchTarget)
-    );
+    // Never suggest an upgrade if that item category is already selected or in kitchen stock
+    const isCovered =
+      (recommendedProtein && up.itemPattern.test(recommendedProtein.name)) ||
+      recommendedSides.some((s) => up.itemPattern.test(s.name)) ||
+      allIngredients.some((ing) => ing.available && up.itemPattern.test(ing.name));
 
-    if (!alreadyAvailable) {
+    if (!isCovered) {
       const existingOutOfStock = allIngredients.find(
-        (ing) => !ing.available && ing.name.toLowerCase().includes(searchTarget)
+        (ing) => !ing.available && up.itemPattern.test(ing.name)
       );
 
       missingUpgrades.push({
-        id: existingOutOfStock ? existingOutOfStock.id : `upgrade-${searchTarget.replace(/\s+/g, "-")}`,
+        id: existingOutOfStock ? existingOutOfStock.id : `upgrade-${up.suggestedName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
         name: existingOutOfStock ? existingOutOfStock.name : up.suggestedName,
         role: up.role,
         reason: up.reason,
@@ -167,6 +172,11 @@ export function findBestPairings(
       (ing) => !ing.available && ing.mealTypes.includes(mealType)
     );
     for (const unav of unavailableInCatalogue) {
+      const isSelected =
+        (recommendedProtein && recommendedProtein.name.toLowerCase() === unav.name.toLowerCase()) ||
+        recommendedSides.some((s) => s.name.toLowerCase() === unav.name.toLowerCase());
+      if (isSelected) continue;
+
       const isPrefProtein = rule.preferredProteins.some((p) =>
         unav.name.toLowerCase().includes(p.toLowerCase())
       );

@@ -357,4 +357,29 @@ describe("Nutrient Curation Engine", () => {
     expect(tags).toContain("High Protein");
     expect(tags).toContain("High Fat");
   });
+
+  it("never suggests Egg Sauce or Fresh Eggs as a missing upgrade when Fresh Eggs are already selected", () => {
+    const yam: Ingredient = {
+      id: "yam-tuber",
+      name: "Yam (Tuber / Raw Slices)",
+      role: "Main",
+      mealTypes: ["Breakfast", "Lunch"],
+      owner: "User",
+      available: true,
+    };
+    const eggs: Ingredient = {
+      id: "fresh-eggs",
+      name: "Fresh Eggs",
+      role: "Protein",
+      mealTypes: ["Breakfast", "Lunch"],
+      owner: "User",
+      available: true,
+    };
+    const pairings = findBestPairings(yam, [yam, eggs], "Breakfast");
+
+    expect(pairings.recommendedProtein?.name).toBe("Fresh Eggs");
+    const upgradeNames = (pairings.missingUpgrades || []).map((u) => u.name.toLowerCase());
+    expect(upgradeNames.some((n) => n.includes("egg sauce"))).toBe(false);
+    expect(upgradeNames.some((n) => n.includes("fresh eggs"))).toBe(false);
+  });
 });
