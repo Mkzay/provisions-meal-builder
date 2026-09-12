@@ -155,11 +155,11 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
               </div>
 
               {/* Card Footer Pill Strip */}
-              <div className="mt-4 pt-3.5 border-t-2 border-stone-900/20 w-full flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase tracking-wider text-stone-900 bg-white/80 px-2.5 py-1 rounded-xl border border-stone-900/40">
+              <div className="mt-4 pt-3.5 border-t-2 border-stone-900/20 w-full flex items-center justify-between gap-2">
+                <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-stone-900 bg-white/80 px-2.5 py-1 rounded-xl border border-stone-900/40 whitespace-nowrap shrink-0">
                   {opt.tagText}
                 </span>
-                <span className="text-sm font-black text-stone-900 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-1 group-hover:translate-x-1 transition-transform whitespace-nowrap shrink-0">
                   <span>Explore</span>
                   <span>→</span>
                 </span>

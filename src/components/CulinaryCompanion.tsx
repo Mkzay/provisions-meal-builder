@@ -145,7 +145,7 @@ export const CulinaryCompanion: React.FC<CulinaryCompanionProps> = ({
             <Heart size={16} weight="fill" />
           </div>
           <h5 className="font-display font-black text-sm text-stone-900">
-            A Note For Esther
+            A Note for You
           </h5>
         </div>
         <p className="text-xs text-stone-800 font-medium leading-relaxed">

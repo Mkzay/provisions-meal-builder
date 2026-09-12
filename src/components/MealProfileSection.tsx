@@ -24,7 +24,7 @@ const GOAL_OPTIONS: {
   {
     goal: "Gain weight",
     label: "Gain weight",
-    badge: "Esther's Default",
+    badge: "Default",
     description: "Hearty, nourishing meals to steadily increase intake and energy.",
   },
   {

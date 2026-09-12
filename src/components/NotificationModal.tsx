@@ -162,7 +162,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
               </div>
               <div>
                 <h3 id="notification-modal-title" className="text-lg sm:text-xl font-display font-black tracking-tight text-stone-900">
-                  Esther&apos;s Meal Reminders
+                  Your Meal Reminders
                 </h3>
                 <p className="text-xs text-stone-600 mt-0.5 font-medium">
                   Gentle nudges so you never get lost in work and skip eating.
