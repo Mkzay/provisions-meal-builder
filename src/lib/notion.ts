@@ -49,32 +49,17 @@ export async function fetchCatalogue(owner?: string): Promise<KitchenCatalogue> 
   try {
     const filter = owner
       ? {
-          and: [
-            {
-              property: "Available",
-              checkbox: {
-                equals: true,
-              },
-            },
-            {
-              property: "Owner",
-              select: {
-                equals: owner,
-              },
-            },
-          ],
-        }
-      : {
-          property: "Available",
-          checkbox: {
-            equals: true,
+          property: "Owner",
+          select: {
+            equals: owner,
           },
-        };
+        }
+      : undefined;
 
     // 1. Query Ingredients Catalogue
     const ingredientsResponse = await notion.databases.query({
       database_id: ingredientsDbId,
-      filter,
+      ...(filter ? { filter } : {}),
     });
 
     const ingredients: Ingredient[] = ingredientsResponse.results
@@ -84,7 +69,7 @@ export async function fetchCatalogue(owner?: string): Promise<KitchenCatalogue> 
     // 2. Query Ready Meals
     const readyMealsResponse = await notion.databases.query({
       database_id: readyMealsDbId,
-      filter,
+      ...(filter ? { filter } : {}),
     });
 
     const readyMeals: ReadyMeal[] = readyMealsResponse.results
@@ -260,6 +245,63 @@ export async function addSupplyToNotion(
   }
 }
 
+export async function updateSupplyAvailability(
+  pageId: string,
+  available: boolean
+): Promise<{ success: boolean }> {
+  const notion = getNotionClient();
+  if (
+    !notion ||
+    pageId.startsWith("local-") ||
+    pageId.startsWith("mock-") ||
+    pageId.startsWith("ing-") ||
+    pageId.startsWith("ready-")
+  ) {
+    return { success: true };
+  }
+
+  try {
+    await notion.pages.update({
+      page_id: pageId,
+      properties: {
+        Available: {
+          checkbox: available,
+        },
+      },
+    });
+    return { success: true };
+  } catch (err) {
+    console.error("Error updating supply availability in Notion:", err);
+    return { success: false };
+  }
+}
+
+export async function deleteSupplyFromNotion(
+  pageId: string
+): Promise<{ success: boolean }> {
+  const notion = getNotionClient();
+  if (
+    !notion ||
+    pageId.startsWith("local-") ||
+    pageId.startsWith("mock-") ||
+    pageId.startsWith("ing-") ||
+    pageId.startsWith("ready-")
+  ) {
+    return { success: true };
+  }
+
+  try {
+    await notion.pages.update({
+      page_id: pageId,
+      archived: true,
+    });
+    return { success: true };
+  } catch (err) {
+    console.error("Error archiving supply in Notion:", err);
+    return { success: false };
+  }
+}
+
 // Re-export Database 4 (Meal Profile) and Database 5 (Progress Log) methods
 export {
   fetchMealProfile,
@@ -268,6 +310,7 @@ export {
   addWeightLogEntry,
   deleteWeightLogEntry,
 } from "./notion-profile";
+
 
 
 

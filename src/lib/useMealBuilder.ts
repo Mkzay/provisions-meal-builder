@@ -234,51 +234,6 @@ export function useMealBuilder(owner: string = "Esther") {
     setCurrentStep("meal_type");
   };
 
-  const handleAddSupply = async (input: AddSupplyInput) => {
-    const supplyInput = { ...input, owner: input.owner || owner };
-    let nextCatalogue = { ...catalogue };
-
-    if (input.kind === "ingredient") {
-      const newIng: Ingredient = {
-        id: `ing-${Date.now()}`,
-        name: input.name,
-        mealTypes: input.mealTypes,
-        role: input.role || "Main",
-        owner,
-        available: true,
-      };
-      nextCatalogue = {
-        ...nextCatalogue,
-        ingredients: [newIng, ...nextCatalogue.ingredients],
-      };
-    } else {
-      const newReady: ReadyMeal = {
-        id: `ready-${Date.now()}`,
-        name: input.name,
-        mealTypes: input.mealTypes,
-        owner,
-        available: true,
-      };
-      nextCatalogue = {
-        ...nextCatalogue,
-        readyMeals: [newReady, ...nextCatalogue.readyMeals],
-      };
-    }
-
-    setCatalogue(nextCatalogue);
-    saveCachedCatalogue(nextCatalogue, owner);
-
-    try {
-      await fetch("/api/notion/supplies", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(supplyInput),
-      });
-    } catch {
-      queueOfflineMutation("supplies", supplyInput);
-    }
-  };
-
   const handleAddBulkSupplies = async (inputs: AddSupplyInput[]) => {
     if (!inputs.length) return;
     let nextCatalogue = { ...catalogue };
@@ -309,16 +264,10 @@ export function useMealBuilder(owner: string = "Esther") {
     });
 
     if (newIngredients.length) {
-      nextCatalogue = {
-        ...nextCatalogue,
-        ingredients: [...newIngredients, ...nextCatalogue.ingredients],
-      };
+      nextCatalogue = { ...nextCatalogue, ingredients: [...newIngredients, ...nextCatalogue.ingredients] };
     }
     if (newReadyMeals.length) {
-      nextCatalogue = {
-        ...nextCatalogue,
-        readyMeals: [...newReadyMeals, ...nextCatalogue.readyMeals],
-      };
+      nextCatalogue = { ...nextCatalogue, readyMeals: [...newReadyMeals, ...nextCatalogue.readyMeals] };
     }
 
     setCatalogue(nextCatalogue);
@@ -336,6 +285,67 @@ export function useMealBuilder(owner: string = "Esther") {
         });
       })
     );
+  };
+
+  const handleAddSupply = async (input: AddSupplyInput) => {
+    return handleAddBulkSupplies([input]);
+  };
+
+  const handleToggleAvailability = async (
+    id: string,
+    kind: "ingredient" | "ready_meal",
+    available: boolean
+  ) => {
+    const nextCatalogue = {
+      ...catalogue,
+      ingredients:
+        kind === "ingredient"
+          ? catalogue.ingredients.map((i) => (i.id === id ? { ...i, available } : i))
+          : catalogue.ingredients,
+      readyMeals:
+        kind === "ready_meal"
+          ? catalogue.readyMeals.map((m) => (m.id === id ? { ...m, available } : m))
+          : catalogue.readyMeals,
+    };
+    setCatalogue(nextCatalogue);
+    saveCachedCatalogue(nextCatalogue, owner);
+
+    try {
+      await fetch("/api/notion/supplies", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, available }),
+      });
+    } catch {
+      // offline mutation recorded
+    }
+  };
+
+  const handleDeleteSupply = async (
+    id: string,
+    kind: "ingredient" | "ready_meal"
+  ) => {
+    const nextCatalogue = {
+      ...catalogue,
+      ingredients:
+        kind === "ingredient"
+          ? catalogue.ingredients.filter((i) => i.id !== id)
+          : catalogue.ingredients,
+      readyMeals:
+        kind === "ready_meal"
+          ? catalogue.readyMeals.filter((m) => m.id !== id)
+          : catalogue.readyMeals,
+    };
+    setCatalogue(nextCatalogue);
+    saveCachedCatalogue(nextCatalogue, owner);
+
+    try {
+      await fetch(`/api/notion/supplies?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+    } catch {
+      // offline deletion recorded
+    }
   };
 
   return {
@@ -377,6 +387,8 @@ export function useMealBuilder(owner: string = "Esther") {
     handleQuickAddStaples,
     handleAddSupply,
     handleAddBulkSupplies,
+    handleToggleAvailability,
+    handleDeleteSupply,
   };
 }
 

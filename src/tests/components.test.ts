@@ -89,6 +89,10 @@ describe("Component import integrity", () => {
     await import("../components/FoodIdeasModal");
   });
 
+  it("imports KitchenInventoryModal", async () => {
+    await import("../components/KitchenInventoryModal");
+  });
+
   it("imports MealProfileModal", async () => {
     await import("../components/MealProfileModal");
   });

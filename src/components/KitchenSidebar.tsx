@@ -6,6 +6,7 @@ import {
   Clock,
   CookingPot,
   Fire,
+  Package,
   PlusCircle,
   Sparkle,
 } from "@/components/icons";
@@ -21,6 +22,7 @@ interface KitchenSidebarProps {
   onOpenSettings?: () => void;
   onOpenStaples: () => void;
   onOpenFoodIdeas?: () => void;
+  onOpenInventory?: () => void;
 }
 
 export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
@@ -32,6 +34,7 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
   onOpenSettings,
   onOpenStaples,
   onOpenFoodIdeas,
+  onOpenInventory,
 }) => {
   const availableReadyMeals = readyMeals.filter((m) => m.available);
   const availableIngredients = ingredients.filter((i) => i.available);
@@ -86,6 +89,16 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
             </button>
           )}
         </div>
+
+        {onOpenInventory && (
+          <button
+            onClick={onOpenInventory}
+            className="w-full py-2.5 px-3 rounded-xl border-2 border-stone-900 bg-stone-100 hover:bg-stone-200 text-xs font-black text-stone-900 transition-all shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] flex items-center justify-center gap-2"
+          >
+            <Package size={15} weight="bold" />
+            <span>Manage Kitchen Stock ({readyMeals.length + ingredients.length})</span>
+          </button>
+        )}
       </div>
 
       {/* In The Fridge Now Card */}

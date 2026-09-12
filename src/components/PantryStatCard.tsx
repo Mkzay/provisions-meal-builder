@@ -3,6 +3,7 @@
 import {
   BowlFood,
   CookingPot,
+  Package,
   Plus,
 } from "@/components/icons";
 import React from "react";
@@ -13,6 +14,7 @@ interface PantryStatCardProps {
   isCachedFallback?: boolean;
   onOpenAddSupply: () => void;
   onOpenSettings?: () => void;
+  onOpenInventory?: () => void;
   className?: string;
 }
 
@@ -27,6 +29,7 @@ export const PantryStatCard: React.FC<PantryStatCardProps> = ({
   isCachedFallback = false,
   onOpenAddSupply,
   onOpenSettings,
+  onOpenInventory,
   className = "",
 }) => {
   return (
@@ -99,20 +102,33 @@ export const PantryStatCard: React.FC<PantryStatCardProps> = ({
       </div>
 
       {/* Footer Quick Actions */}
-      <div className="flex items-center justify-between pt-3 mt-3 border-t border-stone-900/10 gap-2">
-        <button
-          onClick={onOpenAddSupply}
-          className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 border-2 border-stone-900 shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] transition-all"
-        >
-          <Plus size={14} weight="bold" />
-          <span>Quick Restock</span>
-        </button>
-        <button
-          onClick={onOpenSettings}
-          className="inline-flex items-center gap-1 text-[11px] font-bold text-stone-600 hover:text-stone-900 hover:underline"
-        >
-          <span>Manage Notion Connection →</span>
-        </button>
+      <div className="flex items-center justify-between pt-3 mt-3 border-t border-stone-900/10 gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onOpenAddSupply}
+            className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 border-2 border-stone-900 shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] transition-all"
+          >
+            <Plus size={14} weight="bold" />
+            <span>Restock</span>
+          </button>
+          {onOpenInventory && (
+            <button
+              onClick={onOpenInventory}
+              className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1.5 rounded-xl bg-emerald-200 hover:bg-emerald-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] transition-all"
+            >
+              <Package size={14} weight="bold" />
+              <span>Manage Stock</span>
+            </button>
+          )}
+        </div>
+        {onOpenSettings && (
+          <button
+            onClick={onOpenSettings}
+            className="inline-flex items-center gap-1 text-[11px] font-bold text-stone-600 hover:text-stone-900 hover:underline"
+          >
+            <span>Notion Connection →</span>
+          </button>
+        )}
       </div>
     </div>
   );

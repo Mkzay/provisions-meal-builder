@@ -7,6 +7,7 @@ import { CulinaryCompanion } from "@/components/CulinaryCompanion";
 import { FoodIdeasModal } from "@/components/FoodIdeasModal";
 import { GentleSafetyNet } from "@/components/GentleSafetyNet";
 import { ArrowLeft } from "@/components/icons";
+import { KitchenInventoryModal } from "@/components/KitchenInventoryModal";
 import { KitchenSidebar } from "@/components/KitchenSidebar";
 import { LeftoverModal } from "@/components/LeftoverModal";
 import { MainIngredientGrid } from "@/components/MainIngredientGrid";
@@ -38,6 +39,7 @@ export default function MealBuilderPage() {
   const [isPersonalHubOpen, setIsPersonalHubOpen] = useState(false);
   const [personalHubTab, setPersonalHubTab] = useState<PersonalHubTab>("profile");
   const [isFoodIdeasOpen, setIsFoodIdeasOpen] = useState(false);
+  const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
   const [isPromptDismissed, setIsPromptDismissed] = useState<boolean>(() =>
     hasProfilePromptBeenDismissed()
@@ -90,6 +92,8 @@ export default function MealBuilderPage() {
     handleQuickAddStaples,
     handleAddSupply,
     handleAddBulkSupplies,
+    handleToggleAvailability,
+    handleDeleteSupply,
   } = useMealBuilder(owner);
 
   const [isStaplesDrawerOpen, setIsStaplesDrawerOpen] = useState(false);
@@ -131,6 +135,7 @@ export default function MealBuilderPage() {
               ingredientsCount={catalogue.ingredients.filter((i) => i.available).length}
               isCachedFallback={catalogue.isCachedFallback}
               onOpenAddSupply={() => setIsAddSupplyOpen(true)}
+              onOpenInventory={() => setIsInventoryOpen(true)}
             />
           </div>
         )}
@@ -147,6 +152,7 @@ export default function MealBuilderPage() {
               onSelectReadyMeal={handleSelectReadyMeal}
               onOpenStaples={() => setIsStaplesDrawerOpen(true)}
               onOpenFoodIdeas={() => setIsFoodIdeasOpen(true)}
+              onOpenInventory={() => setIsInventoryOpen(true)}
             />
           </div>
 
@@ -348,6 +354,19 @@ export default function MealBuilderPage() {
         onAddSupply={handleAddSupply}
         ingredients={catalogue.ingredients}
         readyMeals={catalogue.readyMeals}
+        owner={owner}
+      />
+
+      {/* Kitchen Stock & Inventory Modal */}
+      <KitchenInventoryModal
+        isOpen={isInventoryOpen}
+        onClose={() => setIsInventoryOpen(false)}
+        ingredients={catalogue.ingredients}
+        readyMeals={catalogue.readyMeals}
+        onToggleAvailability={handleToggleAvailability}
+        onDeleteSupply={handleDeleteSupply}
+        onOpenAddSupply={() => setIsAddSupplyOpen(true)}
+        onOpenFoodIdeas={() => setIsFoodIdeasOpen(true)}
         owner={owner}
       />
 
