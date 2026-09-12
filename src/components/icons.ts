@@ -54,4 +54,6 @@ export { Scales } from "@phosphor-icons/react/dist/ssr/Scales";
 export { ChartLineUp } from "@phosphor-icons/react/dist/ssr/ChartLineUp";
 export { TrashSimple } from "@phosphor-icons/react/dist/ssr/TrashSimple";
 export { SignOut } from "@phosphor-icons/react/dist/ssr/SignOut";
+export { Eye } from "@phosphor-icons/react/dist/ssr/Eye";
+export { EyeSlash } from "@phosphor-icons/react/dist/ssr/EyeSlash";
 

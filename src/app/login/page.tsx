@@ -1,9 +1,78 @@
 "use client";
 
+import {
+  BowlFood,
+  Coffee,
+  Cookie,
+  CookingPot,
+  Egg,
+  Eye,
+  EyeSlash,
+  Heart,
+  Sparkle,
+  Sun,
+} from "@/components/icons";
 import { ProvisionsLogo } from "@/components/ProvisionsLogo";
+import { motion } from "framer-motion";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useState } from "react";
+
+// Floating Culinary Stickers for background ambiance
+const STICKERS = [
+  {
+    id: "pot",
+    label: "Fresh Provisions",
+    icon: <CookingPot size={18} weight="duotone" className="text-emerald-800" />,
+    bg: "bg-[#A7F3D0]",
+    textColor: "text-emerald-950",
+    className: "top-8 left-6 md:top-16 md:left-20 lg:left-32",
+    floatAnim: {
+      y: [0, -12, 0],
+      rotate: [-3, 2, -3],
+      transition: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+    },
+  },
+  {
+    id: "egg",
+    label: "Morning Fuel",
+    icon: <Egg size={18} weight="duotone" className="text-amber-800" />,
+    bg: "bg-[#FEF08A]",
+    textColor: "text-amber-950",
+    className: "top-10 right-6 md:top-20 md:right-24 lg:right-36",
+    floatAnim: {
+      y: [0, 10, 0],
+      rotate: [2, -3, 2],
+      transition: { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 },
+    },
+  },
+  {
+    id: "snack",
+    label: "Quick Bites",
+    icon: <Cookie size={18} weight="duotone" className="text-purple-800" />,
+    bg: "bg-[#DDD6FE]",
+    textColor: "text-purple-950",
+    className: "bottom-12 left-6 md:bottom-20 md:left-24 lg:left-40",
+    floatAnim: {
+      y: [0, -10, 0],
+      rotate: [-2, 3, -2],
+      transition: { duration: 5.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 },
+    },
+  },
+  {
+    id: "dinner",
+    label: "Comfort Dinners",
+    icon: <BowlFood size={18} weight="duotone" className="text-rose-800" />,
+    bg: "bg-[#FECDD3]",
+    textColor: "text-rose-950",
+    className: "bottom-10 right-6 md:bottom-24 md:right-20 lg:right-36",
+    floatAnim: {
+      y: [0, 12, 0],
+      rotate: [3, -2, 3],
+      transition: { duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 0.6 },
+    },
+  },
+];
 
 function LoginForm() {
   const router = useRouter();
@@ -12,6 +81,7 @@ function LoginForm() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -48,29 +118,114 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAF8F5]">
-      <div className="w-full max-w-sm">
-        {/* Card */}
-        <div className="p-6 sm:p-8 bg-white rounded-3xl border-[2.5px] border-stone-900 shadow-brutal-lg space-y-6">
+    <div className="relative min-h-screen flex flex-col items-center justify-center p-4 bg-[#FAF8F5] overflow-hidden select-none">
+      {/* Neo-brutalist Dotted Background Pattern */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.07]"
+        style={{
+          backgroundImage: "radial-gradient(#1C1917 1.5px, transparent 1.5px)",
+          backgroundSize: "24px 24px",
+        }}
+      />
+
+      {/* Warm Ambient Center Glow */}
+      <div className="absolute w-[500px] h-[500px] rounded-full bg-amber-200/40 blur-3xl pointer-events-none -z-0" />
+
+      {/* Floating Kitchen Badges (Animated Stickers) */}
+      <div className="absolute inset-0 pointer-events-none max-w-6xl mx-auto overflow-hidden">
+        {STICKERS.map((s) => (
+          <motion.div
+            key={s.id}
+            animate={s.floatAnim}
+            className={`absolute hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-2xl border-2 border-stone-900 shadow-brutal-sm ${s.bg} ${s.textColor} font-bold text-xs pointer-events-auto cursor-default transition-transform hover:scale-105 active:scale-95 ${s.className}`}
+          >
+            <span className="shrink-0">{s.icon}</span>
+            <span className="tracking-wide uppercase text-[11px] font-black">{s.label}</span>
+          </motion.div>
+        ))}
+
+        {/* Small Ambient Sparkles for Visual Polish */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute top-12 left-1/2 -translate-x-48 text-amber-500 opacity-60 hidden md:block"
+        >
+          <Sparkle size={24} weight="fill" />
+        </motion.div>
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], rotate: [-6, 6, -6] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-28 left-1/3 text-rose-400 opacity-50 hidden md:block"
+        >
+          <Heart size={20} weight="fill" />
+        </motion.div>
+        <motion.div
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-36 right-1/4 text-amber-500 opacity-60 hidden md:block"
+        >
+          <Sun size={22} weight="fill" />
+        </motion.div>
+      </div>
+
+      {/* Top Brand Stamp */}
+      <motion.div
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 350, damping: 25, delay: 0.1 }}
+        className="mb-4 sm:mb-6 z-10 flex items-center gap-2 px-3.5 py-1 bg-white/90 backdrop-blur-xs rounded-full border border-stone-900/30 shadow-brutal-xs"
+      >
+        <Sparkle size={13} weight="fill" className="text-amber-500" />
+        <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-stone-800">
+          Provisions Kitchen Sanctuary
+        </span>
+        <Sparkle size={13} weight="fill" className="text-amber-500" />
+      </motion.div>
+
+      {/* Login Card Container */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.94, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 320, damping: 24, delay: 0.15 }}
+        className="w-full max-w-sm z-10"
+      >
+        <div className="relative p-6 sm:p-8 bg-white rounded-3xl border-[2.5px] border-stone-900 shadow-brutal-lg space-y-6">
           {/* Brand Header */}
           <div className="text-center space-y-2">
-            <div className="flex justify-center mb-1">
-              <ProvisionsLogo size={48} />
-            </div>
-            <h1 className="font-display text-2xl font-black text-stone-900">
+            <motion.div
+              whileHover={{ rotate: [-2, 2, 0], scale: 1.06 }}
+              transition={{ duration: 0.3 }}
+              className="flex justify-center mb-2"
+            >
+              <div className="relative">
+                <ProvisionsLogo size={52} />
+                <motion.span
+                  animate={{ scale: [1, 1.25, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-stone-900"
+                  title="Kitchen online"
+                />
+              </div>
+            </motion.div>
+            <h1 className="font-display text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
               Welcome Back
             </h1>
-            <p className="text-xs text-stone-600 font-medium leading-relaxed">
+            <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
               Sign in to access your kitchen catalogue and meals.
             </p>
           </div>
 
-          {/* Error Alert */}
+          {/* Error Alert with spring shake */}
           {errorMessage && (
-            <div className="p-3 bg-rose-50 border-2 border-rose-500 rounded-xl text-rose-900 text-xs font-bold flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1, x: [-8, 8, -6, 6, -3, 3, 0] }}
+              transition={{ duration: 0.4 }}
+              className="p-3.5 bg-rose-50 border-2 border-rose-600 rounded-2xl text-rose-950 text-xs font-black flex items-center gap-2.5 shadow-brutal-xs"
+            >
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-stone-900 shrink-0" />
               <span>{errorMessage}</span>
-            </div>
+            </motion.div>
           )}
 
           {/* Form */}
@@ -91,7 +246,7 @@ function LoginForm() {
                 placeholder="Enter your username"
                 required
                 disabled={isLoading}
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 disabled:opacity-50"
+                className="w-full px-4 py-3 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all disabled:opacity-50"
               />
             </div>
 
@@ -102,40 +257,87 @@ function LoginForm() {
               >
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                disabled={isLoading}
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 disabled:opacity-50"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 pr-11 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all disabled:opacity-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-stone-500 hover:text-stone-900 transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeSlash size={18} weight="bold" />
+                  ) : (
+                    <Eye size={18} weight="bold" />
+                  )}
+                </button>
+              </div>
             </div>
 
-            <button
+            <motion.button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 px-4 rounded-xl font-black text-xs border-2 border-stone-900 shadow-brutal-sm transition-all active:translate-x-0.5 active:translate-y-0.5 mt-2 flex items-center justify-center gap-2 ${
+              whileHover={{ scale: 1.015 }}
+              whileTap={{ scale: 0.985 }}
+              className={`w-full py-3.5 px-4 rounded-2xl font-black text-sm border-2 border-stone-900 shadow-brutal transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none mt-2 flex items-center justify-center gap-2 ${
                 isLoading
-                  ? "bg-amber-200 text-stone-700 cursor-wait"
-                  : "bg-amber-300 hover:bg-amber-400 text-stone-900"
+                  ? "bg-amber-200 text-amber-900 cursor-wait"
+                  : "bg-amber-300 hover:bg-amber-400 text-amber-950"
               }`}
             >
-              <span>{isLoading ? "Signing in..." : "Sign In to Kitchen"}</span>
-            </button>
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 rounded-full border-2 border-stone-900 border-t-transparent animate-spin shrink-0" />
+                  <span>Entering Kitchen...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In to Kitchen</span>
+                  <span>→</span>
+                </>
+              )}
+            </motion.button>
           </form>
 
           {/* Info note */}
-          <div className="pt-2 border-t border-stone-200 text-center">
-            <span className="text-[11px] font-medium text-stone-500">
-              Private access instance
+          <div className="pt-2 border-t-2 border-stone-100 flex items-center justify-between text-[11px] font-bold text-stone-500">
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Private Access
             </span>
+            <span className="text-stone-400">Notion Synced</span>
           </div>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Mobile-Friendly Floating Badges Footer */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="mt-6 sm:hidden flex flex-wrap justify-center items-center gap-2 z-10"
+      >
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#FEF08A] border border-stone-900 text-[10px] font-black uppercase tracking-wider text-amber-950 shadow-brutal-xs">
+          🍳 Fuel Up
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#A7F3D0] border border-stone-900 text-[10px] font-black uppercase tracking-wider text-emerald-950 shadow-brutal-xs">
+          ✨ Fresh Pantry
+        </span>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#FECDD3] border border-stone-900 text-[10px] font-black uppercase tracking-wider text-rose-950 shadow-brutal-xs">
+          🥣 Zero Stress
+        </span>
+      </motion.div>
     </div>
   );
 }
