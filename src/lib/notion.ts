@@ -32,26 +32,49 @@ export function getNotionClient(): Client | null {
   return new Client({ auth: apiKey });
 }
 
-export async function fetchCatalogue(): Promise<KitchenCatalogue> {
+export async function fetchCatalogue(owner?: string): Promise<KitchenCatalogue> {
   const notion = getNotionClient();
   const ingredientsDbId = process.env.NOTION_INGREDIENTS_DB_ID;
   const readyMealsDbId = process.env.NOTION_READY_MEALS_DB_ID;
 
   if (!notion || !ingredientsDbId || !readyMealsDbId) {
-    console.log("Notion credentials not configured. Serving realistic starter kitchen seed.");
-    return SEED_CATALOGUE;
+    return {
+      ingredients: [],
+      readyMeals: [],
+      lastSynced: new Date().toISOString(),
+      isCachedFallback: true,
+    };
   }
 
   try {
+    const filter = owner
+      ? {
+          and: [
+            {
+              property: "Available",
+              checkbox: {
+                equals: true,
+              },
+            },
+            {
+              property: "Owner",
+              select: {
+                equals: owner,
+              },
+            },
+          ],
+        }
+      : {
+          property: "Available",
+          checkbox: {
+            equals: true,
+          },
+        };
+
     // 1. Query Ingredients Catalogue
     const ingredientsResponse = await notion.databases.query({
       database_id: ingredientsDbId,
-      filter: {
-        property: "Available",
-        checkbox: {
-          equals: true,
-        },
-      },
+      filter,
     });
 
     const ingredients: Ingredient[] = ingredientsResponse.results
@@ -61,12 +84,7 @@ export async function fetchCatalogue(): Promise<KitchenCatalogue> {
     // 2. Query Ready Meals
     const readyMealsResponse = await notion.databases.query({
       database_id: readyMealsDbId,
-      filter: {
-        property: "Available",
-        checkbox: {
-          equals: true,
-        },
-      },
+      filter,
     });
 
     const readyMeals: ReadyMeal[] = readyMealsResponse.results
@@ -74,15 +92,17 @@ export async function fetchCatalogue(): Promise<KitchenCatalogue> {
       .filter((meal): meal is ReadyMeal => meal !== null);
 
     return {
-      ingredients: ingredients.length > 0 ? ingredients : SEED_CATALOGUE.ingredients,
-      readyMeals: readyMeals.length > 0 ? readyMeals : SEED_CATALOGUE.readyMeals,
+      ingredients,
+      readyMeals,
       lastSynced: new Date().toISOString(),
       isCachedFallback: false,
     };
   } catch (error) {
-    console.error("Error connecting to Notion API, falling back to cached seed:", error);
+    console.error("Error connecting to Notion API, returning clean fallback:", error);
     return {
-      ...SEED_CATALOGUE,
+      ingredients: [],
+      readyMeals: [],
+      lastSynced: new Date().toISOString(),
       isCachedFallback: true,
     };
   }

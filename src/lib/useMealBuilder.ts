@@ -9,6 +9,7 @@ import { findBestPairings } from "./pairings";
 import { SEED_CATALOGUE } from "./seed-data";
 import {
   AddSupplyInput,
+  EMPTY_CATALOGUE,
   Ingredient,
   KitchenCatalogue,
   LeftoverDecision,
@@ -29,7 +30,7 @@ export type FlowStep =
   | "confirm";
 
 export function useMealBuilder(owner: string = "Esther") {
-  const [catalogue, setCatalogue] = useState<KitchenCatalogue>(SEED_CATALOGUE);
+  const [catalogue, setCatalogue] = useState<KitchenCatalogue>(EMPTY_CATALOGUE);
   const [isClientReady, setIsClientReady] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -51,22 +52,22 @@ export function useMealBuilder(owner: string = "Esther") {
   const [isLogging, setIsLogging] = useState(false);
 
   useEffect(() => {
-    const cached = loadCachedCatalogue();
+    const cached = loadCachedCatalogue(owner);
     setCatalogue(cached);
     setIsClientReady(true);
 
-    fetch("/api/notion/catalogue")
+    fetch(`/api/notion/catalogue?owner=${encodeURIComponent(owner)}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((freshCatalogue: KitchenCatalogue | null) => {
         if (freshCatalogue) {
           setCatalogue(freshCatalogue);
-          saveCachedCatalogue(freshCatalogue);
+          saveCachedCatalogue(freshCatalogue, owner);
         }
       })
       .catch((err) => {
         console.log("Using cached catalogue snapshot:", err);
       });
-  }, []);
+  }, [owner]);
 
   const availableReadyMeals = getAvailableReadyMeals(catalogue.readyMeals, mealType);
   const availableMains = getAvailableMains(catalogue.ingredients, mealType);
@@ -76,11 +77,11 @@ export function useMealBuilder(owner: string = "Esther") {
 
   const handleRefreshCatalogue = async () => {
     try {
-      const res = await fetch("/api/notion/catalogue");
+      const res = await fetch(`/api/notion/catalogue?owner=${encodeURIComponent(owner)}`);
       if (res.ok) {
         const fresh: KitchenCatalogue = await res.json();
         setCatalogue(fresh);
-        saveCachedCatalogue(fresh);
+        saveCachedCatalogue(fresh, owner);
       }
     } catch (e) {
       console.error("Refresh failed:", e);
@@ -89,7 +90,7 @@ export function useMealBuilder(owner: string = "Esther") {
 
   const handleResetSeedData = () => {
     setCatalogue(SEED_CATALOGUE);
-    saveCachedCatalogue(SEED_CATALOGUE);
+    saveCachedCatalogue(SEED_CATALOGUE, owner);
     setIsSettingsOpen(false);
   };
 
@@ -229,7 +230,7 @@ export function useMealBuilder(owner: string = "Esther") {
     }
     const nextCatalogue = { ...catalogue, ingredients: nextIngredients };
     setCatalogue(nextCatalogue);
-    saveCachedCatalogue(nextCatalogue);
+    saveCachedCatalogue(nextCatalogue, owner);
     setCurrentStep("meal_type");
   };
 
@@ -265,7 +266,7 @@ export function useMealBuilder(owner: string = "Esther") {
     }
 
     setCatalogue(nextCatalogue);
-    saveCachedCatalogue(nextCatalogue);
+    saveCachedCatalogue(nextCatalogue, owner);
 
     try {
       await fetch("/api/notion/supplies", {

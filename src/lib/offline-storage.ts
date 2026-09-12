@@ -1,29 +1,39 @@
-import { SEED_CATALOGUE } from "./seed-data";
-import { AddSupplyInput, KitchenCatalogue, LeftoverDecision, MealLogEntry, ReadyMeal } from "./types";
+import {
+  AddSupplyInput,
+  EMPTY_CATALOGUE,
+  KitchenCatalogue,
+  LeftoverDecision,
+  MealLogEntry,
+  ReadyMeal,
+} from "./types";
 
-const CATALOGUE_CACHE_KEY = "provisions_catalogue_cache_v1";
+function getCatalogueKey(owner?: string): string {
+  const o = (owner || "default").trim().toLowerCase();
+  return `provisions_catalogue_cache_${o}_v1`;
+}
+
 const OFFLINE_OUTBOX_KEY = "provisions_offline_outbox_v1";
 
-export function loadCachedCatalogue(): KitchenCatalogue {
+export function loadCachedCatalogue(owner?: string): KitchenCatalogue {
   if (typeof window === "undefined") {
-    return SEED_CATALOGUE;
+    return EMPTY_CATALOGUE;
   }
 
   try {
-    const item = localStorage.getItem(CATALOGUE_CACHE_KEY);
-    if (!item) return SEED_CATALOGUE;
+    const item = localStorage.getItem(getCatalogueKey(owner));
+    if (!item) return EMPTY_CATALOGUE;
     const parsed = JSON.parse(item);
     return parsed;
   } catch (e) {
     console.error("Failed to load catalogue from localStorage:", e);
-    return SEED_CATALOGUE;
+    return EMPTY_CATALOGUE;
   }
 }
 
-export function saveCachedCatalogue(catalogue: KitchenCatalogue): void {
+export function saveCachedCatalogue(catalogue: KitchenCatalogue, owner?: string): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(CATALOGUE_CACHE_KEY, JSON.stringify(catalogue));
+    localStorage.setItem(getCatalogueKey(owner), JSON.stringify(catalogue));
   } catch (e) {
     console.error("Failed to save catalogue to localStorage:", e);
   }

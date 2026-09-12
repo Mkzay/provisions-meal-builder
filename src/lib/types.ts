@@ -86,6 +86,13 @@ export interface KitchenCatalogue {
   isCachedFallback?: boolean;
 }
 
+export const EMPTY_CATALOGUE: KitchenCatalogue = {
+  ingredients: [],
+  readyMeals: [],
+  lastSynced: "",
+  isCachedFallback: false,
+};
+
 export type ReminderFrequency = "every_3_days" | "weekly" | "biweekly";
 
 export type DayOfWeek =

@@ -1,12 +1,16 @@
+import { auth } from "@/auth";
 import { fetchCatalogue } from "@/lib/notion";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const catalogue = await fetchCatalogue();
+    const session = await auth();
+    const { searchParams } = new URL(req.url);
+    const owner = session?.user?.ownerName || searchParams.get("owner") || undefined;
+    const catalogue = await fetchCatalogue(owner);
     return NextResponse.json(catalogue, {
       headers: {
-        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+        "Cache-Control": "private, no-cache, no-store, must-revalidate",
       },
     });
   } catch (error) {
