@@ -96,11 +96,14 @@ export const LeftoverModal: React.FC<LeftoverModalProps> = ({
         aria-labelledby="leftover-modal-title"
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="w-full max-w-md max-h-[92dvh] sm:max-h-[88vh] bg-surface border-[2.5px] border-ink rounded-t-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-brutal-lg overflow-y-auto no-scrollbar relative"
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 28 }}
+          transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+          className="w-full max-w-md max-h-[92dvh] sm:max-h-[88vh] bg-surface border-[2.5px] border-ink rounded-t-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-brutal-lg overflow-y-auto no-scrollbar modal-scroll-contain relative"
         >
+          {/* Mobile Bottom Sheet Pull Bar */}
+          <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto -mt-2 mb-4 shrink-0" />
           {step === "ask" && (
             <div className="space-y-5 text-center">
               <div className="w-14 h-14 rounded-2xl bg-saffron-300 border-2 border-ink text-ink flex items-center justify-center mx-auto shadow-brutal-sm">

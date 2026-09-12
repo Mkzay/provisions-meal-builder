@@ -321,6 +321,7 @@ export default function MealBuilderPage() {
         isOpen={isAddSupplyOpen}
         onClose={() => setIsAddSupplyOpen(false)}
         onAddSupply={handleAddSupply}
+        owner={owner}
       />
 
       {/* Personal Hub: Eating Goal & Weight Progress Log */}

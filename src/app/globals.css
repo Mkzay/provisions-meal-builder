@@ -70,3 +70,27 @@ h1, h2, h3, h4, .font-heading {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* Allow text selection and cursor placement inside form inputs */
+input, textarea, [contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Eliminate mobile tap delay for snappy app-like responsiveness */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Eliminate iOS Safari auto-zoom on input focus */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Prevent modal scrolling from chaining/rubberbanding to parent background */
+.modal-scroll-contain {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}

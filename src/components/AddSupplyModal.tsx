@@ -16,12 +16,14 @@ interface AddSupplyModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddSupply: (input: AddSupplyInput) => Promise<void>;
+  owner?: string;
 }
 
 export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
   isOpen,
   onClose,
   onAddSupply,
+  owner,
 }) => {
   const [kind, setKind] = useState<"ingredient" | "ready_meal">("ingredient");
   const [name, setName] = useState("");
@@ -93,11 +95,15 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
         aria-labelledby="add-supply-modal-title"
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 20 }}
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 28 }}
+          transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
           className="relative w-full max-w-lg max-h-[92dvh] sm:max-h-[88vh] flex flex-col bg-[#FAF8F5] border-[2.5px] border-stone-900 rounded-t-[28px] sm:rounded-3xl shadow-brutal-lg overflow-hidden"
         >
+          {/* Mobile Bottom Sheet Pull Bar */}
+          <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto mt-2.5 mb-0.5 shrink-0" />
+
           {/* Pinned Header */}
           <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b-2 border-stone-900 shrink-0 bg-[#FAF8F5]">
             <div className="flex items-center gap-3">
@@ -109,7 +115,7 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
                   Restock Kitchen
                 </h3>
                 <p className="text-xs text-stone-600 mt-0.5 font-medium">
-                  Add new groceries or ready meals to Esther&apos;s kitchen.
+                  Add new groceries or ready meals to {owner ? `${owner}'s` : "your"} kitchen.
                 </p>
               </div>
             </div>
@@ -124,7 +130,7 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
 
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
             {/* Scrollable Form Body */}
-            <div className="flex-1 overflow-y-auto no-scrollbar p-5 sm:p-6 space-y-4 min-h-0">
+            <div className="flex-1 overflow-y-auto no-scrollbar modal-scroll-contain p-5 sm:p-6 space-y-4 min-h-0">
               {/* Kind Selector Tabs (Symmetric, No Wrapping) */}
               <div className="grid grid-cols-2 gap-2 p-1.5 bg-stone-200 border-2 border-stone-900 rounded-2xl shadow-brutal-sm">
                 <button

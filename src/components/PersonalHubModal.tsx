@@ -54,11 +54,15 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
         aria-labelledby="personal-hub-modal-title"
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 20 }}
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 28 }}
+          transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
           className="relative w-full max-w-lg max-h-[92dvh] sm:max-h-[88vh] flex flex-col bg-[#FAF8F5] border-[2.5px] border-stone-900 rounded-t-[28px] sm:rounded-3xl shadow-brutal-lg overflow-hidden"
         >
+          {/* Mobile Bottom Sheet Pull Bar */}
+          <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto mt-2.5 mb-0.5 shrink-0" />
+
           {/* Header */}
           <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b-2 border-stone-900 shrink-0 bg-[#FAF8F5]">
             <div className="flex items-center gap-3">
@@ -134,7 +138,7 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
           </div>
 
           {/* Scrollable Body */}
-          <div className="flex-1 overflow-y-auto no-scrollbar p-5 sm:p-6 min-h-0">
+          <div className="flex-1 overflow-y-auto no-scrollbar modal-scroll-contain p-5 sm:p-6 min-h-0">
             {activeTab === "profile" ? (
               <MealProfileSection owner={owner} onSaved={onProfileSaved} />
             ) : (

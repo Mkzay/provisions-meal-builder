@@ -280,6 +280,9 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
               min="50"
               max="260"
               step="1"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              enterKeyHint="done"
               value={heightCm}
               onChange={(e) => handleCmChange(e.target.value)}
               placeholder="e.g. 178"
@@ -298,6 +301,9 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                   min="3"
                   max="8"
                   step="1"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  enterKeyHint="next"
                   value={feet}
                   onChange={(e) => handleFeetChange(e.target.value)}
                   placeholder="5"
@@ -313,6 +319,8 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                   min="0"
                   max="11.9"
                   step="any"
+                  inputMode="decimal"
+                  enterKeyHint="done"
                   value={inches}
                   onChange={(e) => handleInchesChange(e.target.value)}
                   placeholder="10"

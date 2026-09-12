@@ -223,6 +223,8 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
                 <input
                   type="number"
                   step="any"
+                  inputMode="decimal"
+                  enterKeyHint="done"
                   min={weightUnit === "kg" ? "20" : "44"}
                   max={weightUnit === "kg" ? "350" : "770"}
                   placeholder={weightUnit === "kg" ? "e.g. 75.56" : "e.g. 166.5"}
