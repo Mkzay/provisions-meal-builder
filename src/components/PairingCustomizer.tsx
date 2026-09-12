@@ -17,7 +17,7 @@ import {
   getSuggestedComboName,
 } from "@/lib/pairings";
 import { Ingredient, MealType, NutrientTag, PairingResult } from "@/lib/types";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface PairingCustomizerProps {
   selectedMain: Ingredient;
@@ -48,6 +48,7 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
   );
   const [isChangingProtein, setIsChangingProtein] = useState(false);
   const [isChangingSides, setIsChangingSides] = useState(false);
+  const [aiSanitized, setAiSanitized] = useState<{ dishName?: string; culinaryNote?: string } | null>(null);
 
   // Dynamic blueprint resolution based on current selections
   const inStockContext = [selectedMain, ...(selectedProtein ? [selectedProtein] : []), ...selectedSupplementaries];
@@ -58,6 +59,41 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
     : getSuggestedComboName(selectedMain.name, selectedProtein?.name, selectedSupplementaries.map((s) => s.name));
 
   const curatedNote = activeBlueprint?.culinaryNote || pairingResult.culinaryNote;
+
+  // Background AI inspection with silent fallback
+  useEffect(() => {
+    let active = true;
+    const controller = new AbortController();
+
+    fetch("/api/curate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        main: selectedMain.name,
+        protein: selectedProtein?.name,
+        supplementary: selectedSupplementaries.map((s) => s.name),
+        mealType,
+        dishName: curatedTitle,
+        culinaryNote: curatedNote,
+      }),
+      signal: controller.signal,
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && data?.success && data.dishName && data.culinaryNote) {
+          setAiSanitized({ dishName: data.dishName, culinaryNote: data.culinaryNote });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [selectedMain.id, selectedProtein?.id, selectedSupplementaries.length]);
+
+  const displayTitle = aiSanitized?.dishName || curatedTitle;
+  const displayNote = aiSanitized?.culinaryNote || curatedNote;
 
   const comboTags = getComboNutrientTags(
     selectedMain,
@@ -120,11 +156,11 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
 
         <div>
           <h3 className="text-xl sm:text-2xl font-display font-black text-stone-900 leading-tight">
-            {curatedTitle}
+            {displayTitle}
           </h3>
-          {curatedNote && (
+          {displayNote && (
             <p className="text-xs sm:text-sm text-stone-700 font-medium mt-1 leading-relaxed">
-              {curatedNote}
+              {displayNote}
             </p>
           )}
         </div>
