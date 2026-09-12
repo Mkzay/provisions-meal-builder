@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Subtle neo-brutalist hard drop shadow -->
+  <rect x="7" y="7" width="50" height="50" rx="14" fill="#1C1917" />
+  <!-- Butter yellow canvas tile with crisp dark border -->
+  <rect x="4" y="4" width="50" height="50" rx="14" fill="#FDE68A" stroke="#1C1917" stroke-width="2.5" />
+  <!-- Soft inner warmth circular glow -->
+  <circle cx="29" cy="29" r="17" fill="#FEF9C3" opacity="0.7" />
+  
+  <!-- Architectural "P" Glyph with Sprout & Sparkle (Centered) -->
+  <g transform="translate(5, 5)">
+    <!-- Main Bold "P" Silhouette -->
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M10 11C10 8.79086 11.7909 7 14 7H26C32.0751 7 37 11.9249 37 18C37 24.0751 32.0751 29 26 29H17.5V38C17.5 40.2091 15.7091 42 13.5 42H13C11.3431 42 10 40.6569 10 39V11ZM17.5 13.5V22.5H25.5C27.9853 22.5 30 20.4853 30 18C30 15.5147 27.9853 13.5 25.5 13.5H17.5Z"
+      fill="#1C1917"
+    />
+
+    <!-- Culinary Nourishing Sprout Leaf -->
+    <path
+      d="M21 21C21 16 25 13.5 29 13.5C29 17.5 26.5 21 21 21Z"
+      fill="#10B981"
+      stroke="#1C1917"
+      stroke-width="1.5"
+      stroke-linejoin="round"
+    />
+
+    <!-- Secondary Fresh Sprout Leaf -->
+    <path
+      d="M22 19C20 16.5 19 14.5 20.5 12.5C22.8 12.5 24 15.5 22 19Z"
+      fill="#6EE7B7"
+      stroke="#1C1917"
+      stroke-width="1.2"
+      stroke-linejoin="round"
+    />
+
+    <!-- Leaf Rib Accent -->
+    <path
+      d="M22 20.5C24 18 26.5 16 28 14.5"
+      stroke="#065F46"
+      stroke-width="1"
+      stroke-linecap="round"
+    />
+
+    <!-- Vitality Sparkle Accent -->
+    <path
+      d="M38 8L39 11L42 12L39 13L38 16L37 13L34 12L37 11L38 8Z"
+      fill="#F59E0B"
+      stroke="#1C1917"
+      stroke-width="0.8"
+    />
+  </g>
+</svg>

@@ -3,9 +3,52 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Provisions — Kitchen Decider",
-  description: "Vibrant, low-effort kitchen decider that removes the mental wall around eating.",
+  metadataBase: new URL(
+    process.env.NEXTAUTH_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://provisions-meal-builder.vercel.app")
+  ),
+  title: {
+    default: "Provisions — Kitchen Decider & Meal Sanctuary",
+    template: "%s | Provisions",
+  },
+  description:
+    "Zero-friction kitchen decider and pantry pairings designed to banish meal fatigue.",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/icon.svg",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: "Provisions",
+    title: "Provisions — Kitchen Decider & Meal Sanctuary",
+    description:
+      "Zero-friction pantry pairings and ready-meal suggestions to overcome daily meal fatigue.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Provisions — Kitchen Decider & Meal Sanctuary",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Provisions — Kitchen Decider & Meal Sanctuary",
+    description:
+      "Zero-friction pantry pairings and ready-meal suggestions to overcome daily meal fatigue.",
+    images: ["/og-image.png"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -33,7 +76,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <head>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥣</text></svg>" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="alternate icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
