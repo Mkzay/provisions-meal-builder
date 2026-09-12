@@ -9,6 +9,7 @@ import {
   Sparkle,
 } from "@/components/icons";
 import { MissingUpgradesCard } from "@/components/MissingUpgradesCard";
+import { findMatchingDishBlueprint } from "@/lib/dish-blueprints";
 import { getComboNutrientTags } from "@/lib/nutrient-curation";
 import {
   getCleanUpFootprint,
@@ -41,12 +42,18 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
   const [selectedSupplementaries, setSelectedSupplementaries] = useState<Ingredient[]>(() =>
     pairingResult.recommendedSupplementary ? [pairingResult.recommendedSupplementary] : []
   );
+  const [isChangingProtein, setIsChangingProtein] = useState(false);
+  const [isChangingSides, setIsChangingSides] = useState(false);
 
-  const previewName = getSuggestedComboName(
-    selectedMain.name,
-    selectedProtein?.name,
-    selectedSupplementaries.map((s) => s.name)
-  );
+  // Dynamic blueprint resolution based on current selections
+  const inStockContext = [selectedMain, ...(selectedProtein ? [selectedProtein] : []), ...selectedSupplementaries];
+  const activeBlueprint = findMatchingDishBlueprint(selectedMain, inStockContext, mealType);
+
+  const curatedTitle = activeBlueprint
+    ? activeBlueprint.generateTitle(selectedMain, selectedProtein, selectedSupplementaries)
+    : getSuggestedComboName(selectedMain.name, selectedProtein?.name, selectedSupplementaries.map((s) => s.name));
+
+  const curatedNote = activeBlueprint?.culinaryNote || pairingResult.culinaryNote;
 
   const comboTags = getComboNutrientTags(
     selectedMain,
@@ -95,18 +102,54 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
   };
 
   return (
-    <div className="w-full space-y-6">
-      {/* Anchor Base Overview Header */}
-      <div className="flex items-center justify-between p-5 sm:p-6 bg-[#FEF08A] rounded-3xl border-2 border-stone-900 shadow-brutal">
-        <div className="flex items-center gap-3.5">
-          <div className="w-13 h-13 rounded-2xl bg-white border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-sm shrink-0">
-            <Grains size={28} weight="duotone" className="text-amber-800" />
+    <div className="w-full space-y-5">
+      {/* Top Card: Curated Meal Presentation */}
+      <div className="p-5 sm:p-6 bg-gradient-to-br from-amber-100 via-amber-50 to-white rounded-3xl border-2 border-stone-900 shadow-brutal space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-stone-900 bg-amber-300 px-2.5 py-0.5 rounded-full border border-stone-900 shadow-2xs">
+            Curated Meal
+          </span>
+          <span className="text-xs font-bold text-stone-600">
+            {mealType} Plate
+          </span>
+        </div>
+
+        <div>
+          <h3 className="text-xl sm:text-2xl font-display font-black text-stone-900 leading-tight">
+            {curatedTitle}
+          </h3>
+          {curatedNote && (
+            <p className="text-xs sm:text-sm text-stone-700 font-medium mt-1 leading-relaxed">
+              {curatedNote}
+            </p>
+          )}
+        </div>
+
+        {comboTags.length > 0 && (
+          <div className="pt-1 flex items-center gap-1.5 flex-wrap">
+            {comboTags.map((tag) => (
+              <span
+                key={tag}
+                className="px-2 py-0.5 rounded-md bg-white text-stone-800 text-[10px] font-extrabold border border-stone-900/40 shadow-2xs"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
-          <div>
-            <span className="text-[11px] font-black uppercase tracking-wider text-stone-900 bg-white/80 px-2 py-0.5 rounded-md border border-stone-900/40 inline-block mb-1">
+        )}
+      </div>
+
+      {/* Tier 1: Anchor Base Card */}
+      <div className="p-4 sm:p-5 bg-white rounded-3xl border-2 border-stone-900 shadow-brutal-sm flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-12 h-12 rounded-2xl bg-amber-100 border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-xs shrink-0">
+            <Grains size={26} weight="duotone" className="text-amber-800" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-black uppercase tracking-wider text-stone-500 block">
               Anchor Base
             </span>
-            <h4 className="text-xl sm:text-2xl font-display font-black text-stone-900 leading-tight">
+            <h4 className="text-base sm:text-lg font-display font-black text-stone-900 truncate">
               {selectedMain.name}
             </h4>
             {renderMicroTags(selectedMain.nutrientTags)}
@@ -114,146 +157,176 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
         </div>
 
         <button
+          type="button"
           onClick={onChangeMain}
-          className="text-xs font-black text-stone-900 py-2 px-3.5 rounded-xl bg-white border-2 border-stone-900 shadow-brutal-sm hover:bg-stone-100 transition-all active:translate-x-[1px] active:translate-y-[1px] shrink-0"
+          className="text-xs font-black text-stone-900 py-2 px-3.5 rounded-xl bg-stone-100 hover:bg-stone-200 border-2 border-stone-900 shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] shrink-0 transition-all"
         >
-          Change Base
+          Change
         </button>
       </div>
 
-      {/* Protein Source Section */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-emerald-200 border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-sm">
-              <Egg size={18} weight="duotone" />
+      {/* Tier 2: Protein Source Card */}
+      <div className="p-4 sm:p-5 bg-white rounded-3xl border-2 border-stone-900 shadow-brutal-sm space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-xs shrink-0">
+              <Egg size={24} weight="duotone" className="text-emerald-800" />
             </div>
-            <div>
-              <h4 className="font-display font-black text-base text-stone-900 leading-none">
+            <div className="min-w-0">
+              <span className="text-[10px] font-black uppercase tracking-wider text-stone-500 block">
                 Protein Source
+              </span>
+              <h4 className="text-base sm:text-lg font-display font-black text-stone-900 truncate">
+                {selectedProtein ? selectedProtein.name : "None / Plain Base"}
               </h4>
-              <p className="text-[11px] text-stone-600 font-medium mt-0.5">
-                Satiety &amp; strength • 1-tap selection
-              </p>
+              {selectedProtein && renderMicroTags(selectedProtein.nutrientTags)}
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsChangingProtein((prev) => !prev)}
+            className={`text-xs font-black py-2 px-3.5 rounded-xl border-2 border-stone-900 shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] shrink-0 transition-all ${
+              isChangingProtein
+                ? "bg-stone-900 text-white"
+                : "bg-emerald-200 hover:bg-emerald-300 text-stone-900"
+            }`}
+          >
+            {isChangingProtein ? "Done" : "Change"}
+          </button>
         </div>
 
-        {pairingResult.availableProteins.length === 0 ? (
-          <p className="text-xs text-stone-600 italic px-1 font-medium">
-            No proteins currently available in your kitchen for {mealType}.
-          </p>
-        ) : (
-          <div className="flex flex-wrap gap-2.5">
-            {pairingResult.availableProteins.map((protein) => {
-              const isSelected = selectedProtein?.id === protein.id;
-              const isRecommended = pairingResult.recommendedProtein?.id === protein.id;
-
-              return (
-                <button
-                  key={protein.id}
-                  onClick={() => {
-                    if (typeof window !== "undefined" && window.navigator?.vibrate) {
-                      window.navigator.vibrate(8);
-                    }
-                    setSelectedProtein(isSelected ? undefined : protein);
-                  }}
-                  className={`flex flex-col items-start gap-1 py-2 px-3.5 rounded-2xl border-2 border-stone-900 transition-all text-left ${
-                    isSelected
-                      ? "bg-amber-300 text-stone-900 shadow-brutal-sm -translate-y-0.5"
-                      : "bg-white hover:bg-stone-50 text-stone-900 shadow-xs"
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 text-sm font-black">
-                    {isRecommended && !isSelected && (
-                      <Sparkle size={15} weight="fill" className="text-amber-500" />
-                    )}
-                    {isSelected && <Check size={15} weight="bold" />}
+        {/* Collapsible Protein Swap Selection */}
+        {isChangingProtein && (
+          <div className="pt-3 border-t-2 border-stone-900/10 space-y-2.5">
+            <p className="text-xs text-stone-600 font-bold">
+              Select in-stock protein to swap:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {pairingResult.availableProteins.map((protein) => {
+                const isSelected = selectedProtein?.id === protein.id;
+                return (
+                  <button
+                    key={protein.id}
+                    onClick={() => {
+                      if (typeof window !== "undefined" && window.navigator?.vibrate) {
+                        window.navigator.vibrate(8);
+                      }
+                      setSelectedProtein(protein);
+                      setIsChangingProtein(false);
+                    }}
+                    className={`py-2 px-3 rounded-xl border-2 border-stone-900 text-xs font-black transition-all flex items-center gap-1.5 ${
+                      isSelected
+                        ? "bg-amber-300 text-stone-900 shadow-brutal-xs"
+                        : "bg-stone-50 hover:bg-stone-100 text-stone-800"
+                    }`}
+                  >
+                    {isSelected && <Check size={14} weight="bold" />}
                     <span>{protein.name}</span>
-                  </div>
-                  {renderMicroTags(protein.nutrientTags)}
-                </button>
-              );
-            })}
-
-            <button
-              onClick={() => setSelectedProtein(undefined)}
-              className="py-2.5 px-3.5 rounded-2xl text-xs font-black border-2 border-stone-900 transition-all bg-stone-100 hover:bg-stone-200 text-stone-900 shadow-brutal-sm hover:shadow-none active:translate-x-0.5 active:translate-y-0.5 self-center"
-            >
-              None (Base only)
-            </button>
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedProtein(undefined);
+                  setIsChangingProtein(false);
+                }}
+                className={`py-2 px-3 rounded-xl border-2 border-stone-900 text-xs font-black transition-all ${
+                  !selectedProtein
+                    ? "bg-stone-900 text-white"
+                    : "bg-stone-100 hover:bg-stone-200 text-stone-700"
+                }`}
+              >
+                None (Skip)
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Greens, Accents & Nourishing Sides Section */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-purple-200 border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-sm">
-              <ForkKnife size={18} weight="duotone" />
+      {/* Tier 3: Greens, Accents & Sides Card */}
+      <div className="p-4 sm:p-5 bg-white rounded-3xl border-2 border-stone-900 shadow-brutal-sm space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-12 h-12 rounded-2xl bg-purple-100 border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-xs shrink-0">
+              <ForkKnife size={24} weight="duotone" className="text-purple-800" />
             </div>
-            <div>
-              <h4 className="font-display font-black text-base text-stone-900 leading-none">
-                Greens, Accents &amp; Nourishing Sides
+            <div className="min-w-0">
+              <span className="text-[10px] font-black uppercase tracking-wider text-stone-500 block">
+                Greens, Accents &amp; Sides
+              </span>
+              <h4 className="text-base sm:text-lg font-display font-black text-stone-900 truncate">
+                {selectedSupplementaries.length > 0
+                  ? selectedSupplementaries.map((s) => s.name).join(", ")
+                  : "None selected"}
               </h4>
-              <p className="text-[11px] text-stone-600 font-medium mt-0.5">
-                Fiber, clean fats &amp; flavor • Multi-select
-              </p>
+              {selectedSupplementaries.length > 0 && (
+                <span className="text-[10px] font-black text-purple-900 bg-purple-100 px-2 py-0.5 rounded-full border border-purple-300 inline-block mt-0.5">
+                  {selectedSupplementaries.length} selected
+                </span>
+              )}
             </div>
           </div>
-          {selectedSupplementaries.length > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-200 text-purple-900 border border-stone-900 shadow-xs">
-                {selectedSupplementaries.length} selected
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelectedSupplementaries([])}
-                className="text-[11px] font-black text-stone-600 hover:text-stone-900 underline"
-              >
-                Clear
-              </button>
-            </div>
-          )}
+
+          <button
+            type="button"
+            onClick={() => setIsChangingSides((prev) => !prev)}
+            className={`text-xs font-black py-2 px-3.5 rounded-xl border-2 border-stone-900 shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] shrink-0 transition-all ${
+              isChangingSides
+                ? "bg-stone-900 text-white"
+                : "bg-purple-200 hover:bg-purple-300 text-stone-900"
+            }`}
+          >
+            {isChangingSides ? "Done" : selectedSupplementaries.length > 0 ? "Change" : "Add"}
+          </button>
         </div>
 
-        {pairingResult.availableSupplementary.length === 0 ? (
-          <p className="text-xs text-stone-600 italic px-1 font-medium">
-            No greens or sides currently available for {mealType}.
-          </p>
-        ) : (
-          <div className="flex flex-wrap gap-2.5">
-            {pairingResult.availableSupplementary.map((side) => {
-              const isSelected = selectedSupplementaries.some((s) => s.id === side.id);
-
-              return (
+        {/* Collapsible Sides Selection */}
+        {isChangingSides && (
+          <div className="pt-3 border-t-2 border-stone-900/10 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-stone-600 font-bold">
+                Toggle in-stock sides &amp; accents:
+              </p>
+              {selectedSupplementaries.length > 0 && (
                 <button
-                  key={side.id}
-                  onClick={() => {
-                    if (typeof window !== "undefined" && window.navigator?.vibrate) {
-                      window.navigator.vibrate(8);
-                    }
-                    setSelectedSupplementaries((prev) =>
-                      prev.some((s) => s.id === side.id)
-                        ? prev.filter((s) => s.id !== side.id)
-                        : [...prev, side]
-                    );
-                  }}
-                  className={`flex flex-col items-start gap-1 py-2 px-3.5 rounded-2xl border-2 border-stone-900 transition-all text-left ${
-                    isSelected
-                      ? "bg-purple-300 text-stone-900 shadow-brutal-sm -translate-y-0.5"
-                      : "bg-white hover:bg-stone-50 text-stone-900 shadow-xs"
-                  }`}
+                  type="button"
+                  onClick={() => setSelectedSupplementaries([])}
+                  className="text-xs font-black text-rose-700 hover:underline"
                 >
-                  <div className="flex items-center gap-1.5 text-sm font-black">
-                    {isSelected && <Check size={15} weight="bold" />}
-                    <span>{side.name}</span>
-                  </div>
-                  {renderMicroTags(side.nutrientTags)}
+                  Clear all
                 </button>
-              );
-            })}
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {pairingResult.availableSupplementary.map((side) => {
+                const isSelected = selectedSupplementaries.some((s) => s.id === side.id);
+                return (
+                  <button
+                    key={side.id}
+                    onClick={() => {
+                      if (typeof window !== "undefined" && window.navigator?.vibrate) {
+                        window.navigator.vibrate(8);
+                      }
+                      setSelectedSupplementaries((prev) =>
+                        prev.some((s) => s.id === side.id)
+                          ? prev.filter((s) => s.id !== side.id)
+                          : [...prev, side]
+                      );
+                    }}
+                    className={`py-2 px-3 rounded-xl border-2 border-stone-900 text-xs font-black transition-all flex items-center gap-1.5 ${
+                      isSelected
+                        ? "bg-purple-300 text-stone-900 shadow-brutal-xs"
+                        : "bg-stone-50 hover:bg-stone-100 text-stone-800"
+                    }`}
+                  >
+                    {isSelected && <Check size={14} weight="bold" />}
+                    <span>{side.name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
@@ -264,57 +337,12 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
         onQuickRestockUpgrade={onQuickRestockUpgrade}
       />
 
-      {/* Plate Summary & Action Bar */}
-      <div className="pt-5 border-t-2 border-stone-900/20 space-y-4">
-        <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-[#D1FAE5] border-2 border-stone-900 shadow-brutal-sm space-y-2.5">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-stone-800 bg-white/80 px-2.5 py-0.5 rounded-full border border-stone-900/30 inline-block">
-              Current Plate
-            </span>
-            <span className="text-xs font-bold text-emerald-900">
-              Balanced &amp; Ready
-            </span>
-          </div>
-          <div className="text-sm sm:text-base font-bold text-stone-900 leading-snug">
-            {previewName}
-          </div>
-          {comboTags.length > 0 && (
-            <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-              {comboTags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2 py-0.5 rounded-lg bg-white/90 text-stone-800 text-[10px] font-extrabold border border-stone-900/40 shadow-2xs"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-          <div className="flex items-center gap-2 flex-wrap pt-1">
-            <span className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-lg bg-white/80 border border-stone-900/40 text-stone-800 shadow-xs">
-              {getPrepTimeEstimate(selectedMain, selectedProtein, selectedSupplementaries)}
-            </span>
-            <span className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-lg bg-white/80 border border-stone-900/40 text-stone-800 shadow-xs">
-              {getCleanUpFootprint(selectedMain, selectedProtein, selectedSupplementaries)}
-            </span>
-          </div>
+      {/* Action Footer */}
+      <div className="pt-4 border-t-2 border-stone-900/20 space-y-3">
+        <div className="flex items-center justify-between text-xs font-bold text-stone-700 px-1">
+          <span>⏱️ {getPrepTimeEstimate(selectedMain, selectedProtein, selectedSupplementaries)}</span>
+          <span>🧼 {getCleanUpFootprint(selectedMain, selectedProtein, selectedSupplementaries)}</span>
         </div>
-
-        {(selectedProtein || selectedSupplementaries.length > 0) && (
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof window !== "undefined" && window.navigator?.vibrate) {
-                window.navigator.vibrate(8);
-              }
-              setSelectedProtein(undefined);
-              setSelectedSupplementaries([]);
-            }}
-            className="w-full py-2.5 px-4 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 font-bold text-xs border border-stone-900/40 transition-all text-center"
-          >
-            Just the base is plenty today (Skip pairings)
-          </button>
-        )}
 
         <button
           onClick={handleConfirm}

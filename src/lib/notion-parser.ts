@@ -231,6 +231,8 @@ export function parseNotionMealProfile(page: any): MealProfile | null {
 
     const heightVal = props.Height?.number ?? props.height?.number;
     const height = typeof heightVal === "number" && !isNaN(heightVal) && heightVal > 0 ? heightVal : undefined;
+    const weightVal = props.Weight?.number ?? props.weight?.number;
+    const weight = typeof weightVal === "number" && !isNaN(weightVal) && weightVal > 0 ? weightVal : undefined;
     const rawPriorities = props["Nutrient Priorities"]?.multi_select || props.NutrientPriorities?.multi_select || [];
     const nutrientPriorities: NutrientTag[] = rawPriorities.map((p: any) => p.name).filter(Boolean);
     const mealsVal = props["Meals Per Day"]?.number ?? props.MealsPerDay?.number;
@@ -241,6 +243,7 @@ export function parseNotionMealProfile(page: any): MealProfile | null {
       owner,
       goal,
       height,
+      weight,
       ...(nutrientPriorities.length > 0 ? { nutrientPriorities } : {}),
       ...(mealsPerDay ? { mealsPerDay } : {}),
       updatedAt: page.last_edited_time || new Date().toISOString(),
@@ -255,6 +258,7 @@ export function buildMealProfileProperties(profile: {
   owner: string;
   goal: UserGoal;
   height?: number;
+  weight?: number;
   nutrientPriorities?: NutrientTag[];
   mealsPerDay?: number;
 }): Record<string, any> {
@@ -268,6 +272,10 @@ export function buildMealProfileProperties(profile: {
     properties.Height = { number: profile.height };
   } else {
     properties.Height = { number: null };
+  }
+
+  if (typeof profile.weight === "number" && !isNaN(profile.weight) && profile.weight > 0) {
+    properties.Weight = { number: profile.weight };
   }
 
   if (profile.nutrientPriorities && profile.nutrientPriorities.length > 0) {

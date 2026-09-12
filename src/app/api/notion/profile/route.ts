@@ -39,6 +39,10 @@ export async function POST(req: NextRequest) {
       typeof body.height === "number" && !isNaN(body.height) && body.height > 0
         ? body.height
         : undefined;
+    const weight =
+      typeof body.weight === "number" && !isNaN(body.weight) && body.weight > 0
+        ? body.weight
+        : undefined;
     const nutrientPriorities = Array.isArray(body.nutrientPriorities)
       ? body.nutrientPriorities
       : undefined;
@@ -58,6 +62,7 @@ export async function POST(req: NextRequest) {
       owner,
       goal,
       height,
+      weight,
       nutrientPriorities,
       mealsPerDay,
     });

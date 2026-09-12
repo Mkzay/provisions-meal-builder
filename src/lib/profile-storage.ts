@@ -85,6 +85,7 @@ export async function saveClientProfile(profile: {
   owner?: string;
   goal: UserGoal;
   height?: number;
+  weight?: number;
   nutrientPriorities?: import("./types").NutrientTag[];
   mealsPerDay?: number;
 }): Promise<{ success: boolean; profile: MealProfile }> {
@@ -93,6 +94,7 @@ export async function saveClientProfile(profile: {
     owner: targetOwner,
     goal: profile.goal,
     height: profile.height,
+    weight: profile.weight,
     nutrientPriorities: profile.nutrientPriorities,
     mealsPerDay: profile.mealsPerDay,
     updatedAt: new Date().toISOString(),
@@ -110,6 +112,7 @@ export async function saveClientProfile(profile: {
         owner: targetOwner,
         goal: profile.goal,
         height: profile.height,
+        weight: profile.weight,
         nutrientPriorities: profile.nutrientPriorities,
         mealsPerDay: profile.mealsPerDay,
       }),
@@ -170,7 +173,14 @@ export async function addClientWeightLog(input: {
       throw new Error(`HTTP error ${res.status}`);
     }
 
-    return await res.json();
+    const result = await res.json();
+    // Also sync weight to locally cached profile
+    const cached = getClientProfileCached(targetOwner);
+    if (cached) {
+      setClientProfileCached({ ...cached, weight: input.weight });
+    }
+
+    return result;
   } catch (err) {
     console.error("Failed to add client weight log:", err);
     return {

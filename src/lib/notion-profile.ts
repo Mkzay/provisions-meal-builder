@@ -45,6 +45,7 @@ export async function saveMealProfile(profile: {
   owner: string;
   goal: UserGoal;
   height?: number;
+  weight?: number;
   nutrientPriorities?: import("./types").NutrientTag[];
   mealsPerDay?: number;
 }): Promise<{ success: boolean; profile: MealProfile }> {
@@ -58,6 +59,7 @@ export async function saveMealProfile(profile: {
         owner: profile.owner,
         goal: profile.goal,
         height: profile.height,
+        weight: profile.weight,
         nutrientPriorities: profile.nutrientPriorities,
         mealsPerDay: profile.mealsPerDay,
         updatedAt: new Date().toISOString(),
@@ -93,6 +95,7 @@ export async function saveMealProfile(profile: {
           owner: profile.owner,
           goal: profile.goal,
           height: profile.height,
+          weight: profile.weight,
           nutrientPriorities: profile.nutrientPriorities,
           mealsPerDay: profile.mealsPerDay,
           updatedAt: new Date().toISOString(),
@@ -114,6 +117,7 @@ export async function saveMealProfile(profile: {
         owner: profile.owner,
         goal: profile.goal,
         height: profile.height,
+        weight: profile.weight,
         nutrientPriorities: profile.nutrientPriorities,
         mealsPerDay: profile.mealsPerDay,
         updatedAt: new Date().toISOString(),
@@ -214,6 +218,23 @@ export async function addWeightLogEntry(input: {
       },
       properties,
     });
+
+    // Also sync latest weight onto MealProfile in Database 4 if present
+    const profileDbId = process.env.NOTION_PROFILE_DB_ID;
+    if (profileDbId) {
+      notion.databases.query({
+        database_id: profileDbId,
+        filter: { property: "Owner", select: { equals: input.owner } },
+        page_size: 1,
+      }).then((res) => {
+        if (res.results.length > 0) {
+          return notion.pages.update({
+            page_id: res.results[0].id,
+            properties: { Weight: { number: roundedWeight } },
+          });
+        }
+      }).catch((err) => console.log("Profile weight sync background notice:", err));
+    }
 
     return {
       success: true,

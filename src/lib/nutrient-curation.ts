@@ -1,4 +1,5 @@
-import { findBestPairings } from "./pairings";
+import { findMatchingDishBlueprint, isCookingOil } from "./dish-blueprints";
+import { findBestPairings, getSuggestedComboName } from "./pairings";
 import { Ingredient, MealType, NutrientTag, PairingResult, ReadyMeal } from "./types";
 
 export interface SuggestNutrientComboInput {
@@ -75,7 +76,7 @@ export function suggestNutrientAwareCombo(
     (i) => i.role === "Protein" && i.available && i.mealTypes.includes(mealType)
   );
   const availableSupplementary = allIngredients.filter(
-    (i) => i.role === "Supplementary" && i.available && i.mealTypes.includes(mealType)
+    (i) => i.role === "Supplementary" && i.available && i.mealTypes.includes(mealType) && !isCookingOil(i)
   );
 
   interface Candidate {
@@ -162,8 +163,16 @@ export function suggestNutrientAwareCombo(
   const chosen = bestTies[Math.floor(Math.random() * bestTies.length)];
 
   // Order available list in pairings so the selected ones appear first
+  const inStock = allIngredients.filter((i) => i.available);
+  const bp = findMatchingDishBlueprint(chosen.main, inStock, mealType);
+  const dishName = bp
+    ? bp.generateTitle(chosen.main, chosen.protein, chosen.supplementary ? [chosen.supplementary] : [])
+    : getSuggestedComboName(chosen.main, chosen.protein, chosen.supplementary);
+
   const customizedPairings: PairingResult = {
     ...chosen.pairings,
+    dishName,
+    culinaryNote: bp?.culinaryNote || chosen.pairings.culinaryNote,
     recommendedProtein: chosen.protein,
     recommendedSupplementary: chosen.supplementary,
     availableProteins: chosen.protein

@@ -1,3 +1,4 @@
+import { findMatchingDishBlueprint, isCookingOil } from "./dish-blueprints";
 import { Ingredient, MealType, PairingResult } from "./types";
 
 interface AffinityRule {
@@ -7,51 +8,15 @@ interface AffinityRule {
 }
 
 const AFFINITY_RULES: AffinityRule[] = [
-  {
-    mainPattern: /rice|jollof|basmati/i,
-    preferredProteins: ["beef stew", "stew", "fried / grilled chicken", "chicken", "fresh eggs", "fried egg", "canned sardines", "sardines"],
-    preferredSupplementary: ["dodo", "fried plantain", "steamed spinach", "sliced avocado", "gravy"],
-  },
-  {
-    mainPattern: /yam/i,
-    preferredProteins: ["fresh eggs", "fried egg", "egg sauce", "beef stew", "canned sardines"],
-    preferredSupplementary: ["egg sauce", "tomato gravy", "dodo", "sliced avocado", "hot tea"],
-  },
-  {
-    mainPattern: /bread|toast/i,
-    preferredProteins: ["fresh eggs", "fried egg", "canned sardines", "baked beans"],
-    preferredSupplementary: ["hot tea", "hot tea / cocoa", "sliced avocado", "butter"],
-  },
-  {
-    mainPattern: /pasta|spaghetti|noodles/i,
-    preferredProteins: ["beef stew", "canned sardines", "fresh eggs", "chicken"],
-    preferredSupplementary: ["sliced avocado", "steamed spinach", "dodo"],
-  },
-  {
-    mainPattern: /potato|sweet potato/i,
-    preferredProteins: ["fresh eggs", "egg sauce", "beef stew", "chicken"],
-    preferredSupplementary: ["egg sauce", "sliced avocado", "hot tea"],
-  },
-  {
-    mainPattern: /oats|oatmeal/i,
-    preferredProteins: ["fresh eggs"],
-    preferredSupplementary: ["hot tea", "hot tea / cocoa", "sliced avocado"],
-  },
-  {
-    mainPattern: /plantain/i,
-    preferredProteins: ["fresh eggs", "fried egg", "beef stew", "chicken"],
-    preferredSupplementary: ["egg sauce", "hot tea", "sliced avocado"],
-  },
-  {
-    mainPattern: /cracker|biscuit|snack|cookie|wafer/i,
-    preferredProteins: ["peanut butter", "canned sardines", "fresh eggs", "cheese"],
-    preferredSupplementary: ["hot tea", "sliced avocado", "apple slices"],
-  },
-  {
-    mainPattern: /amala|fufu|tuwo|garri|eba|semovita|wheat/i,
-    preferredProteins: ["goat meat", "beef stew", "catfish", "croaker", "smoked fish", "stockfish", "panla"],
-    preferredSupplementary: ["ewedu", "okra", "ugu", "bitterleaf", "efo shoko", "waterleaf", "iru", "palm oil"],
-  },
+  { mainPattern: /rice|jollof|basmati/i, preferredProteins: ["beef stew", "stew", "fried / grilled chicken", "chicken", "fresh eggs", "fried egg", "canned sardines"], preferredSupplementary: ["dodo", "fried plantain", "steamed spinach", "sliced avocado", "gravy"] },
+  { mainPattern: /yam/i, preferredProteins: ["fresh eggs", "fried egg", "egg sauce", "beef stew", "canned sardines"], preferredSupplementary: ["egg sauce", "tomato gravy", "dodo", "sliced avocado", "hot tea"] },
+  { mainPattern: /bread|toast/i, preferredProteins: ["fresh eggs", "fried egg", "canned sardines", "baked beans"], preferredSupplementary: ["hot tea", "hot tea / cocoa", "sliced avocado", "butter"] },
+  { mainPattern: /pasta|spaghetti|noodles/i, preferredProteins: ["beef stew", "canned sardines", "fresh eggs", "chicken"], preferredSupplementary: ["sliced avocado", "steamed spinach", "dodo"] },
+  { mainPattern: /potato|sweet potato/i, preferredProteins: ["fresh eggs", "egg sauce", "beef stew", "chicken"], preferredSupplementary: ["egg sauce", "sliced avocado", "hot tea"] },
+  { mainPattern: /oats|oatmeal/i, preferredProteins: ["fresh eggs"], preferredSupplementary: ["hot tea", "hot tea / cocoa", "sliced avocado"] },
+  { mainPattern: /plantain/i, preferredProteins: ["fresh eggs", "fried egg", "beef stew", "chicken"], preferredSupplementary: ["egg sauce", "hot tea", "sliced avocado"] },
+  { mainPattern: /cracker|biscuit|snack|cookie|wafer/i, preferredProteins: ["peanut butter", "canned sardines", "fresh eggs", "cheese"], preferredSupplementary: ["hot tea", "sliced avocado", "apple slices"] },
+  { mainPattern: /amala|fufu|tuwo|garri|eba|semovita|wheat/i, preferredProteins: ["goat meat", "beef stew", "catfish", "croaker", "smoked fish", "stockfish", "panla"], preferredSupplementary: ["ewedu", "okra", "ugu", "bitterleaf", "efo shoko", "waterleaf", "iru"] },
 ];
 
 interface MissingUpgradeKnowledge {
@@ -84,45 +49,70 @@ export function findBestPairings(
       ing.mealTypes.includes(mealType)
   );
 
-  // Available supplementary for this meal type
+  // Available supplementary for this meal type (excluding raw cooking oils)
   const availableSupplementary = allIngredients.filter(
     (ing) =>
       ing.role === "Supplementary" &&
       ing.available &&
-      ing.mealTypes.includes(mealType)
+      ing.mealTypes.includes(mealType) &&
+      !isCookingOil(ing)
   );
-
-  // Find matching affinity rule for main
-  const rule = AFFINITY_RULES.find((r) => r.mainPattern.test(main.name));
 
   let recommendedProtein: Ingredient | undefined;
   let recommendedSupplementary: Ingredient | undefined;
 
-  if (rule) {
-    // Rank proteins
-    for (const pref of rule.preferredProteins) {
-      const match = availableProteins.find((p) =>
-        p.name.toLowerCase().includes(pref.toLowerCase())
-      );
+  // 1. Try matching authentic culinary dish blueprint from available stock
+  const inStock = allIngredients.filter((i) => i.available);
+  const blueprint = findMatchingDishBlueprint(main, inStock, mealType);
+
+  if (blueprint) {
+    for (const pat of blueprint.preferredProteinPatterns) {
+      const match = availableProteins.find((p) => pat.test(p.name));
       if (match) {
         recommendedProtein = match;
         break;
       }
     }
-
-    // Rank supplementary
-    for (const pref of rule.preferredSupplementary) {
-      const match = availableSupplementary.find((s) =>
-        s.name.toLowerCase().includes(pref.toLowerCase())
-      );
-      if (match) {
-        recommendedSupplementary = match;
-        break;
+    if (blueprint.preferredSidePatterns) {
+      for (const pat of blueprint.preferredSidePatterns) {
+        const match = availableSupplementary.find((s) => pat.test(s.name));
+        if (match) {
+          recommendedSupplementary = match;
+          break;
+        }
       }
     }
   }
 
-  // Fallbacks if affinity rule didn't match or preferred was unavailable
+  // 2. Fallback to general affinity rule if protein/side not yet picked
+  const rule = AFFINITY_RULES.find((r) => r.mainPattern.test(main.name));
+  if (rule) {
+    if (!recommendedProtein) {
+      for (const pref of rule.preferredProteins) {
+        const match = availableProteins.find((p) =>
+          p.name.toLowerCase().includes(pref.toLowerCase())
+        );
+        if (match) {
+          recommendedProtein = match;
+          break;
+        }
+      }
+    }
+
+    if (!recommendedSupplementary) {
+      for (const pref of rule.preferredSupplementary) {
+        const match = availableSupplementary.find((s) =>
+          s.name.toLowerCase().includes(pref.toLowerCase())
+        );
+        if (match) {
+          recommendedSupplementary = match;
+          break;
+        }
+      }
+    }
+  }
+
+  // 3. Ultimate Fallbacks if preferred was unavailable
   if (!recommendedProtein && availableProteins.length > 0) {
     recommendedProtein = availableProteins[0];
   }
@@ -196,12 +186,18 @@ export function findBestPairings(
     }
   }
 
+  const dishName = blueprint
+    ? blueprint.generateTitle(main, recommendedProtein, recommendedSupplementary ? [recommendedSupplementary] : [])
+    : getSuggestedComboName(main, recommendedProtein, recommendedSupplementary);
+
   return {
+    dishName,
+    culinaryNote: blueprint?.culinaryNote,
     recommendedProtein,
     availableProteins: sortedProteins,
     recommendedSupplementary,
     availableSupplementary: sortedSupplementary,
-    missingUpgrades: missingUpgrades.slice(0, 2), // Keep focused: top 1-2 upgrades
+    missingUpgrades: missingUpgrades.slice(0, 2),
   };
 }
 

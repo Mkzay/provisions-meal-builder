@@ -66,6 +66,17 @@ export async function fetchCatalogue(owner?: string): Promise<KitchenCatalogue> 
       .map((page) => parseNotionIngredient(page))
       .filter((item): item is Ingredient => item !== null);
 
+    // Deduplicate ingredients by name
+    const seenNames = new Set<string>();
+    const uniqueIngredients: Ingredient[] = [];
+    for (const ing of ingredients) {
+      const norm = ing.name.trim().toLowerCase();
+      if (!seenNames.has(norm)) {
+        seenNames.add(norm);
+        uniqueIngredients.push(ing);
+      }
+    }
+
     // 2. Query Ready Meals
     const readyMealsResponse = await notion.databases.query({
       database_id: readyMealsDbId,
@@ -76,9 +87,20 @@ export async function fetchCatalogue(owner?: string): Promise<KitchenCatalogue> 
       .map((page) => parseNotionReadyMeal(page))
       .filter((meal): meal is ReadyMeal => meal !== null);
 
+    // Deduplicate ready meals by name
+    const seenMealNames = new Set<string>();
+    const uniqueReadyMeals: ReadyMeal[] = [];
+    for (const meal of readyMeals) {
+      const norm = meal.name.trim().toLowerCase();
+      if (!seenMealNames.has(norm)) {
+        seenMealNames.add(norm);
+        uniqueReadyMeals.push(meal);
+      }
+    }
+
     return {
-      ingredients,
-      readyMeals,
+      ingredients: uniqueIngredients,
+      readyMeals: uniqueReadyMeals,
       lastSynced: new Date().toISOString(),
       isCachedFallback: false,
     };

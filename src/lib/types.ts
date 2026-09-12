@@ -55,6 +55,8 @@ export interface MissingUpgradeSuggestion {
 }
 
 export interface PairingResult {
+  dishName?: string;
+  culinaryNote?: string;
   recommendedProtein?: Ingredient;
   availableProteins: Ingredient[];
   recommendedSupplementary?: Ingredient;
@@ -147,6 +149,7 @@ export interface MealProfile {
   owner: string;
   goal: UserGoal;
   height?: number; // Number in Notion Database 4
+  weight?: number; // Number in Notion Database 4
   nutrientPriorities?: NutrientTag[];
   mealsPerDay?: number;
   updatedAt?: string;

@@ -178,6 +178,9 @@ describe("Notion API Data Parser & Transformer", () => {
           Height: {
             number: 168,
           },
+          Weight: {
+            number: 65.5,
+          },
         },
       };
 
@@ -187,6 +190,7 @@ describe("Notion API Data Parser & Transformer", () => {
       expect(profile?.owner).toBe("Esther");
       expect(profile?.goal).toBe("Gain weight");
       expect(profile?.height).toBe(168);
+      expect(profile?.weight).toBe(65.5);
     });
 
     it("builds valid Notion properties for Meal Profile", () => {
@@ -194,11 +198,13 @@ describe("Notion API Data Parser & Transformer", () => {
         owner: "Esther",
         goal: "Gain weight",
         height: 168,
+        weight: 65.5,
       });
 
       expect(properties.Owner.select.name).toBe("Esther");
       expect(properties.Goal.select.name).toBe("Gain weight");
       expect(properties.Height.number).toBe(168);
+      expect(properties.Weight.number).toBe(65.5);
     });
   });
 
