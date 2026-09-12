@@ -122,6 +122,37 @@ describe("Culinary Dish Blueprints & Suggestion Engine", () => {
     expect(bp?.id).toBe("plantain-dish");
   });
 
+  it("dynamically formats curated dish title from the exact anchor base (Ofada vs White vs Basmati Rice)", () => {
+    const ofada: Ingredient = {
+      id: "ofada",
+      name: "Ofada Rice (Unpolished Brown Rice)",
+      role: "Main",
+      mealTypes: ["Lunch", "Dinner"],
+      owner: "User",
+      available: true,
+    };
+    const stockWithoutBeans = stock.filter((i) => i.id !== "beans");
+    const pairing = findBestPairings(ofada, [...stockWithoutBeans, ofada], "Lunch");
+
+    // Curated title MUST say "Ofada Rice" and NEVER "White Rice"
+    expect(pairing.dishName).toContain("Ofada Rice");
+    expect(pairing.dishName).not.toContain("White Rice");
+    expect(pairing.dishName).toBe("Ofada Rice & Tomato Stew with Lean Beef / Stew Beef");
+
+    // Test Basmati
+    const basmati: Ingredient = {
+      id: "basmati",
+      name: "Basmati Rice",
+      role: "Main",
+      mealTypes: ["Lunch", "Dinner"],
+      owner: "User",
+      available: true,
+    };
+    const basmatiPairing = findBestPairings(basmati, [...stockWithoutBeans, basmati], "Lunch");
+    expect(basmatiPairing.dishName).toContain("Basmati Rice");
+    expect(basmatiPairing.dishName).not.toContain("White Rice");
+  });
+
   it("meal-sanitizer falls back silently to null when no API key or on error", async () => {
     const result = await sanitizeMealWithAI(
       {

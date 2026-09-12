@@ -67,6 +67,20 @@ function clean(name?: string): string {
   return name.replace(/\(.*?\)/g, "").trim();
 }
 
+export function cleanBase(name?: string): string {
+  if (!name) return "";
+  let text = clean(name);
+  if (text.toLowerCase().includes("bread")) return "Bread";
+  if (text.toLowerCase().includes("spaghetti")) return "Spaghetti";
+  if (text.toLowerCase().includes("custard")) return "Custard";
+  if (text.toLowerCase().includes("oat")) return "Oatmeal";
+  if (text.toLowerCase().includes("plantain")) return "Plantains";
+  if (text.includes("/")) {
+    text = text.split("/")[0].trim();
+  }
+  return text;
+}
+
 export const DISH_BLUEPRINTS: DishBlueprint[] = [
   // 1. Swallows (Amala, Fufu, Semo, Tuwo, Wheat, Eba) - must precede tuber yam
   {
@@ -79,7 +93,7 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     culinaryNote: "Warm velvety swallow paired with traditional soup and seasoned protein.",
     generateTitle: (base, protein, sides) => {
       const soup = (sides || []).find((s) => /ewedu|okra|efo|spinach|bitterleaf/i.test(s.name));
-      let t = `${clean(base.name)} with ${soup ? clean(soup.name) : "Savory Stew"}`;
+      let t = `${cleanBase(base.name)} with ${soup ? clean(soup.name) : "Savory Stew"}`;
       if (protein) t += ` & ${clean(protein.name)}`;
       return t;
     },
@@ -94,15 +108,17 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredSidePatterns: [/plantain|dodo/i, /cabbage|carrot|salad|coleslaw/i],
     culinaryNote: "Classic tender rice and honey beans paired with rich savory stew.",
     suitableMeals: ["Lunch", "Dinner"],
-    generateTitle: (_base, protein, sides) => {
-      let t = "Rice & Beans with Stew";
-      if (protein) t += ` & ${clean(protein.name)}`;
+    generateTitle: (base, protein, sides) => {
+      let t = `${cleanBase(base.name)} & Beans with Stew`;
+      if (protein && !clean(protein.name).toLowerCase().includes("bean")) {
+        t += ` & ${clean(protein.name)}`;
+      }
       const dodo = (sides || []).find((s) => /plantain|dodo/i.test(s.name));
       if (dodo) t += ` + ${clean(dodo.name)}`;
       return t;
     },
   },
-  // 3. Jollof Spaghetti
+  // 3. Jollof Spaghetti / Pasta
   {
     id: "jollof-spaghetti",
     name: "Jollof Spaghetti",
@@ -112,8 +128,8 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredSidePatterns: [/plantain|dodo/i, /cabbage|carrot|green bean/i],
     culinaryNote: "Simmered pasta in rich, seasoned tomato and aromatic pepper reduction.",
     suitableMeals: ["Lunch", "Dinner"],
-    generateTitle: (_base, protein, sides) => {
-      let t = "Jollof Spaghetti";
+    generateTitle: (base, protein, sides) => {
+      let t = `Jollof ${cleanBase(base.name)}`;
       if (protein) t += ` with ${clean(protein.name)}`;
       const valid = (sides || []).filter((s) => !isCookingOil(s) && !/tomato|onion/i.test(s.name));
       if (valid.length > 0) t += ` & ${clean(valid[0].name)}`;
@@ -129,8 +145,8 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredSidePatterns: [/plantain|dodo/i, /cabbage|carrot/i],
     culinaryNote: "Steamed pasta paired with savory tomato stew and wholesome protein.",
     suitableMeals: ["Lunch", "Dinner"],
-    generateTitle: (_base, protein, sides) => {
-      let t = "Spaghetti & Savory Stew";
+    generateTitle: (base, protein, sides) => {
+      let t = `${cleanBase(base.name)} & Savory Stew`;
       if (protein) t += ` with ${clean(protein.name)}`;
       const valid = (sides || []).filter((s) => !isCookingOil(s) && !/tomato|onion/i.test(s.name));
       if (valid.length > 0) t += ` & ${clean(valid[0].name)}`;
@@ -147,8 +163,9 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredSidePatterns: [/plantain/i],
     culinaryNote: "Steamed tender yam paired with spiced scrambled egg sauce.",
     suitableMeals: ["Breakfast", "Lunch"],
-    generateTitle: (_base, protein, sides) => {
-      let t = clean(protein?.name).toLowerCase().includes("egg") ? "Boiled Yam & Fresh Egg Sauce" : `Boiled Yam with ${clean(protein?.name) || "Sauce"}`;
+    generateTitle: (base, protein, sides) => {
+      const baseLabel = `Boiled ${cleanBase(base.name)}`;
+      let t = clean(protein?.name).toLowerCase().includes("egg") ? `${baseLabel} & Fresh Egg Sauce` : `${baseLabel} with ${clean(protein?.name) || "Sauce"}`;
       const valid = (sides || []).filter((s) => !isCookingOil(s) && !/tomato|onion/i.test(s.name));
       if (valid.length > 0) t += ` with ${clean(valid[0].name)}`;
       return t;
@@ -163,8 +180,8 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredSidePatterns: [/plantain/i, /spinach|efo/i],
     culinaryNote: "Steamed yam paired with savory stew for grounding, sustained energy.",
     suitableMeals: ["Breakfast", "Lunch", "Dinner"],
-    generateTitle: (_base, protein, sides) => {
-      let t = `Boiled Yam & ${clean(protein?.name) || "Stew"}`;
+    generateTitle: (base, protein, sides) => {
+      let t = `Boiled ${cleanBase(base.name)} & ${clean(protein?.name) || "Stew"}`;
       const valid = (sides || []).filter((s) => !isCookingOil(s) && !isFruit(s));
       if (valid.length > 0) t += ` with ${clean(valid[0].name)}`;
       return t;
@@ -179,9 +196,9 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredProteinPatterns: [/egg/i, /yogurt/i],
     preferredSidePatterns: [/chia/i, /watermelon|grape|apple|banana|berry|fruit/i, /milk/i],
     culinaryNote: "Warm wholesome oats topped with sliced fruit, seeds, and protein on the side.",
-    generateTitle: (_base, protein, sides) => {
+    generateTitle: (base, protein, sides) => {
       const valid = (sides || []).filter((s) => isFruit(s) || /chia|milk/i.test(s.name));
-      let t = "Creamy Oatmeal";
+      let t = `Creamy ${cleanBase(base.name)}`;
       if (valid.length > 0) t += ` with ${valid.map((s) => clean(s.name)).join(" & ")}`;
       if (protein) t += ` (${clean(protein.name)} on side)`;
       return t;
@@ -196,9 +213,9 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredProteinPatterns: [/egg/i, /bean|akara|moi moi/i, /yogurt/i],
     preferredSidePatterns: [/milk/i, /banana|grape|watermelon|fruit/i, /bread/i],
     culinaryNote: "Smooth comforting hot custard enriched with milk and wholesome sides.",
-    generateTitle: (_base, protein, sides) => {
+    generateTitle: (base, protein, sides) => {
       const valid = (sides || []).filter((s) => isFruit(s) || /milk|bread/i.test(s.name));
-      let t = "Smooth Custard";
+      let t = `Creamy ${cleanBase(base.name)}`;
       if (valid.length > 0) t += ` with ${valid.map((s) => clean(s.name)).join(" & ")}`;
       if (protein) t += ` & ${clean(protein.name)}`;
       return t;
@@ -213,8 +230,8 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredProteinPatterns: [/croaker|fish|titus/i, /egg/i, /beef/i],
     preferredSidePatterns: [/plantain|dodo/i, /garri/i, /bread/i],
     culinaryNote: "Tender honey beans stewed with sweet golden fried plantains.",
-    generateTitle: (_base, protein, sides) => {
-      let t = "Beans Porridge";
+    generateTitle: (base, protein, sides) => {
+      let t = `${cleanBase(base.name)} Porridge`;
       const hasDodo = (sides || []).some((s) => /plantain|dodo/i.test(s.name));
       if (hasDodo) t += " & Dodo";
       if (protein && !clean(protein.name).toLowerCase().includes("bean")) {
@@ -232,19 +249,19 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredProteinPatterns: [/egg/i, /croaker|fish|titus/i, /bean/i],
     preferredSidePatterns: [/cabbage|salad/i],
     culinaryNote: "Sweet fried dodo or tender boiled plantains paired with savory protein.",
-    generateTitle: (base, protein) => `${clean(base.name)} & ${clean(protein?.name) || "Egg Sauce"}`,
+    generateTitle: (base, protein) => `${cleanBase(base.name)} & ${clean(protein?.name) || "Egg Sauce"}`,
   },
-  // 11. White Rice & Savory Stew
+  // 11. Rice & Savory Stew (Supports Ofada, Basmati, White Rice dynamically)
   {
     id: "rice-savory-stew",
-    name: "White Rice & Savory Stew",
+    name: "Rice & Savory Stew",
     basePattern: /^(?!.*(?:swallow|tuwo))\b.*rice.*/i,
     suitableMeals: ["Lunch", "Dinner"],
     preferredProteinPatterns: [/beef/i, /chicken/i, /croaker|fish/i, /egg/i],
     preferredSidePatterns: [/plantain|dodo/i, /cabbage|carrot|salad/i],
     culinaryNote: "Steamed fragrant rice bathed in savory spiced stew with cooked protein.",
-    generateTitle: (_base, protein, sides) => {
-      let t = "White Rice & Tomato Stew";
+    generateTitle: (base, protein, sides) => {
+      let t = `${cleanBase(base.name)} & Tomato Stew`;
       if (protein) t += ` with ${clean(protein.name)}`;
       const valid = (sides || []).filter((s) => /plantain|dodo|cabbage|carrot|salad/i.test(s.name));
       if (valid.length > 0) t += ` & ${clean(valid[0].name)}`;
@@ -260,8 +277,8 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredProteinPatterns: [/groundnut|peanut/i, /fish|panla|kuli/i],
     preferredSidePatterns: [/milk/i, /coconut/i],
     culinaryNote: "Refreshing ice-cold drinking garri paired with crunchy roasted groundnuts and milk.",
-    generateTitle: (_base, protein, sides) => {
-      let t = "Ijebu Garri with Cold Water";
+    generateTitle: (base, protein, sides) => {
+      let t = `${cleanBase(base.name)} with Cold Water`;
       if (protein) t += ` & ${clean(protein.name)}`;
       const valid = (sides || []).filter((s) => /milk|coconut/i.test(s.name));
       if (valid.length > 0) t += ` with ${valid.map((s) => clean(s.name)).join(" & ")}`;
@@ -277,9 +294,9 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredProteinPatterns: [/beef/i, /croaker|fish|catfish/i, /goat|turkey|chicken/i],
     preferredSidePatterns: [/ewedu|okra|efo|bitterleaf|waterleaf/i],
     culinaryNote: "Warm, smooth eba swallow paired with seasoned greens and protein.",
-    generateTitle: (_base, protein, sides) => {
+    generateTitle: (base, protein, sides) => {
       const soup = (sides || []).find((s) => /ewedu|okra|efo|bitterleaf|waterleaf/i.test(s.name));
-      let t = `Eba with ${soup ? clean(soup.name) : "Stew"}`;
+      let t = `${cleanBase(base.name)} with ${soup ? clean(soup.name) : "Stew"}`;
       if (protein) t += ` & ${clean(protein.name)}`;
       return t;
     },
@@ -293,8 +310,8 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredProteinPatterns: [/egg/i, /sardine|tuna/i, /peanut/i],
     preferredSidePatterns: [/tea/i, /fruit/i],
     culinaryNote: "Crisp toasted bread paired with fluffy eggs or savory fish.",
-    generateTitle: (_base, protein, sides) => {
-      let t = `Toasted Bread & ${clean(protein?.name) || "Eggs"}`;
+    generateTitle: (base, protein, sides) => {
+      let t = `Toasted ${cleanBase(base.name)} & ${clean(protein?.name) || "Eggs"}`;
       const valid = (sides || []).filter((s) => !isCookingOil(s));
       if (valid.length > 0) t += ` with ${clean(valid[0].name)}`;
       return t;
@@ -309,7 +326,7 @@ export const DISH_BLUEPRINTS: DishBlueprint[] = [
     preferredProteinPatterns: [/egg/i, /fish/i],
     preferredSidePatterns: [/spinach|cabbage/i],
     culinaryNote: "Naturally sweet potatoes paired with a savory scrambled egg sauce.",
-    generateTitle: (_base, protein) => `Boiled Sweet Potatoes & ${clean(protein?.name) || "Egg Sauce"}`,
+    generateTitle: (base, protein) => `Boiled ${cleanBase(base.name)} & ${clean(protein?.name) || "Egg Sauce"}`,
   },
 ];
 
