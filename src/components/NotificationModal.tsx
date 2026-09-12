@@ -14,7 +14,6 @@ import {
   getStoredNotificationConfig,
   requestNotificationPermission,
   saveNotificationConfig,
-  sendTestNudge,
 } from "@/lib/notifications";
 import { DayOfWeek, NotificationConfig, ReminderFrequency } from "@/lib/types";
 import { ReminderPicker } from "@/components/ReminderPickers";
@@ -39,7 +38,6 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
 }) => {
   const [config, setConfig] = useState<NotificationConfig>(getStoredNotificationConfig);
   const [permission, setPermission] = useState<NotificationPermission>("default");
-  const [testSent, setTestSent] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -119,23 +117,6 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
     const updated = { ...config, [field]: value };
     setConfig(updated);
     saveNotificationConfig(updated);
-  };
-
-  const handleSendTest = () => {
-    if (permission !== "granted") {
-      requestNotificationPermission().then((res) => {
-        setPermission(res);
-        if (res === "granted") {
-          sendTestNudge(config.includeGroceryNudges);
-          setTestSent(true);
-          setTimeout(() => setTestSent(false), 3000);
-        }
-      });
-    } else {
-      sendTestNudge(config.includeGroceryNudges);
-      setTestSent(true);
-      setTimeout(() => setTestSent(false), 3000);
-    }
   };
 
   if (!isOpen) return null;
@@ -354,19 +335,11 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
           </div>
 
           {/* Pinned Footer */}
-          <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 bg-stone-100/90 shrink-0 flex items-center justify-between gap-3 safe-area-bottom">
-            <button
-              type="button"
-              onClick={handleSendTest}
-              className="inline-flex items-center gap-2 text-xs font-bold text-stone-900 bg-amber-300 hover:bg-amber-400 border-2 border-stone-900 shadow-brutal-sm px-4 py-2.5 rounded-xl active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
-            >
-              <Bell size={16} weight="bold" />
-              <span>{testSent ? "Test Nudge Sent!" : "Send Test Nudge Now"}</span>
-            </button>
+          <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 bg-stone-100/90 shrink-0 flex items-center justify-end gap-3 safe-area-bottom">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2.5 rounded-xl font-bold text-xs bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-sm hover:bg-stone-800 transition-all"
+              className="w-full sm:w-auto px-8 py-2.5 rounded-xl font-bold text-xs bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-sm hover:bg-stone-800 transition-all"
             >
               Done
             </button>

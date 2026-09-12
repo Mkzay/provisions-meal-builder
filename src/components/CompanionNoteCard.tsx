@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowClockwise, Sparkle, X } from "@/components/icons";
+import { Sparkle, X } from "@/components/icons";
 import {
   clearNoteDismissal,
   dismissNoteForMealWindow,
@@ -75,16 +75,6 @@ export const CompanionNoteCard: React.FC<CompanionNoteCardProps> = ({
     };
   }, [mealType, owner]);
 
-  const handleRefresh = async () => {
-    setIsLoading(true);
-    if (typeof window !== "undefined" && window.navigator?.vibrate) {
-      window.navigator.vibrate(8);
-    }
-    const fresh = await fetchClientCompanionNote(owner, mealType, true);
-    setNote(fresh);
-    setIsLoading(false);
-  };
-
   const handleDismiss = () => {
     dismissNoteForMealWindow(mealType);
     setIsDismissed(true);
@@ -117,34 +107,17 @@ export const CompanionNoteCard: React.FC<CompanionNoteCardProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-1">
+          {isDismissible && (
             <button
               type="button"
-              onClick={handleRefresh}
-              disabled={isLoading}
-              title="Get a fresh thought"
-              aria-label="Refresh companion note"
-              className="p-1 rounded-md text-stone-700 hover:text-stone-900 hover:bg-black/5 transition-colors disabled:opacity-50"
+              onClick={handleDismiss}
+              title="Dismiss for this meal window"
+              aria-label="Dismiss note"
+              className="p-1 rounded-md text-stone-500 hover:text-stone-900 hover:bg-black/5 transition-colors"
             >
-              <ArrowClockwise
-                size={13}
-                weight="bold"
-                className={isLoading ? "animate-spin" : ""}
-              />
+              <X size={13} weight="bold" />
             </button>
-
-            {isDismissible && (
-              <button
-                type="button"
-                onClick={handleDismiss}
-                title="Dismiss for this meal window"
-                aria-label="Dismiss note"
-                className="p-1 rounded-md text-stone-500 hover:text-stone-900 hover:bg-black/5 transition-colors"
-              >
-                <X size={13} weight="bold" />
-              </button>
-            )}
-          </div>
+          )}
         </div>
 
         <p

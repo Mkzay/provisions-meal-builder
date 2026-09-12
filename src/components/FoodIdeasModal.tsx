@@ -220,9 +220,14 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                           <h4 className="font-display font-black text-sm text-stone-900 leading-snug">
                             {idea.name}
                           </h4>
-                          <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-300 shrink-0">
-                            {idea.origin}
-                          </span>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md border border-stone-900 bg-stone-100 text-stone-800">
+                              {idea.kind === "ready_meal" ? "Ready Meal" : idea.role}
+                            </span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white text-stone-500 border border-stone-300">
+                              {idea.origin}
+                            </span>
+                          </div>
                         </div>
 
                         <p className="text-xs text-stone-600 mt-1 leading-relaxed line-clamp-2">
@@ -230,7 +235,7 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                         </p>
 
                         <p className="text-[11px] font-bold text-stone-800 bg-amber-50/80 p-2 rounded-lg border border-amber-200 mt-2">
-                          💡 {idea.combos}
+                          💡 <span className="font-black text-amber-950">Pair Idea:</span> {idea.combos}
                         </p>
                       </div>
 
@@ -259,7 +264,7 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                             className="inline-flex items-center gap-1 text-xs font-black text-stone-900 bg-amber-300 hover:bg-amber-200 px-3 py-1.5 rounded-xl border-2 border-stone-900 shadow-2xs active:translate-x-0.5 active:translate-y-0.5 transition-all disabled:opacity-50"
                           >
                             <Plus size={13} weight="bold" />
-                            <span>{isBusy ? "Adding..." : "+ Stock"}</span>
+                            <span>{isBusy ? "Adding..." : idea.kind === "ready_meal" ? "+ Stock Meal" : "+ Stock Item"}</span>
                           </button>
                         )}
                       </div>
