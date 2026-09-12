@@ -137,7 +137,7 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
           </div>
 
           {/* Search and Filters */}
-          <div className="p-3.5 sm:px-6 sm:py-3 border-b-2 border-stone-900 bg-stone-100/90 space-y-2 shrink-0">
+          <div className="p-3.5 sm:px-6 sm:py-3 border-b-2 border-stone-900 bg-stone-100/90 space-y-3 shrink-0">
             <input
               type="text"
               placeholder="Search pantry items (e.g. Eggs, Yam, Rice)..."
@@ -146,7 +146,7 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
               className="w-full bg-white border-2 border-stone-900 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-brutal-xs"
             />
             <div
-              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5"
+              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1.5 pb-1 px-0.5"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               <button

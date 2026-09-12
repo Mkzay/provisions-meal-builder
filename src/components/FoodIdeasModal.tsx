@@ -148,7 +148,7 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
           </div>
 
           {/* Controls: Search & Category Tabs */}
-          <div className="p-4 sm:px-6 sm:py-3.5 border-b-2 border-stone-900 bg-stone-100/90 space-y-2.5 shrink-0">
+          <div className="p-4 sm:px-6 sm:py-3.5 border-b-2 border-stone-900 bg-stone-100/90 space-y-3 shrink-0">
             {/* Search Input */}
             <input
               type="text"
@@ -160,7 +160,7 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
 
             {/* Category Filter Pills */}
             <div
-              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5"
+              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1.5 pb-1 px-0.5"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {CATEGORIES.map(({ id, label, icon }) => {
@@ -172,7 +172,7 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                     onClick={() => setSelectedCategory(id)}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all border-2 border-stone-900 ${
                       isActive
-                        ? "bg-amber-300 text-stone-900 shadow-brutal-xs -translate-y-0.5"
+                        ? "bg-amber-300 text-stone-900 shadow-brutal-xs"
                         : "bg-white text-stone-700 hover:bg-stone-50"
                     }`}
                   >
