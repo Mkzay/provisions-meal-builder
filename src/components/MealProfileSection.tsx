@@ -55,10 +55,48 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
   const [selectedGoal, setSelectedGoal] = useState<UserGoal>(() =>
     getDefaultGoalForOwner(owner)
   );
-  const [height, setHeight] = useState<string>("");
+  const [heightUnit, setHeightUnit] = useState<"cm" | "ft">("cm");
+  const [heightCm, setHeightCm] = useState<string>("");
+  const [feet, setFeet] = useState<string>("");
+  const [inches, setInches] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
+
+  const handleCmChange = (val: string) => {
+    setHeightCm(val);
+    const num = parseFloat(val);
+    if (!isNaN(num) && num > 0) {
+      const totalIn = Math.round(num / 2.54);
+      setFeet(String(Math.floor(totalIn / 12)));
+      setInches(String(totalIn % 12));
+    } else {
+      setFeet("");
+      setInches("");
+    }
+  };
+
+  const handleFeetChange = (val: string) => {
+    setFeet(val);
+    const f = parseInt(val) || 0;
+    const i = parseFloat(inches) || 0;
+    if (f > 0 || i > 0) {
+      setHeightCm(String(Math.round((f * 12 + i) * 2.54)));
+    } else {
+      setHeightCm("");
+    }
+  };
+
+  const handleInchesChange = (val: string) => {
+    setInches(val);
+    const f = parseInt(feet) || 0;
+    const i = parseFloat(val) || 0;
+    if (f > 0 || i > 0) {
+      setHeightCm(String(Math.round((f * 12 + i) * 2.54)));
+    } else {
+      setHeightCm("");
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -68,10 +106,22 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
         if (!active) return;
         if (existing) {
           setSelectedGoal(existing.goal || getDefaultGoalForOwner(owner));
-          setHeight(existing.height ? String(existing.height) : "");
+          if (existing.height) {
+            const cmVal = existing.height;
+            setHeightCm(String(cmVal));
+            const totalIn = Math.round(cmVal / 2.54);
+            setFeet(String(Math.floor(totalIn / 12)));
+            setInches(String(totalIn % 12));
+          } else {
+            setHeightCm("");
+            setFeet("");
+            setInches("");
+          }
         } else {
           setSelectedGoal(getDefaultGoalForOwner(owner));
-          setHeight("");
+          setHeightCm("");
+          setFeet("");
+          setInches("");
         }
       })
       .finally(() => {
@@ -84,11 +134,17 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
 
   const handleSave = async () => {
     setIsSaving(true);
-    const parsedHeight = parseFloat(height);
-    const validHeight =
-      !isNaN(parsedHeight) && parsedHeight > 0
-        ? Math.round(parsedHeight)
-        : undefined;
+    let validHeight: number | undefined;
+    if (heightUnit === "cm") {
+      const num = parseFloat(heightCm);
+      if (!isNaN(num) && num > 0) validHeight = Math.round(num);
+    } else {
+      const f = parseInt(feet) || 0;
+      const i = parseFloat(inches) || 0;
+      if (f > 0 || i > 0) {
+        validHeight = Math.round((f * 12 + i) * 2.54);
+      }
+    }
 
     const res = await saveClientProfile({
       owner,
@@ -180,32 +236,100 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
         </div>
       </div>
 
-      {/* Static Height */}
-      <div className="p-4 bg-white rounded-2xl border-2 border-stone-900 shadow-brutal-xs space-y-2">
+      {/* Height Configuration */}
+      <div className="p-4 bg-white rounded-2xl border-2 border-stone-900 shadow-brutal-xs space-y-2.5">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-bold text-stone-900">Height in cm (Optional)</label>
-          <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
-            Notion Record
-          </span>
+          <label className="text-xs font-black uppercase tracking-wider text-stone-900">
+            Height (Optional)
+          </label>
+          {/* Segmented Pill Switcher */}
+          <div className="inline-flex items-center p-0.5 bg-stone-200/90 rounded-lg border border-stone-900">
+            <button
+              type="button"
+              onClick={() => setHeightUnit("cm")}
+              className={`px-2.5 py-0.5 rounded-md text-[10px] font-black transition-all ${
+                heightUnit === "cm"
+                  ? "bg-amber-300 text-stone-900 border border-stone-900 shadow-xs"
+                  : "text-stone-600 hover:text-stone-900"
+              }`}
+            >
+              cm
+            </button>
+            <button
+              type="button"
+              onClick={() => setHeightUnit("ft")}
+              className={`px-2.5 py-0.5 rounded-md text-[10px] font-black transition-all ${
+                heightUnit === "ft"
+                  ? "bg-purple-300 text-stone-900 border border-stone-900 shadow-xs"
+                  : "text-stone-600 hover:text-stone-900"
+              }`}
+            >
+              ft / in
+            </button>
+          </div>
         </div>
+
         <p className="text-[11px] text-stone-600 leading-snug">
-          Stored in your Notion profile. No derived BMI or calories calculated.
+          Stored in your profile. No derived BMI or calories calculated.
         </p>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            min="50"
-            max="260"
-            step="1"
-            value={height}
-            onChange={(e) => setHeight(e.target.value)}
-            placeholder="e.g. 168"
-            className="flex-1 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl px-3 py-2 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
-          />
-          <span className="text-xs font-black text-stone-700 px-3 py-2 bg-stone-100 border-2 border-stone-900 rounded-xl">
-            cm
-          </span>
-        </div>
+
+        {heightUnit === "cm" ? (
+          <div className="relative">
+            <input
+              type="number"
+              min="50"
+              max="260"
+              step="1"
+              value={heightCm}
+              onChange={(e) => handleCmChange(e.target.value)}
+              placeholder="e.g. 178"
+              className="w-full bg-[#FAF8F5] border-2 border-stone-900 rounded-xl px-3.5 py-2.5 pr-14 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-black text-stone-600 px-2 py-1 bg-stone-200/80 border border-stone-900 rounded-lg">
+              cm
+            </span>
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="relative">
+                <input
+                  type="number"
+                  min="3"
+                  max="8"
+                  step="1"
+                  value={feet}
+                  onChange={(e) => handleFeetChange(e.target.value)}
+                  placeholder="5"
+                  className="w-full bg-[#FAF8F5] border-2 border-stone-900 rounded-xl px-3.5 py-2.5 pr-12 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-black text-stone-600 px-2 py-1 bg-stone-200/80 border border-stone-900 rounded-lg">
+                  ft
+                </span>
+              </div>
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  max="11.9"
+                  step="any"
+                  value={inches}
+                  onChange={(e) => handleInchesChange(e.target.value)}
+                  placeholder="10"
+                  className="w-full bg-[#FAF8F5] border-2 border-stone-900 rounded-xl px-3.5 py-2.5 pr-12 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-black text-stone-600 px-2 py-1 bg-stone-200/80 border border-stone-900 rounded-lg">
+                  in
+                </span>
+              </div>
+            </div>
+            {heightCm && (
+              <p className="text-[10px] font-bold text-stone-500 pl-1">
+                Equivalent to ~{heightCm} cm
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Action CTA */}
@@ -223,9 +347,9 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
       >
         <span>
           {isSaving
-            ? "Saving to Notion..."
+            ? "Saving Profile..."
             : justSaved
-            ? "✓ Profile Saved to Notion!"
+            ? "✓ Profile Saved!"
             : "Save Eating Profile"}
         </span>
       </button>

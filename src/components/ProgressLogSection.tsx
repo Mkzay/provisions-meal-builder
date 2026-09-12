@@ -26,6 +26,7 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
     new Date().toISOString().slice(0, 10)
   );
   const [weightInput, setWeightInput] = useState<string>("");
+  const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
   const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
       owner,
       date: dateInput,
       weight: val,
+      unit: weightUnit,
     });
 
     setIsSubmitting(false);
@@ -82,14 +84,14 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
     if (index >= logs.length - 1) return null;
     const current = logs[index].weight;
     const previous = logs[index + 1].weight;
-    return Math.round((current - previous) * 10) / 10;
+    return Math.round((current - previous) * 100) / 100;
   };
 
   const latestEntry = logs[0];
   const oldestEntry = logs[logs.length - 1];
   const overallDelta =
     logs.length > 1
-      ? Math.round((latestEntry.weight - oldestEntry.weight) * 10) / 10
+      ? Math.round((latestEntry.weight - oldestEntry.weight) * 100) / 100
       : null;
 
   return (
@@ -105,8 +107,8 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
               <span className="text-2xl sm:text-3xl font-display font-black text-stone-900">
                 {latestEntry.weight}
               </span>
-              <span className="text-xs font-bold text-stone-600">
-                {latestEntry.unit}
+              <span className="text-xs font-bold text-stone-600 uppercase">
+                {latestEntry.unit || "kg"}
               </span>
             </div>
           </div>
@@ -125,7 +127,7 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
                     : "bg-stone-100 text-stone-700"
                 }`}
               >
-                {overallDelta > 0 ? `+${overallDelta}` : overallDelta} {latestEntry.unit}
+                {overallDelta > 0 ? `+${overallDelta}` : overallDelta} {latestEntry.unit || "kg"}
               </span>
             ) : (
               <span className="text-xs text-stone-400 font-bold block mt-0.5">
@@ -137,7 +139,7 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
       )}
 
       {/* Quick Add Form Section */}
-      <div className="p-4 bg-amber-50 rounded-2xl border-2 border-stone-900 shadow-brutal-xs space-y-3">
+      <div className="p-4 sm:p-5 bg-amber-50 rounded-2xl border-2 border-stone-900 shadow-brutal-xs space-y-3.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-black uppercase tracking-wider text-stone-900">
             Log New Weigh-In
@@ -145,61 +147,108 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
           <button
             type="button"
             onClick={() => setShowAddForm(!showAddForm)}
-            className="text-xs font-bold text-stone-700 underline underline-offset-2"
+            className="text-xs font-bold text-stone-700 underline underline-offset-2 hover:text-stone-900 transition-colors"
           >
             {showAddForm ? "Hide form" : "+ Add entry"}
           </button>
         </div>
 
         {showAddForm && (
-          <form onSubmit={handleAddEntry} className="space-y-3 pt-1">
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <label className="text-[10px] font-bold uppercase text-stone-600 block mb-1">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  value={dateInput}
-                  onChange={(e) => setDateInput(e.target.value)}
-                  className="w-full bg-white border-2 border-stone-900 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-900"
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold uppercase text-stone-600 block mb-1">
+          <form onSubmit={handleAddEntry} className="space-y-3.5 pt-1">
+            {/* 1. Date Field */}
+            <div>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-stone-600 block mb-1">
+                Date
+              </label>
+              <input
+                type="date"
+                value={dateInput}
+                onChange={(e) => setDateInput(e.target.value)}
+                className="w-full bg-white border-2 border-stone-900 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-stone-900 shadow-brutal-xs focus:outline-none focus:ring-2 focus:ring-amber-400"
+                required
+              />
+            </div>
+
+            {/* 2. Weight Field with Integrated Unit Switcher */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-stone-600 block">
                   Weight
                 </label>
-                <div className="flex items-center gap-1.5">
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="20"
-                    max="300"
-                    placeholder="58.5"
-                    value={weightInput}
-                    onChange={(e) => setWeightInput(e.target.value)}
-                    className="w-full bg-white border-2 border-stone-900 rounded-xl px-2.5 py-1.5 text-xs font-bold text-stone-900"
-                    required
-                  />
-                  <span className="px-2.5 py-1.5 rounded-xl border-2 border-stone-900 bg-stone-100 text-xs font-black shrink-0 shadow-xs">
+                {/* Segmented Unit Pill Switch */}
+                <div className="inline-flex items-center p-0.5 bg-stone-200/90 rounded-lg border border-stone-900">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (weightUnit !== "kg") {
+                        setWeightUnit("kg");
+                        const num = parseFloat(weightInput);
+                        if (!isNaN(num) && num > 0) {
+                          setWeightInput(String(Math.round((num / 2.20462) * 100) / 100));
+                        }
+                      }
+                    }}
+                    className={`px-2.5 py-0.5 rounded-md text-[10px] font-black transition-all ${
+                      weightUnit === "kg"
+                        ? "bg-amber-300 text-stone-900 border border-stone-900 shadow-xs"
+                        : "text-stone-600 hover:text-stone-900"
+                    }`}
+                  >
                     kg
-                  </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (weightUnit !== "lbs") {
+                        setWeightUnit("lbs");
+                        const num = parseFloat(weightInput);
+                        if (!isNaN(num) && num > 0) {
+                          setWeightInput(String(Math.round(num * 2.20462 * 100) / 100));
+                        }
+                      }
+                    }}
+                    className={`px-2.5 py-0.5 rounded-md text-[10px] font-black transition-all ${
+                      weightUnit === "lbs"
+                        ? "bg-purple-300 text-stone-900 border border-stone-900 shadow-xs"
+                        : "text-stone-600 hover:text-stone-900"
+                    }`}
+                  >
+                    lbs
+                  </button>
+                </div>
+              </div>
+
+              {/* Integrated Input Field with In-Box Unit Badge */}
+              <div className="relative flex items-center">
+                <input
+                  type="number"
+                  step="any"
+                  min={weightUnit === "kg" ? "20" : "44"}
+                  max={weightUnit === "kg" ? "350" : "770"}
+                  placeholder={weightUnit === "kg" ? "e.g. 75.56" : "e.g. 166.5"}
+                  value={weightInput}
+                  onChange={(e) => setWeightInput(e.target.value)}
+                  className="w-full bg-white border-2 border-stone-900 rounded-xl pl-3.5 pr-14 py-2.5 text-sm sm:text-base font-black text-stone-900 placeholder:text-stone-400 placeholder:font-normal shadow-brutal-xs focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  required
+                />
+                <div className="absolute right-2 px-2.5 py-1 rounded-lg bg-stone-100 border border-stone-900 text-xs font-black text-stone-700 pointer-events-none uppercase">
+                  {weightUnit}
                 </div>
               </div>
             </div>
 
+            {/* 3. Action Button */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full py-2.5 px-4 rounded-xl font-black text-xs border-2 border-stone-900 shadow-brutal-xs flex items-center justify-center gap-2 active:translate-x-0.5 active:translate-y-0.5 ${
+              className={`w-full py-3 px-4 rounded-xl font-black text-xs sm:text-sm border-2 border-stone-900 shadow-brutal-xs flex items-center justify-center gap-2 active:translate-x-0.5 active:translate-y-0.5 transition-all ${
                 isSubmitting
                   ? "bg-amber-200 text-stone-700 cursor-wait"
                   : "bg-emerald-400 hover:bg-emerald-300 text-stone-900"
               }`}
             >
-              <Plus size={14} weight="bold" />
-              <span>{isSubmitting ? "Saving to Notion..." : "Save Weigh-In to Notion"}</span>
+              <Plus size={16} weight="bold" />
+              <span>{isSubmitting ? "Saving Weigh-In..." : "Save Weigh-In"}</span>
             </button>
           </form>
         )}
@@ -216,7 +265,7 @@ export const ProgressLogSection: React.FC<ProgressLogSectionProps> = ({
         {isLoading && logs.length === 0 ? (
           <div className="p-6 text-center bg-white rounded-2xl border-2 border-stone-200 space-y-2">
             <span className="text-xs font-bold text-stone-500 animate-pulse">
-              Syncing with Notion...
+              Loading your weigh-ins...
             </span>
           </div>
         ) : logs.length === 0 ? (

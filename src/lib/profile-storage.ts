@@ -101,8 +101,10 @@ export async function addClientWeightLog(input: {
   owner?: string;
   date: string;
   weight: number;
+  unit?: "kg" | "lbs";
 }): Promise<{ success: boolean; entry: WeightLogEntry }> {
   const targetOwner = input.owner || getCurrentOwner();
+  const activeUnit = input.unit === "lbs" ? "lbs" : "kg";
   try {
     const res = await fetch("/api/notion/progress-log", {
       method: "POST",
@@ -111,6 +113,7 @@ export async function addClientWeightLog(input: {
         owner: targetOwner,
         date: input.date,
         weight: input.weight,
+        unit: activeUnit,
       }),
     });
 
@@ -128,7 +131,7 @@ export async function addClientWeightLog(input: {
         owner: targetOwner,
         date: input.date,
         weight: input.weight,
-        unit: "kg",
+        unit: activeUnit,
       },
     };
   }

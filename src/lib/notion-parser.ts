@@ -323,12 +323,18 @@ export function parseNotionWeightLog(page: any): WeightLogEntry | null {
     const weightVal = props.Weight?.number ?? props.weight?.number;
     if (typeof weightVal !== "number" || isNaN(weightVal)) return null;
 
+    const titleText =
+      props.Name?.title?.[0]?.plain_text ||
+      props.Name?.title?.[0]?.text?.content ||
+      "";
+    const unit: "kg" | "lbs" = titleText.toLowerCase().includes("lbs") ? "lbs" : "kg";
+
     return {
       id: page.id,
       owner,
       date,
-      weight: Math.round(weightVal * 10) / 10,
-      unit: "kg",
+      weight: Math.round(weightVal * 100) / 100,
+      unit,
       createdAt: page.created_time || new Date().toISOString(),
     };
   } catch (err) {
@@ -341,14 +347,16 @@ export function buildWeightLogProperties(entry: {
   owner: string;
   date: string;
   weight: number;
+  unit?: "kg" | "lbs";
 }): Record<string, any> {
-  const roundedWeight = Math.round(entry.weight * 10) / 10;
+  const roundedWeight = Math.round(entry.weight * 100) / 100;
+  const unitLabel = entry.unit === "lbs" ? "lbs" : "kg";
   return {
     Name: {
       title: [
         {
           text: {
-            content: `${roundedWeight} kg - ${entry.date}`,
+            content: `${roundedWeight} ${unitLabel} - ${entry.date}`,
           },
         },
       ],

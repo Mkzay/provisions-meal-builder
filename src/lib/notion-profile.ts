@@ -170,9 +170,12 @@ export async function addWeightLogEntry(input: {
   owner: string;
   date: string;
   weight: number;
+  unit?: "kg" | "lbs";
 }): Promise<{ success: boolean; entry: WeightLogEntry }> {
   const notion = getNotionClient();
   const progressDbId = process.env.NOTION_PROGRESS_LOG_DB_ID;
+  const activeUnit = input.unit === "lbs" ? "lbs" : "kg";
+  const roundedWeight = Math.round(input.weight * 100) / 100;
 
   if (!notion || !progressDbId) {
     return {
@@ -181,15 +184,20 @@ export async function addWeightLogEntry(input: {
         id: `local-wt-${Date.now()}`,
         owner: input.owner,
         date: input.date,
-        weight: Math.round(input.weight * 10) / 10,
-        unit: "kg",
+        weight: roundedWeight,
+        unit: activeUnit,
         createdAt: new Date().toISOString(),
       },
     };
   }
 
   try {
-    const properties = buildWeightLogProperties(input);
+    const properties = buildWeightLogProperties({
+      owner: input.owner,
+      date: input.date,
+      weight: roundedWeight,
+      unit: activeUnit,
+    });
     const created = await notion.pages.create({
       parent: {
         database_id: progressDbId,
@@ -203,8 +211,8 @@ export async function addWeightLogEntry(input: {
         id: created.id,
         owner: input.owner,
         date: input.date,
-        weight: Math.round(input.weight * 10) / 10,
-        unit: "kg",
+        weight: roundedWeight,
+        unit: activeUnit,
         createdAt: new Date().toISOString(),
       },
     };
@@ -216,8 +224,8 @@ export async function addWeightLogEntry(input: {
         id: `error-${Date.now()}`,
         owner: input.owner,
         date: input.date,
-        weight: input.weight,
-        unit: "kg",
+        weight: roundedWeight,
+        unit: activeUnit,
       },
     };
   }

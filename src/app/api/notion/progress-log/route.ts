@@ -38,10 +38,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const unit = body.unit === "lbs" ? "lbs" : "kg";
+
     const result = await addWeightLogEntry({
       owner,
       date,
       weight,
+      unit,
     });
 
     return NextResponse.json(result);

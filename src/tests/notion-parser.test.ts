@@ -228,16 +228,18 @@ describe("Notion API Data Parser & Transformer", () => {
       expect(entry?.weight).toBe(58.5);
     });
 
-    it("builds valid Notion properties for Weight Log", () => {
+    it("builds valid Notion properties for Weight Log with two-decimal precision and unit", () => {
       const properties: any = buildWeightLogProperties({
         owner: "Esther",
         date: "2026-09-12",
         weight: 58.54,
+        unit: "lbs",
       });
 
       expect(properties.Owner.select.name).toBe("Esther");
       expect(properties.Date.date.start).toBe("2026-09-12");
-      expect(properties.Weight.number).toBe(58.5);
+      expect(properties.Weight.number).toBe(58.54);
+      expect(properties.Name.title[0].text.content).toContain("lbs");
     });
   });
 });
