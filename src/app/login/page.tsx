@@ -12,64 +12,82 @@ import {
   Sparkle,
   Sun,
 } from "@/components/icons";
+import { CulinaryBackdropSvg } from "@/components/CulinaryBackdropSvg";
 import { ProvisionsLogo } from "@/components/ProvisionsLogo";
 import { motion } from "framer-motion";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useState } from "react";
 
-// Floating Culinary Stickers for background ambiance
+// Wonky "Provision" brand letters
+const WONKY_LETTERS = [
+  { char: "P", rotate: "-rotate-6", bg: "bg-[#FEF08A]", textColor: "text-amber-950", delay: 0.04 },
+  { char: "R", rotate: "rotate-3", bg: "bg-[#A7F3D0]", textColor: "text-emerald-950", delay: 0.08 },
+  { char: "O", rotate: "-rotate-3", bg: "bg-[#FECDD3]", textColor: "text-rose-950", delay: 0.12 },
+  { char: "V", rotate: "rotate-6", bg: "bg-[#DDD6FE]", textColor: "text-purple-950", delay: 0.16 },
+  { char: "I", rotate: "-rotate-2", bg: "bg-[#FEF08A]", textColor: "text-amber-950", delay: 0.2 },
+  { char: "S", rotate: "rotate-4", bg: "bg-[#A7F3D0]", textColor: "text-emerald-950", delay: 0.24 },
+  { char: "I", rotate: "-rotate-4", bg: "bg-[#FECDD3]", textColor: "text-rose-950", delay: 0.28 },
+  { char: "O", rotate: "rotate-2", bg: "bg-[#DDD6FE]", textColor: "text-purple-950", delay: 0.32 },
+  { char: "N", rotate: "-rotate-6", bg: "bg-[#FEF08A]", textColor: "text-amber-950", delay: 0.36 },
+];
+
+// Floating Culinary Stickers (responsive on mobile & desktop)
 const STICKERS = [
   {
     id: "pot",
     label: "Fresh Provisions",
-    icon: <CookingPot size={18} weight="duotone" className="text-emerald-800" />,
+    shortLabel: "Fresh Eats",
+    icon: <CookingPot size={16} weight="duotone" className="text-emerald-800 shrink-0" />,
     bg: "bg-[#A7F3D0]",
     textColor: "text-emerald-950",
-    className: "top-8 left-6 md:top-16 md:left-20 lg:left-32",
+    pos: "top-3 -left-2 sm:top-12 sm:left-8 md:left-20 lg:left-32",
     floatAnim: {
-      y: [0, -12, 0],
-      rotate: [-3, 2, -3],
-      transition: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+      y: [0, -10, 0],
+      rotate: [-5, 1, -5],
+      transition: { duration: 4.8, repeat: Infinity, ease: "easeInOut" },
     },
   },
   {
     id: "egg",
     label: "Morning Fuel",
-    icon: <Egg size={18} weight="duotone" className="text-amber-800" />,
+    shortLabel: "Fuel Up",
+    icon: <Egg size={16} weight="duotone" className="text-amber-800 shrink-0" />,
     bg: "bg-[#FEF08A]",
     textColor: "text-amber-950",
-    className: "top-10 right-6 md:top-20 md:right-24 lg:right-36",
+    pos: "top-4 -right-2 sm:top-14 sm:right-8 md:right-24 lg:right-36",
     floatAnim: {
-      y: [0, 10, 0],
-      rotate: [2, -3, 2],
-      transition: { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 },
+      y: [0, 8, 0],
+      rotate: [4, -2, 4],
+      transition: { duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 0.3 },
     },
   },
   {
     id: "snack",
     label: "Quick Bites",
-    icon: <Cookie size={18} weight="duotone" className="text-purple-800" />,
+    shortLabel: "Snack Ready",
+    icon: <Cookie size={16} weight="duotone" className="text-purple-800 shrink-0" />,
     bg: "bg-[#DDD6FE]",
     textColor: "text-purple-950",
-    className: "bottom-12 left-6 md:bottom-20 md:left-24 lg:left-40",
+    pos: "bottom-4 -left-2 sm:bottom-14 sm:left-8 md:left-24 lg:left-40",
     floatAnim: {
-      y: [0, -10, 0],
-      rotate: [-2, 3, -2],
-      transition: { duration: 5.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 },
+      y: [0, -8, 0],
+      rotate: [-3, 3, -3],
+      transition: { duration: 5.4, repeat: Infinity, ease: "easeInOut", delay: 0.6 },
     },
   },
   {
     id: "dinner",
     label: "Comfort Dinners",
-    icon: <BowlFood size={18} weight="duotone" className="text-rose-800" />,
+    shortLabel: "Warm Meals",
+    icon: <BowlFood size={16} weight="duotone" className="text-rose-800 shrink-0" />,
     bg: "bg-[#FECDD3]",
     textColor: "text-rose-950",
-    className: "bottom-10 right-6 md:bottom-24 md:right-20 lg:right-36",
+    pos: "bottom-5 -right-2 sm:bottom-16 sm:right-8 md:right-20 lg:right-36",
     floatAnim: {
-      y: [0, 12, 0],
-      rotate: [3, -2, 3],
-      transition: { duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 0.6 },
+      y: [0, 10, 0],
+      rotate: [3, -3, 3],
+      transition: { duration: 4.6, repeat: Infinity, ease: "easeInOut", delay: 0.5 },
     },
   },
 ];
@@ -118,89 +136,108 @@ function LoginForm() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center p-4 bg-[#FAF8F5] overflow-hidden select-none">
-      {/* Neo-brutalist Dotted Background Pattern */}
+    <div className="relative min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 bg-[#FAF8F5] overflow-hidden select-none">
+      {/* 1. Transparent Culinary Backdrop SVG */}
+      <CulinaryBackdropSvg />
+
+      {/* 2. Neo-brutalist Dotted Background Grid */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.07]"
+        className="absolute inset-0 pointer-events-none opacity-[0.05] z-0"
         style={{
           backgroundImage: "radial-gradient(#1C1917 1.5px, transparent 1.5px)",
           backgroundSize: "24px 24px",
         }}
       />
 
-      {/* Warm Ambient Center Glow */}
-      <div className="absolute w-[500px] h-[500px] rounded-full bg-amber-200/40 blur-3xl pointer-events-none -z-0" />
+      {/* 3. Warm Ambient Center Glow */}
+      <div className="absolute w-[360px] sm:w-[540px] h-[360px] sm:h-[540px] rounded-full bg-amber-200/40 blur-3xl pointer-events-none z-0" />
 
-      {/* Floating Kitchen Badges (Animated Stickers) */}
-      <div className="absolute inset-0 pointer-events-none max-w-6xl mx-auto overflow-hidden">
+      {/* 4. Floating Kitchen Stickers (Active on both Mobile & Desktop) */}
+      <div className="absolute inset-0 pointer-events-none max-w-6xl mx-auto overflow-hidden z-10">
         {STICKERS.map((s) => (
           <motion.div
             key={s.id}
             animate={s.floatAnim}
-            className={`absolute hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-2xl border-2 border-stone-900 shadow-brutal-sm ${s.bg} ${s.textColor} font-bold text-xs pointer-events-auto cursor-default transition-transform hover:scale-105 active:scale-95 ${s.className}`}
+            className={`absolute flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl sm:rounded-2xl border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm ${s.bg} ${s.textColor} font-bold text-[10px] sm:text-xs pointer-events-auto cursor-default transition-transform hover:scale-110 active:scale-95 ${s.pos}`}
           >
-            <span className="shrink-0">{s.icon}</span>
-            <span className="tracking-wide uppercase text-[11px] font-black">{s.label}</span>
+            {s.icon}
+            <span className="tracking-wide uppercase font-black">
+              <span className="inline sm:hidden">{s.shortLabel}</span>
+              <span className="hidden sm:inline">{s.label}</span>
+            </span>
           </motion.div>
         ))}
 
-        {/* Small Ambient Sparkles for Visual Polish */}
+        {/* Ambient Sparkles */}
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute top-12 left-1/2 -translate-x-48 text-amber-500 opacity-60 hidden md:block"
+          className="absolute top-8 left-1/4 text-amber-500 opacity-60"
         >
-          <Sparkle size={24} weight="fill" />
+          <Sparkle size={20} weight="fill" />
         </motion.div>
         <motion.div
-          animate={{ scale: [1, 1.2, 1], rotate: [-6, 6, -6] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-28 left-1/3 text-rose-400 opacity-50 hidden md:block"
+          animate={{ scale: [1, 1.25, 1], rotate: [-8, 8, -8] }}
+          transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-24 left-1/4 text-rose-400 opacity-60"
         >
-          <Heart size={20} weight="fill" />
+          <Heart size={18} weight="fill" />
         </motion.div>
         <motion.div
           animate={{ y: [0, -6, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-36 right-1/4 text-amber-500 opacity-60 hidden md:block"
+          className="absolute top-20 right-1/4 text-amber-500 opacity-60"
         >
-          <Sun size={22} weight="fill" />
+          <Sun size={20} weight="fill" />
         </motion.div>
       </div>
 
-      {/* Top Brand Stamp */}
+      {/* 5. Wonky "Provision" Brand Header */}
       <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 350, damping: 25, delay: 0.1 }}
-        className="mb-4 sm:mb-6 z-10 flex items-center gap-2 px-3.5 py-1 bg-white/90 backdrop-blur-xs rounded-full border border-stone-900/30 shadow-brutal-xs"
+        initial={{ opacity: 0, y: -20, scale: 0.92 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 360, damping: 22 }}
+        className="mb-4 sm:mb-6 z-20 flex items-center justify-center gap-1 sm:gap-1.5"
       >
-        <Sparkle size={13} weight="fill" className="text-amber-500" />
-        <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-stone-800">
-          Provisions Kitchen Sanctuary
-        </span>
-        <Sparkle size={13} weight="fill" className="text-amber-500" />
+        {WONKY_LETTERS.map((item, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: -12, rotate: 0 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 18,
+              delay: item.delay,
+            }}
+            whileHover={{ scale: 1.2, y: -5, rotate: 0 }}
+            whileTap={{ scale: 0.9 }}
+            className={`w-7 h-8 sm:w-9 sm:h-10 md:w-10 md:h-11 ${item.bg} ${item.textColor} ${item.rotate} border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm rounded-lg sm:rounded-xl flex items-center justify-center font-display font-black text-base sm:text-xl md:text-2xl transition-transform cursor-default`}
+          >
+            {item.char}
+          </motion.div>
+        ))}
       </motion.div>
 
-      {/* Login Card Container */}
+      {/* 6. Login Card Container */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.94, y: 20 }}
+        initial={{ opacity: 0, scale: 0.94, y: 18 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 320, damping: 24, delay: 0.15 }}
-        className="w-full max-w-sm z-10"
+        className="w-full max-w-sm z-20"
       >
-        <div className="relative p-6 sm:p-8 bg-white rounded-3xl border-[2.5px] border-stone-900 shadow-brutal-lg space-y-6">
+        <div className="relative p-5 sm:p-8 bg-white rounded-3xl border-[2.5px] border-stone-900 shadow-brutal-lg space-y-5 sm:space-y-6">
           {/* Brand Header */}
           <div className="text-center space-y-2">
             <motion.div
-              whileHover={{ rotate: [-2, 2, 0], scale: 1.06 }}
+              whileHover={{ rotate: [-3, 3, 0], scale: 1.08 }}
               transition={{ duration: 0.3 }}
-              className="flex justify-center mb-2"
+              className="flex justify-center mb-1.5"
             >
               <div className="relative">
-                <ProvisionsLogo size={52} />
+                <ProvisionsLogo size={50} />
                 <motion.span
-                  animate={{ scale: [1, 1.25, 1] }}
+                  animate={{ scale: [1, 1.3, 1] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                   className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-stone-900"
                   title="Kitchen online"
@@ -229,7 +266,7 @@ function LoginForm() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-4">
             <div className="space-y-1.5">
               <label
                 htmlFor="username"
@@ -246,7 +283,7 @@ function LoginForm() {
                 placeholder="Enter your username"
                 required
                 disabled={isLoading}
-                className="w-full px-4 py-3 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all disabled:opacity-50"
+                className="w-full px-4 py-2.5 sm:py-3 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all disabled:opacity-50"
               />
             </div>
 
@@ -267,7 +304,7 @@ function LoginForm() {
                   placeholder="••••••••"
                   required
                   disabled={isLoading}
-                  className="w-full px-4 py-3 pr-11 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all disabled:opacity-50"
+                  className="w-full px-4 py-2.5 sm:py-3 pr-11 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all disabled:opacity-50"
                 />
                 <button
                   type="button"
@@ -320,24 +357,6 @@ function LoginForm() {
           </div>
         </div>
       </motion.div>
-
-      {/* Mobile-Friendly Floating Badges Footer */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="mt-6 sm:hidden flex flex-wrap justify-center items-center gap-2 z-10"
-      >
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#FEF08A] border border-stone-900 text-[10px] font-black uppercase tracking-wider text-amber-950 shadow-brutal-xs">
-          🍳 Fuel Up
-        </span>
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#A7F3D0] border border-stone-900 text-[10px] font-black uppercase tracking-wider text-emerald-950 shadow-brutal-xs">
-          ✨ Fresh Pantry
-        </span>
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#FECDD3] border border-stone-900 text-[10px] font-black uppercase tracking-wider text-rose-950 shadow-brutal-xs">
-          🥣 Zero Stress
-        </span>
-      </motion.div>
     </div>
   );
 }
@@ -355,3 +374,4 @@ export default function LoginPage() {
     </Suspense>
   );
 }
+
