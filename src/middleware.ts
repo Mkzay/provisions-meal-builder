@@ -20,6 +20,23 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
+  // Allow brand assets, icons, and social preview images publicly
+  const pathname = req.nextUrl.pathname;
+  if (
+    pathname.startsWith("/og-image") ||
+    pathname.startsWith("/opengraph-image") ||
+    pathname.startsWith("/twitter-image") ||
+    pathname.startsWith("/icon") ||
+    pathname.startsWith("/favicon") ||
+    pathname.startsWith("/apple-touch-icon") ||
+    pathname.startsWith("/manifest.json") ||
+    pathname.startsWith("/sw.js") ||
+    pathname.startsWith("/icons/") ||
+    /\.(?:svg|png|jpg|jpeg|gif|webp|ico)$/i.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+
   if (!isLoggedIn && !isLoginPage) {
     if (req.nextUrl.pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -44,6 +61,6 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|icons/).*)",
+    "/((?!_next/static|_next/image|favicon|icon|apple-touch-icon|og-image|opengraph-image|twitter-image|manifest\\.json|sw\\.js|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)).*)",
   ],
 };

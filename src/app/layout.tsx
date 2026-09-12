@@ -2,11 +2,10 @@ import { SessionWrapper } from "@/components/SessionWrapper";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+const siteUrl = process.env.NEXTAUTH_URL || "https://provisions-meal-builder.vercel.app";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXTAUTH_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://provisions-meal-builder.vercel.app")
-  ),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Provisions — Kitchen Decider & Meal Sanctuary",
     template: "%s | Provisions",
