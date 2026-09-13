@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getAvailableMains,
   getAvailableReadyMeals,
+  getDefaultMealTypeByHour,
   resolveLeftoverAction,
 } from "../lib/flow-logic";
 import { Ingredient, LeftoverDecision, ReadyMeal } from "../lib/types";
@@ -167,6 +168,34 @@ describe("Flow Logic & Leftover State Transitions", () => {
       const result = resolveLeftoverAction(decision);
       expect(result.action).toBe("none");
       expect(result.newReadyMeal).toBeUndefined();
+    });
+  });
+
+  describe("getDefaultMealTypeByHour with mealsPerDay plans", () => {
+    it("returns correct 4-meal cycle for standard schedule", () => {
+      expect(getDefaultMealTypeByHour(8, 4)).toBe("Breakfast");
+      expect(getDefaultMealTypeByHour(13, 4)).toBe("Lunch");
+      expect(getDefaultMealTypeByHour(16, 4)).toBe("Snack");
+      expect(getDefaultMealTypeByHour(20, 4)).toBe("Dinner");
+      expect(getDefaultMealTypeByHour(23, 4)).toBe("Snack");
+    });
+
+    it("returns Breakfast, Lunch, or Dinner for 3-meals plan and NEVER Snack", () => {
+      expect(getDefaultMealTypeByHour(8, 3)).toBe("Breakfast");
+      expect(getDefaultMealTypeByHour(13, 3)).toBe("Lunch");
+      expect(getDefaultMealTypeByHour(15, 3)).toBe("Lunch"); // 3 PM stays Lunch for 3-meal
+      expect(getDefaultMealTypeByHour(16, 3)).toBe("Dinner");
+      expect(getDefaultMealTypeByHour(19, 3)).toBe("Dinner");
+      expect(getDefaultMealTypeByHour(23, 3)).toBe("Dinner");
+      expect(getDefaultMealTypeByHour(2, 3)).toBe("Dinner");
+    });
+
+    it("returns Lunch or Dinner for 2-meals plan and NEVER Snack or Breakfast", () => {
+      expect(getDefaultMealTypeByHour(8, 2)).toBe("Lunch");
+      expect(getDefaultMealTypeByHour(13, 2)).toBe("Lunch");
+      expect(getDefaultMealTypeByHour(15, 2)).toBe("Dinner");
+      expect(getDefaultMealTypeByHour(20, 2)).toBe("Dinner");
+      expect(getDefaultMealTypeByHour(23, 2)).toBe("Dinner");
     });
   });
 });

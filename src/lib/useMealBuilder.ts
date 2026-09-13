@@ -15,7 +15,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isAddSupplyOpen, setIsAddSupplyOpen] = useState(false);
-  const [mealType, setMealType] = useState<MealType>(getDefaultMealTypeByHour(new Date().getHours()));
+  const [mealType, setMealType] = useState<MealType>(() => getDefaultMealTypeByHour(new Date().getHours(), getClientProfileCached(owner)?.mealsPerDay));
   const [currentStep, setCurrentStep] = useState<FlowStep>("meal_type");
   const [selectedSource, setSelectedSource] = useState<MealSource>("Built");
   const [selectedReadyMeal, setSelectedReadyMeal] = useState<ReadyMeal | undefined>();
@@ -96,12 +96,9 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
 
   const handleResetToHome = () => {
     setCurrentStep("meal_type");
-    setSelectedReadyMeal(undefined);
-    setSelectedMain(undefined);
-    setSelectedProtein(undefined);
-    setSelectedSupplementary(undefined);
-    setSelectedSupplementaries([]);
-    setPairingResult(null);
+    setSelectedReadyMeal(undefined); setSelectedMain(undefined);
+    setSelectedProtein(undefined); setSelectedSupplementary(undefined);
+    setSelectedSupplementaries([]); setPairingResult(null);
   };
 
   const handleSelectMealType = (type: MealType) => {

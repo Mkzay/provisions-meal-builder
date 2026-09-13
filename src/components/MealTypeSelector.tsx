@@ -42,7 +42,7 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
 
   const [showSnack, setShowSnack] = useState(false);
 
-  const currentSuggested = getDefaultMealTypeByHour(new Date().getHours());
+  const currentSuggested = getDefaultMealTypeByHour(new Date().getHours(), effectiveMeals);
 
   const options: Array<{
     type: MealType;
@@ -113,16 +113,6 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
 
     return options;
   }, [isTwoMealsPlan, isThreeMealsPlan, twoMealSchedule, showSnack]);
-
-  // Ensure current selection is valid for active schedule
-  useEffect(() => {
-    const isCurrentVisible = visibleOptions.some((o) => o.type === selectedType);
-    if (!isCurrentVisible && visibleOptions.length > 0) {
-      onSelect(visibleOptions[0].type);
-    }
-  }, [visibleOptions, selectedType, onSelect]);
-
-  const isThreeColumns = visibleOptions.length === 3;
 
   useEffect(() => {
     const handleSync = () => {

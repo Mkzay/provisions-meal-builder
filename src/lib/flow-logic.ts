@@ -66,7 +66,21 @@ export function resolveLeftoverAction(
   };
 }
 
-export function getDefaultMealTypeByHour(hour: number): MealType {
+export function getDefaultMealTypeByHour(
+  hour: number,
+  mealsPerDay?: number
+): MealType {
+  if (mealsPerDay === 3) {
+    if (hour >= 5 && hour < 12) return "Breakfast";
+    if (hour >= 12 && hour < 16) return "Lunch";
+    return "Dinner";
+  }
+
+  if (mealsPerDay === 2) {
+    if (hour >= 5 && hour < 15) return "Lunch";
+    return "Dinner";
+  }
+
   if (hour >= 5 && hour < 12) return "Breakfast";
   if (hour >= 12 && hour < 15) return "Lunch";
   if (hour >= 15 && hour < 18) return "Snack";

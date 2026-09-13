@@ -64,4 +64,13 @@ describe("Meals Per Day Logic & Clean UI Verification", () => {
     expect(selectorCode.includes('isThirdInThree ? "sm:col-span-2 w-full" : ""')).toBe(true);
     expect(selectorCode.includes("calc(50%-0.625rem)")).toBe(false);
   });
+
+  it("ensures MealTypeSelector does NOT auto-call onSelect inside useEffect on mount", () => {
+    const selectorCode = fs.readFileSync(
+      path.join(__dirname, "../components/MealTypeSelector.tsx"),
+      "utf-8"
+    );
+    // onSelect must only be invoked via user click, never in a useEffect
+    expect(selectorCode.includes("onSelect(visibleOptions[0].type)")).toBe(false);
+  });
 });
