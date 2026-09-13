@@ -2,7 +2,7 @@
   "name": "Provisions",
   "short_name": "Provisions",
   "description": "Zero-friction pantry pairings and ready-meal decider to beat meal fatigue.",
-  "start_url": "/",
+  "start_url": "/app",
   "display": "standalone",
   "background_color": "#FAF8F5",
   "theme_color": "#FAF8F5",

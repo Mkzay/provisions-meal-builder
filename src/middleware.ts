@@ -7,15 +7,16 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
   try {
     const isLoggedIn = Boolean(req.auth);
-  const isLoginPage = req.nextUrl.pathname.startsWith("/login");
-  const isAuthApi = req.nextUrl.pathname.startsWith("/api/auth");
+  const pathname = req.nextUrl.pathname;
+  const isLandingPage = pathname === "/";
+  const isLoginPage = pathname.startsWith("/login");
+  const isAuthApi = pathname.startsWith("/api/auth");
 
   if (isAuthApi) {
     return NextResponse.next();
   }
 
   // Allow brand assets, icons, and social preview images publicly
-  const pathname = req.nextUrl.pathname;
   if (
     pathname.startsWith("/og-image") ||
     pathname.startsWith("/opengraph-image") ||
@@ -31,19 +32,30 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  if (!isLoggedIn && !isLoginPage) {
-    if (req.nextUrl.pathname.startsWith("/api/")) {
+  // Public Landing Page: logged out users see landing page, logged in users go straight to /app
+  if (isLandingPage) {
+    if (isLoggedIn) {
+      return NextResponse.redirect(new URL("/app", req.nextUrl.origin));
+    }
+    return NextResponse.next();
+  }
+
+  // If already logged in and visiting login, go straight to /app
+  if (isLoggedIn && isLoginPage) {
+    return NextResponse.redirect(new URL("/app", req.nextUrl.origin));
+  }
+
+  // If unauthenticated and trying to access protected routes
+  if (!isLoggedIn) {
+    if (isLoginPage) {
+      return NextResponse.next();
+    }
+    if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const loginUrl = new URL("/login", req.nextUrl.origin);
-    if (req.nextUrl.pathname !== "/") {
-      loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
-    }
+    loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
-  }
-
-  if (isLoggedIn && isLoginPage) {
-    return NextResponse.redirect(new URL("/", req.nextUrl.origin));
   }
 
   return NextResponse.next();

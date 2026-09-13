@@ -125,7 +125,39 @@ describe("Component import integrity", () => {
     await import("../components/ProfileOnboardingBanner");
   });
 
-  it("imports page", async () => {
+  it("imports BottomNavBar", async () => {
+    await import("../components/BottomNavBar");
+  });
+
+  it("imports MobileHeader", async () => {
+    await import("../components/MobileHeader");
+  });
+
+  it("imports LandingHeader", async () => {
+    await import("../components/landing/LandingHeader");
+  });
+
+  it("imports LandingHero", async () => {
+    await import("../components/landing/LandingHero");
+  });
+
+  it("imports LandingInteractiveDemo", async () => {
+    await import("../components/landing/LandingInteractiveDemo");
+  });
+
+  it("imports LandingFeatures", async () => {
+    await import("../components/landing/LandingFeatures");
+  });
+
+  it("imports LandingFooter", async () => {
+    await import("../components/landing/LandingFooter");
+  });
+
+  it("imports LandingPage", async () => {
     await import("../app/page");
+  });
+
+  it("imports MealBuilderAppPage", async () => {
+    await import("../app/app/page");
   });
 });
