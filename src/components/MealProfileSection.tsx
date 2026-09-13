@@ -186,15 +186,15 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
   return (
     <div className="space-y-4">
       {/* Owner Notice */}
-      <div className="flex items-center justify-between p-3.5 bg-white rounded-2xl border-2 border-stone-900 shadow-brutal-xs">
+      <div className="flex items-center justify-between p-3.5 bg-white dark:bg-stone-900 rounded-2xl border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 border border-stone-900" />
-          <span className="text-xs font-bold text-stone-800">Instance:</span>
-          <span className="text-xs font-black text-stone-900 bg-amber-200 px-2 py-0.5 rounded-md border border-stone-900/30">
+          <span className="text-xs font-bold text-stone-800 dark:text-stone-200">Instance:</span>
+          <span className="text-xs font-black text-stone-900 dark:text-amber-200 bg-amber-200 dark:bg-amber-950/80 px-2 py-0.5 rounded-md border border-stone-900/30 dark:border-amber-600/50">
             {owner}
           </span>
         </div>
-        <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+        <span className="text-[10px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
           Single User Setup
         </span>
       </div>
@@ -202,10 +202,10 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
       {/* Goal Picker */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-0.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-stone-600 block">
+          <label className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400 block">
             Current Eating Goal
           </label>
-          <span className="text-[11px] font-bold text-stone-500">Choose 1</span>
+          <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400">Choose 1</span>
         </div>
 
         <div className="grid grid-cols-1 gap-2.5">
@@ -220,29 +220,29 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                   setSelectedGoal(item.goal);
                   handleSave({ goal: item.goal });
                 }}
-                className={`w-full text-left p-3.5 rounded-2xl border-2 border-stone-900 transition-all flex items-start justify-between gap-3 ${
+                className={`w-full text-left p-3.5 rounded-2xl border-2 border-stone-900 dark:border-stone-700 transition-all flex items-start justify-between gap-3 ${
                   isSelected
-                    ? "bg-amber-200 shadow-brutal-sm -translate-y-0.5"
-                    : "bg-white hover:bg-stone-50 shadow-xs"
+                    ? "bg-amber-200 dark:bg-amber-950/80 dark:border-amber-500/80 shadow-brutal-sm -translate-y-0.5"
+                    : "bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 shadow-xs"
                 }`}
               >
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-display font-black text-sm text-stone-900">
+                    <span className="font-display font-black text-sm text-stone-900 dark:text-stone-100">
                       {item.label}
                     </span>
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/80 border border-stone-900/30 text-stone-700">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/80 dark:bg-stone-800 border border-stone-900/30 dark:border-stone-700 text-stone-700 dark:text-stone-300">
                       {item.badge}
                     </span>
                   </div>
-                  <p className="text-xs text-stone-700 font-medium leading-relaxed">
+                  <p className="text-xs text-stone-700 dark:text-stone-300 font-medium leading-relaxed">
                     {item.description}
                   </p>
                 </div>
 
                 <div
-                  className={`w-5 h-5 rounded-full border-2 border-stone-900 shrink-0 mt-0.5 flex items-center justify-center ${
-                    isSelected ? "bg-stone-900 text-white" : "bg-white"
+                  className={`w-5 h-5 rounded-full border-2 border-stone-900 dark:border-stone-600 shrink-0 mt-0.5 flex items-center justify-center ${
+                    isSelected ? "bg-stone-900 dark:bg-amber-400 text-white dark:text-stone-950" : "bg-white dark:bg-stone-800"
                   }`}
                 >
                   {isSelected && <Check size={12} weight="bold" />}
@@ -256,12 +256,12 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
       {/* Meals Per Day Configuration */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-0.5">
-          <label className="text-xs font-black uppercase tracking-wider text-stone-900">
+          <label className="text-xs font-black uppercase tracking-wider text-stone-900 dark:text-stone-100">
             Meals Per Day
           </label>
-          <span className="text-[10px] font-bold text-stone-500">Daily rhythm</span>
+          <span className="text-[10px] font-bold text-stone-500 dark:text-stone-400">Daily rhythm</span>
         </div>
-        <p className="text-xs text-stone-600">
+        <p className="text-xs text-stone-600 dark:text-stone-400">
           How many meals you aim to eat daily (calibrates target intake and reminders).
         </p>
 
@@ -281,14 +281,14 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                   setMealsPerDay(item.count);
                   handleSave({ mealsPerDay: item.count });
                 }}
-                className={`py-2.5 px-1.5 rounded-xl border-2 border-stone-900 text-center transition-all flex flex-col items-center justify-center ${
+                className={`py-2.5 px-1.5 rounded-xl border-2 border-stone-900 dark:border-stone-700 text-center transition-all flex flex-col items-center justify-center ${
                   isSelected
-                    ? "bg-amber-200 shadow-brutal-xs -translate-y-0.5 font-black text-stone-900"
-                    : "bg-white hover:bg-stone-50 font-bold text-stone-700 shadow-xs"
+                    ? "bg-amber-200 dark:bg-amber-400 shadow-brutal-xs -translate-y-0.5 font-black text-stone-900 dark:text-stone-950"
+                    : "bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 font-bold text-stone-700 dark:text-stone-300 shadow-xs"
                 }`}
               >
                 <span className="text-base font-black font-display leading-tight">{item.label}</span>
-                <span className="text-[10px] font-bold tracking-tight text-stone-600 mt-0.5 leading-none">
+                <span className="text-[10px] font-bold tracking-tight text-stone-600 dark:text-stone-400 mt-0.5 leading-none">
                   {item.sub}
                 </span>
               </button>
@@ -297,12 +297,12 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
         </div>
 
         {mealsPerDay === 2 && (
-          <div className="mt-2.5 p-2.5 bg-stone-50 rounded-2xl border-2 border-stone-900 space-y-1.5">
+          <div className="mt-2.5 p-2.5 bg-stone-50 dark:bg-stone-900 rounded-2xl border-2 border-stone-900 dark:border-stone-700 space-y-1.5">
             <div className="flex items-center justify-between px-0.5">
-              <span className="text-[10px] font-black uppercase tracking-wider text-stone-700">
+              <span className="text-[10px] font-black uppercase tracking-wider text-stone-700 dark:text-stone-300">
                 2-Meal Combination
               </span>
-              <span className="text-[10px] font-bold text-stone-500">Pick daily cadence</span>
+              <span className="text-[10px] font-bold text-stone-500 dark:text-stone-400">Pick daily cadence</span>
             </div>
             <div className="grid grid-cols-3 gap-1.5">
               {[
@@ -314,10 +314,10 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                   key={sch.id}
                   type="button"
                   onClick={() => handleScheduleSelect(sch.id)}
-                  className={`py-2 px-1 rounded-xl text-[11px] font-black border-2 border-stone-900 transition-all text-center leading-tight ${
+                  className={`py-2 px-1 rounded-xl text-[11px] font-black border-2 border-stone-900 dark:border-stone-700 transition-all text-center leading-tight ${
                     twoMealSchedule === sch.id
-                      ? "bg-amber-300 shadow-brutal-xs -translate-y-0.5 text-stone-900"
-                      : "bg-white hover:bg-stone-100 text-stone-700"
+                      ? "bg-amber-300 dark:bg-amber-400 shadow-brutal-xs -translate-y-0.5 text-stone-900 dark:text-stone-950"
+                      : "bg-white dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300"
                   }`}
                 >
                   {sch.label}
@@ -332,12 +332,12 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
       <div className="space-y-2">
         <div>
           <div className="flex items-center justify-between">
-            <label className="text-xs font-black uppercase tracking-wider text-stone-900">
+            <label className="text-xs font-black uppercase tracking-wider text-stone-900 dark:text-stone-100">
               Nutrient Priorities (Optional)
             </label>
-            <span className="text-[10px] font-bold text-stone-500">Multi-select</span>
+            <span className="text-[10px] font-bold text-stone-500 dark:text-stone-400">Multi-select</span>
           </div>
-          <p className="text-xs text-stone-600 mt-0.5">
+          <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
             Steers meal suggestions toward pairings that hit these qualities.
           </p>
         </div>
@@ -350,26 +350,26 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                 key={item.tag}
                 type="button"
                 onClick={() => togglePriority(item.tag)}
-                className={`text-left p-2.5 rounded-xl border-2 border-stone-900 transition-all flex flex-col justify-between ${
+                className={`text-left p-2.5 rounded-xl border-2 border-stone-900 dark:border-stone-700 transition-all flex flex-col justify-between ${
                   isSelected
-                    ? "bg-amber-200 shadow-brutal-xs -translate-y-0.5"
-                    : "bg-white hover:bg-stone-50"
+                    ? "bg-amber-200 dark:bg-amber-950/80 dark:border-amber-500/80 text-stone-900 dark:text-amber-100 shadow-brutal-xs -translate-y-0.5"
+                    : "bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-900 dark:text-stone-100"
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-1">
                   <span className="text-sm">{item.icon}</span>
                   <div
-                    className={`w-4 h-4 rounded-md border border-stone-900 flex items-center justify-center ${
-                      isSelected ? "bg-stone-900 text-white" : "bg-white"
+                    className={`w-4 h-4 rounded-md border border-stone-900 dark:border-stone-600 flex items-center justify-center ${
+                      isSelected ? "bg-stone-900 dark:bg-amber-400 text-white dark:text-stone-950" : "bg-white dark:bg-stone-800"
                     }`}
                   >
                     {isSelected && <Check size={10} weight="bold" />}
                   </div>
                 </div>
-                <div className="font-display font-black text-xs text-stone-900 leading-tight">
+                <div className="font-display font-black text-xs text-stone-900 dark:text-stone-100 leading-tight">
                   {item.label}
                 </div>
-                <div className="text-[10px] text-stone-600 font-medium leading-tight mt-0.5">
+                <div className="text-[10px] text-stone-600 dark:text-stone-300 font-medium leading-tight mt-0.5">
                   {item.desc}
                 </div>
               </button>

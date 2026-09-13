@@ -19,10 +19,10 @@ export const ModeSelect: React.FC<ModeSelectProps> = ({
     <div className="w-full space-y-4">
 
       <div className="px-1">
-        <h3 className="text-2xl sm:text-3xl font-display font-black text-stone-900 tracking-tight">
+        <h3 className="text-2xl sm:text-3xl font-display font-black text-stone-900 dark:text-stone-100 tracking-tight">
           How do you want to choose today?
         </h3>
-        <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
+        <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 font-medium mt-0.5">
           Pick whichever matches your mood and energy level right now.
         </p>
       </div>
@@ -39,25 +39,25 @@ export const ModeSelect: React.FC<ModeSelectProps> = ({
             onSuggestForMe();
           }}
           aria-label="Suggest for me: Zero decision mode where the kitchen automatically selects a balanced pairing"
-          className="group relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl border-[2.5px] border-stone-900 bg-[#FEF08A] text-left shadow-brutal hover:shadow-brutal-hover active:translate-x-[2px] active:translate-y-[2px] active:shadow-brutal-pressed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 transition-all"
+          className="group relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl border-[2.5px] border-stone-900 dark:border-amber-500/70 bg-[#FEF08A] dark:bg-[#2D1B03] text-left shadow-brutal dark:shadow-brutal-dark hover:shadow-brutal-hover active:translate-x-[2px] active:translate-y-[2px] active:shadow-brutal-pressed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 transition-all"
         >
           <div>
-            <div className="w-14 h-14 rounded-2xl bg-white border-2 border-stone-900 text-stone-900 mb-4 shadow-brutal-sm flex items-center justify-center group-hover:scale-105 transition-transform">
-              <MagicWand size={30} weight="duotone" className="text-amber-700" />
+            <div className="w-14 h-14 rounded-2xl bg-white dark:bg-stone-900 border-2 border-stone-900 dark:border-amber-500/50 text-stone-900 dark:text-amber-200 mb-4 shadow-brutal-sm dark:shadow-brutal-dark-sm flex items-center justify-center group-hover:scale-105 transition-transform">
+              <MagicWand size={30} weight="duotone" className="text-amber-700 dark:text-amber-300" />
             </div>
 
-            <span className="text-[11px] font-black uppercase tracking-wider text-stone-900 bg-white/80 px-2.5 py-0.5 rounded-md border border-stone-900/40 inline-block mb-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-stone-900 dark:text-amber-200 bg-white/80 dark:bg-amber-500/20 px-2.5 py-0.5 rounded-md border border-stone-900/40 dark:border-amber-500/40 inline-block mb-2">
               Zero Decision Mode
             </span>
-            <h4 className="text-xl sm:text-2xl font-display font-black text-stone-900 tracking-tight">
+            <h4 className="text-xl sm:text-2xl font-display font-black text-stone-900 dark:text-stone-100 tracking-tight">
               Suggest for me
             </h4>
-            <p className="text-xs sm:text-sm text-stone-800 font-medium mt-1.5 leading-relaxed">
+            <p className="text-xs sm:text-sm text-stone-800 dark:text-stone-300 font-medium mt-1.5 leading-relaxed">
               Take a deep breath and let the kitchen decide. We&apos;ll automatically select a balanced main &amp; protein pairing.
             </p>
           </div>
 
-          <div className="mt-6 pt-3.5 border-t-2 border-stone-900/20 w-full flex items-center justify-between text-xs font-black text-stone-900">
+          <div className="mt-6 pt-3.5 border-t-2 border-stone-900/20 dark:border-amber-500/30 w-full flex items-center justify-between text-xs font-black text-stone-900 dark:text-amber-200">
             <span>Surprise me with a meal</span>
             <span className="text-sm font-black group-hover:translate-x-1 transition-transform">→</span>
           </div>
@@ -74,25 +74,25 @@ export const ModeSelect: React.FC<ModeSelectProps> = ({
             onManualPick();
           }}
           aria-label="I'll pick: Craving mode to browse available mains and choose custom pairings"
-          className="group relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl border-[2.5px] border-stone-900 bg-[#A7F3D0] text-left shadow-brutal hover:shadow-brutal-hover active:translate-x-[2px] active:translate-y-[2px] active:shadow-brutal-pressed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 transition-all"
+          className="group relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl border-[2.5px] border-stone-900 dark:border-emerald-500/70 bg-[#A7F3D0] dark:bg-[#04261B] text-left shadow-brutal dark:shadow-brutal-dark hover:shadow-brutal-hover active:translate-x-[2px] active:translate-y-[2px] active:shadow-brutal-pressed focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 transition-all"
         >
           <div>
-            <div className="w-14 h-14 rounded-2xl bg-white border-2 border-stone-900 text-stone-900 mb-4 shadow-brutal-sm flex items-center justify-center group-hover:scale-105 transition-transform">
-              <ChefHat size={30} weight="duotone" className="text-emerald-800" />
+            <div className="w-14 h-14 rounded-2xl bg-white dark:bg-stone-900 border-2 border-stone-900 dark:border-emerald-500/50 text-stone-900 dark:text-emerald-200 mb-4 shadow-brutal-sm dark:shadow-brutal-dark-sm flex items-center justify-center group-hover:scale-105 transition-transform">
+              <ChefHat size={30} weight="duotone" className="text-emerald-800 dark:text-emerald-300" />
             </div>
 
-            <span className="text-[11px] font-black uppercase tracking-wider text-stone-900 bg-white/80 px-2.5 py-0.5 rounded-md border border-stone-900/40 inline-block mb-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-stone-900 dark:text-emerald-200 bg-white/80 dark:bg-emerald-500/20 px-2.5 py-0.5 rounded-md border border-stone-900/40 dark:border-emerald-500/40 inline-block mb-2">
               Craving Mode
             </span>
-            <h4 className="text-xl sm:text-2xl font-display font-black text-stone-900 tracking-tight">
+            <h4 className="text-xl sm:text-2xl font-display font-black text-stone-900 dark:text-stone-100 tracking-tight">
               I&apos;ll pick
             </h4>
-            <p className="text-xs sm:text-sm text-stone-800 font-medium mt-1.5 leading-relaxed">
+            <p className="text-xs sm:text-sm text-stone-800 dark:text-stone-300 font-medium mt-1.5 leading-relaxed">
               Have a specific taste in mind? Browse your {availableMainsCount} available mains and we&apos;ll match the sides.
             </p>
           </div>
 
-          <div className="mt-6 pt-3.5 border-t-2 border-stone-900/20 w-full flex items-center justify-between text-xs font-black text-stone-900">
+          <div className="mt-6 pt-3.5 border-t-2 border-stone-900/20 dark:border-emerald-500/30 w-full flex items-center justify-between text-xs font-black text-stone-900 dark:text-emerald-200">
             <span>Browse pantry mains</span>
             <span className="text-sm font-black group-hover:translate-x-1 transition-transform">→</span>
           </div>

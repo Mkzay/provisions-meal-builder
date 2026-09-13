@@ -125,23 +125,23 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
 
   return (
     <div className="w-full space-y-6">
-      <div className="p-7 bg-[#FEF08A] rounded-3xl border-[2.5px] border-stone-900 shadow-brutal text-center space-y-3.5">
-        <div className="w-14 h-14 rounded-2xl bg-white border-2 border-stone-900 text-stone-900 flex items-center justify-center mx-auto shadow-brutal-sm">
-          <Heart size={30} weight="fill" className="text-rose-600" />
+      <div className="p-7 bg-[#FEF08A] dark:bg-stone-900 rounded-3xl border-[2.5px] border-stone-900 dark:border-amber-500/40 shadow-brutal dark:shadow-brutal-dark text-center space-y-3.5">
+        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 text-stone-900 flex items-center justify-center mx-auto shadow-brutal-sm dark:shadow-brutal-dark-sm">
+          <Heart size={30} weight="fill" className="text-rose-600 dark:text-rose-400" />
         </div>
 
-        <h3 className="text-2xl sm:text-3xl font-display font-black text-stone-900">
+        <h3 className="text-2xl sm:text-3xl font-display font-black text-stone-900 dark:text-stone-100">
           Kitchen feeling bare{owner ? `, ${owner}` : ""}?
         </h3>
 
-        <p className="text-xs sm:text-sm text-stone-800 font-medium max-w-md mx-auto leading-relaxed">
+        <p className="text-xs sm:text-sm text-stone-800 dark:text-stone-300 font-medium max-w-md mx-auto leading-relaxed">
           No ingredients are marked available right now. That is 100% fine! We don&apos;t want you skipping meals or stressing.
         </p>
 
         <div className="pt-2 flex items-center justify-center">
           <button
             onClick={() => setShowStaplesDrawer(true)}
-            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-stone-900 font-black text-xs sm:text-sm transition-all border-2 border-stone-900 shadow-brutal active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-emerald-400 hover:bg-emerald-300 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-stone-900 dark:text-stone-950 font-black text-xs sm:text-sm transition-all border-2 border-stone-900 dark:border-emerald-600/60 shadow-brutal dark:shadow-brutal-dark active:translate-x-[2px] active:translate-y-[2px] active:shadow-none flex items-center justify-center gap-2"
           >
             <PlusCircle size={18} weight="bold" />
             <span>Quick-Tap Pantry Staples (10s)</span>
@@ -152,10 +152,10 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
       {/* 3 Quick Comforts */}
       <div className="space-y-3">
         <div className="px-1">
-          <h4 className="font-display font-black text-lg text-stone-900">
+          <h4 className="font-display font-black text-lg text-stone-900 dark:text-stone-100">
             3 Zero-Effort Lifesavers
           </h4>
-          <p className="text-xs text-stone-600 font-medium">
+          <p className="text-xs text-stone-600 dark:text-stone-400 font-medium">
             If you just need food in your belly right now without thinking:
           </p>
         </div>
@@ -164,11 +164,11 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
           {emergencyComforts.map((item, idx) => (
             <div
               key={idx}
-              className="flex flex-col justify-between p-5 bg-white rounded-3xl border-2 border-stone-900 shadow-brutal-sm hover:shadow-brutal transition-all"
+              className="flex flex-col justify-between p-5 bg-white dark:bg-stone-900 rounded-3xl border-2 border-stone-900 dark:border-stone-700 shadow-brutal-sm dark:shadow-brutal-dark-sm hover:shadow-brutal transition-all"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-stone-100 border-2 border-stone-900 flex items-center justify-center shadow-brutal-sm">
+                  <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 flex items-center justify-center shadow-brutal-sm dark:shadow-brutal-dark-sm">
                     {item.icon}
                   </div>
                   <span
@@ -177,10 +177,10 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
                     {item.time}
                   </span>
                 </div>
-                <h5 className="font-display font-black text-base text-stone-900">
+                <h5 className="font-display font-black text-base text-stone-900 dark:text-stone-100">
                   {item.title}
                 </h5>
-                <p className="text-xs text-stone-700 font-medium mt-1 leading-relaxed">
+                <p className="text-xs text-stone-700 dark:text-stone-300 font-medium mt-1 leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -200,13 +200,13 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-md bg-[#FAF8F5] border-[2.5px] border-stone-900 rounded-t-3xl sm:rounded-3xl p-6 shadow-brutal-lg space-y-4"
+            className="w-full max-w-md bg-[#FAF8F5] dark:bg-stone-900 border-[2.5px] border-stone-900 dark:border-stone-700 rounded-t-3xl sm:rounded-3xl p-6 shadow-brutal-lg dark:shadow-brutal-dark-lg space-y-4"
           >
             <div className="text-center">
-              <h4 id="staples-drawer-title" className="text-xl font-display font-black text-stone-900">
+              <h4 id="staples-drawer-title" className="text-xl font-display font-black text-stone-900 dark:text-stone-100">
                 Tap what you have right now
               </h4>
-              <p className="text-xs text-stone-600 font-medium mt-1">
+              <p className="text-xs text-stone-600 dark:text-stone-400 font-medium mt-1">
                 Select 1 or 2 items and we&apos;ll build your meal immediately.
               </p>
             </div>
@@ -224,10 +224,10 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
                           : [...prev, staple.id]
                       );
                     }}
-                    className={`min-h-[44px] flex items-center justify-between p-3.5 rounded-2xl border-2 border-stone-900 text-left text-xs font-black transition-all ${
+                    className={`min-h-[44px] flex items-center justify-between p-3.5 rounded-2xl border-2 border-stone-900 dark:border-stone-700 text-left text-xs font-black transition-all ${
                       isSelected
-                        ? "bg-amber-300 text-stone-900 shadow-brutal-sm"
-                        : "bg-white hover:bg-stone-50 text-stone-900"
+                        ? "bg-amber-300 dark:bg-amber-400 text-stone-900 dark:text-stone-950 shadow-brutal-sm"
+                        : "bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 text-stone-900 dark:text-stone-100"
                     }`}
                   >
                     <span>{staple.name}</span>
@@ -240,14 +240,14 @@ export const GentleSafetyNet: React.FC<GentleSafetyNetProps> = ({
             <div className="flex gap-2.5 pt-2">
               <button
                 onClick={() => setShowStaplesDrawer(false)}
-                className="flex-1 min-h-[44px] py-3 rounded-xl border-2 border-stone-900 bg-white text-xs font-black text-stone-700 hover:bg-stone-100"
+                className="flex-1 min-h-[44px] py-3 rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs font-black text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700"
               >
                 Cancel
               </button>
               <button
                 onClick={handleApplyStaples}
                 disabled={selectedStapleIds.length === 0}
-                className="flex-1 min-h-[44px] py-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-stone-900 font-black text-xs border-2 border-stone-900 shadow-brutal active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
+                className="flex-1 min-h-[44px] py-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-stone-900 dark:text-stone-950 font-black text-xs border-2 border-stone-900 dark:border-emerald-600/60 shadow-brutal dark:shadow-brutal-dark active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
               >
                 Use Selected ({selectedStapleIds.length})
               </button>

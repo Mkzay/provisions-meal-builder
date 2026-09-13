@@ -22,24 +22,24 @@ interface CompanionNoteCardProps {
 
 const THEMES: Record<MealType, { bg: string; iconBg: string; text: string }> = {
   Breakfast: {
-    bg: "bg-[#FEF9C3]", // Warm morning butter
-    iconBg: "bg-amber-300",
-    text: "text-amber-950",
+    bg: "bg-[#FEF9C3] dark:bg-[#2D1B03] dark:border-amber-500/50",
+    iconBg: "bg-amber-300 dark:bg-amber-950/60 dark:text-amber-300",
+    text: "text-amber-950 dark:text-amber-100",
   },
   Lunch: {
-    bg: "bg-[#FED7AA]", // Energizing midday peach
-    iconBg: "bg-orange-300",
-    text: "text-amber-950",
+    bg: "bg-[#FED7AA] dark:bg-[#2A1605] dark:border-orange-500/50",
+    iconBg: "bg-orange-300 dark:bg-orange-950/60 dark:text-orange-300",
+    text: "text-amber-950 dark:text-orange-100",
   },
   Dinner: {
-    bg: "bg-[#FECDD3]", // Calming evening rose
-    iconBg: "bg-rose-300",
-    text: "text-rose-950",
+    bg: "bg-[#FECDD3] dark:bg-[#330812] dark:border-rose-500/50",
+    iconBg: "bg-rose-300 dark:bg-rose-950/60 dark:text-rose-300",
+    text: "text-rose-950 dark:text-rose-100",
   },
   Snack: {
-    bg: "bg-[#D1FAE5]", // Fresh crisp mint
-    iconBg: "bg-emerald-300",
-    text: "text-emerald-950",
+    bg: "bg-[#D1FAE5] dark:bg-[#04261B] dark:border-emerald-500/50",
+    iconBg: "bg-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300",
+    text: "text-emerald-950 dark:text-emerald-100",
   },
 };
 
@@ -97,7 +97,7 @@ export const CompanionNoteCard: React.FC<CompanionNoteCardProps> = ({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96 }}
         transition={{ duration: 0.2 }}
-        className={`p-4 rounded-2xl border-2 border-stone-900 shadow-brutal-sm ${theme.bg} ${className}`}
+        className={`p-4 rounded-2xl border-2 border-stone-900 shadow-brutal-sm dark:shadow-brutal-dark-sm ${theme.bg} ${className}`}
       >
         <div className="flex items-center justify-between gap-2 mb-1.5">
           <div className="flex items-center gap-2">
@@ -106,7 +106,7 @@ export const CompanionNoteCard: React.FC<CompanionNoteCardProps> = ({
             >
               <Sparkle size={14} weight="fill" />
             </div>
-            <span className="text-[11px] font-black uppercase tracking-wider text-stone-900">
+            <span className="text-[11px] font-black uppercase tracking-wider text-stone-900 dark:text-stone-100">
               Chef&apos;s Thought · {mealType}
             </span>
           </div>
@@ -117,7 +117,7 @@ export const CompanionNoteCard: React.FC<CompanionNoteCardProps> = ({
               onClick={handleDismiss}
               title="Dismiss for this meal window"
               aria-label="Dismiss note"
-              className="p-1 rounded-md text-stone-500 hover:text-stone-900 hover:bg-black/5 transition-colors"
+              className="p-1 rounded-md text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
             >
               <X size={13} weight="bold" />
             </button>

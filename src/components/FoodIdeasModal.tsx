@@ -115,25 +115,25 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 32 }}
           transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-          className="relative w-full max-w-2xl max-h-[92dvh] sm:max-h-[88vh] flex flex-col bg-[#FAF8F5] border-[2.5px] border-stone-900 rounded-t-[28px] sm:rounded-3xl shadow-brutal-lg overflow-hidden"
+          className="relative w-full max-w-2xl max-h-[92dvh] sm:max-h-[88vh] flex flex-col bg-[#FAF8F5] dark:bg-[#141210] border-[2.5px] border-stone-900 dark:border-stone-700 rounded-t-[28px] sm:rounded-3xl shadow-brutal-lg dark:shadow-brutal-dark overflow-hidden"
         >
           {/* Mobile Pull Bar */}
-          <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto mt-2.5 mb-0.5 shrink-0" />
+          <div className="sm:hidden w-12 h-1.5 bg-stone-300 dark:bg-stone-700 rounded-full mx-auto mt-2.5 mb-0.5 shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b-2 border-stone-900 shrink-0 bg-[#FAF8F5] gap-3">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b-2 border-stone-900 dark:border-stone-700 shrink-0 bg-[#FAF8F5] dark:bg-[#141210] gap-3">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-300 border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm flex items-center justify-center text-stone-900 shrink-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-300 dark:bg-amber-400 border-2 border-stone-900 dark:border-amber-700 shadow-brutal-xs sm:shadow-brutal-sm dark:shadow-brutal-dark-sm flex items-center justify-center text-stone-900 dark:text-stone-950 shrink-0">
                 <Sparkle size={20} weight="fill" />
               </div>
               <div className="min-w-0 flex-1">
                 <h3
                   id="food-ideas-title"
-                  className="text-base sm:text-xl font-display font-black tracking-tight text-stone-900 leading-snug"
+                  className="text-base sm:text-xl font-display font-black tracking-tight text-stone-900 dark:text-stone-100 leading-snug"
                 >
                   Food Ideas &amp; Inspiration
                 </h3>
-                <p className="text-xs text-stone-600 mt-0.5 font-medium leading-normal">
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5 font-medium leading-normal">
                   Tap any staple to stock into your kitchen
                 </p>
               </div>
@@ -141,21 +141,21 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
             <button
               onClick={onClose}
               aria-label="Close food ideas modal"
-              className="p-2 rounded-xl border-2 border-stone-900 bg-white shadow-brutal-xs sm:shadow-brutal-sm hover:bg-stone-100 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all shrink-0"
+              className="p-2 rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-brutal-xs sm:shadow-brutal-sm dark:shadow-brutal-dark-sm hover:bg-stone-100 dark:hover:bg-stone-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all shrink-0"
             >
               <X size={18} weight="bold" />
             </button>
           </div>
 
           {/* Controls: Search & Category Tabs */}
-          <div className="p-4 sm:px-6 sm:py-3.5 border-b-2 border-stone-900 bg-stone-100/90 space-y-3 shrink-0">
+          <div className="p-4 sm:px-6 sm:py-3.5 border-b-2 border-stone-900 dark:border-stone-700 bg-stone-100/90 dark:bg-stone-900/90 space-y-3 shrink-0">
             {/* Search Input */}
             <input
               type="text"
               placeholder="Search foods (e.g. Yam, Salmon, Oats, Stew)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border-2 border-stone-900 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-brutal-xs"
+              className="w-full bg-white dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-brutal-xs dark:shadow-brutal-dark-sm"
             />
 
             {/* Category Filter Pills */}
@@ -170,10 +170,10 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                     key={id}
                     type="button"
                     onClick={() => setSelectedCategory(id)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all border-2 border-stone-900 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all border-2 border-stone-900 dark:border-stone-700 ${
                       isActive
-                        ? "bg-amber-300 text-stone-900 shadow-brutal-xs"
-                        : "bg-white text-stone-700 hover:bg-stone-50"
+                        ? "bg-amber-300 dark:bg-amber-400 text-stone-900 dark:text-stone-950 shadow-brutal-xs dark:shadow-brutal-dark-sm"
+                        : "bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700"
                     }`}
                   >
                     {icon}
@@ -190,14 +190,14 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {filteredIdeas.length === 0 ? (
-              <div className="text-center py-12 px-4 bg-white rounded-2xl border-2 border-dashed border-stone-300">
-                <p className="text-sm font-bold text-stone-600">
+              <div className="text-center py-12 px-4 bg-white dark:bg-stone-900/60 rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700">
+                <p className="text-sm font-bold text-stone-600 dark:text-stone-400">
                   No foods found matching &quot;{searchQuery}&quot;
                 </p>
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="mt-2 text-xs font-black text-amber-700 underline"
+                  className="mt-2 text-xs font-black text-amber-700 dark:text-amber-400 underline"
                 >
                   Clear search
                 </button>
@@ -213,24 +213,24 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                   return (
                     <div
                       key={idea.id}
-                      className="p-4 bg-white border-2 border-stone-900 rounded-2xl shadow-brutal-xs flex flex-col justify-between space-y-3"
+                      className="p-4 bg-white dark:bg-stone-800/90 border-2 border-stone-900 dark:border-stone-700 rounded-2xl shadow-brutal-xs dark:shadow-brutal-dark-sm flex flex-col justify-between space-y-3"
                     >
                       <div>
                         <div className="flex items-start justify-between gap-2">
-                          <h4 className="font-display font-black text-sm text-stone-900 leading-snug">
+                          <h4 className="font-display font-black text-sm text-stone-900 dark:text-stone-100 leading-snug">
                             {idea.name}
                           </h4>
                           <div className="flex items-center gap-1 shrink-0">
-                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md border border-stone-900 bg-stone-100 text-stone-800">
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md border border-stone-900 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200">
                               {idea.kind === "ready_meal" ? "Ready Meal" : idea.role === "Main" ? "Anchor Base" : idea.role === "Protein" ? "Protein" : "Greens & Sides"}
                             </span>
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white text-stone-500 border border-stone-300">
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 border border-stone-300 dark:border-stone-700">
                               {idea.origin}
                             </span>
                           </div>
                         </div>
 
-                        <p className="text-xs text-stone-600 mt-1 leading-relaxed line-clamp-2">
+                        <p className="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed line-clamp-2">
                           {idea.description}
                         </p>
 
@@ -239,7 +239,7 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                             {idea.nutrientTags.map((nt) => (
                               <span
                                 key={nt}
-                                className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-100 text-stone-700 border border-stone-300"
+                                className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-300 dark:border-stone-700"
                               >
                                 {nt}
                               </span>
@@ -247,17 +247,17 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                           </div>
                         )}
 
-                        <p className="text-[11px] font-bold text-stone-800 bg-amber-50/80 p-2 rounded-lg border border-amber-200 mt-2">
-                          💡 <span className="font-black text-amber-950">Pair Idea:</span> {idea.combos}
+                        <p className="text-[11px] font-bold text-stone-800 dark:text-amber-200 bg-amber-50/80 dark:bg-amber-950/40 p-2 rounded-lg border border-amber-200 dark:border-amber-900/60 mt-2">
+                          💡 <span className="font-black text-amber-950 dark:text-amber-300">Pair Idea:</span> {idea.combos}
                         </p>
                       </div>
 
-                      <div className="pt-2 border-t border-stone-200 flex items-center justify-between gap-2">
+                      <div className="pt-2 border-t border-stone-200 dark:border-stone-700 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1">
                           {idea.suitableMeals.map((m) => (
                             <span
                               key={m}
-                              className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-100 text-stone-600"
+                              className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300"
                             >
                               {m.slice(0, 1)}
                             </span>
@@ -265,7 +265,7 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                         </div>
 
                         {isStocked ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-black text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-400">
+                          <span className="inline-flex items-center gap-1 text-xs font-black text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-400 dark:border-emerald-700">
                             <Check size={13} weight="bold" />
                             <span>In Kitchen</span>
                           </span>
@@ -274,7 +274,7 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                             type="button"
                             onClick={() => handleStock(idea)}
                             disabled={isBusy}
-                            className="inline-flex items-center gap-1 text-xs font-black text-stone-900 bg-amber-300 hover:bg-amber-200 px-3 py-1.5 rounded-xl border-2 border-stone-900 shadow-2xs active:translate-x-0.5 active:translate-y-0.5 transition-all disabled:opacity-50"
+                            className="inline-flex items-center gap-1 text-xs font-black text-stone-900 dark:text-stone-950 bg-amber-300 dark:bg-amber-400 hover:bg-amber-200 dark:hover:bg-amber-300 px-3 py-1.5 rounded-xl border-2 border-stone-900 dark:border-amber-700 shadow-2xs active:translate-x-0.5 active:translate-y-0.5 transition-all disabled:opacity-50"
                           >
                             <Plus size={13} weight="bold" />
                             <span>{isBusy ? "Adding..." : idea.kind === "ready_meal" ? "+ Stock Meal" : "+ Stock Item"}</span>
@@ -289,14 +289,14 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 bg-stone-100/90 shrink-0 flex items-center justify-between safe-area-bottom">
-            <span className="text-xs font-bold text-stone-500">
+          <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 dark:border-stone-700 bg-stone-100/90 dark:bg-stone-900/90 shrink-0 flex items-center justify-between safe-area-bottom">
+            <span className="text-xs font-bold text-stone-500 dark:text-stone-400">
               Showing {filteredIdeas.length} idea{filteredIdeas.length === 1 ? "" : "s"}
             </span>
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-xl font-bold text-xs bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-sm hover:bg-stone-800 transition-all"
+              className="px-5 py-2 rounded-xl font-bold text-xs bg-stone-900 dark:bg-amber-400 text-white dark:text-stone-950 border-2 border-stone-900 dark:border-stone-950 shadow-brutal-sm hover:bg-stone-800 dark:hover:bg-amber-300 transition-all"
             >
               Done
             </button>

@@ -102,21 +102,21 @@ export const LeftoverModal: React.FC<LeftoverModalProps> = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 28 }}
           transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-          className="w-full max-w-md max-h-[92dvh] sm:max-h-[88vh] bg-surface border-[2.5px] border-ink rounded-t-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-brutal-lg overflow-y-auto no-scrollbar modal-scroll-contain relative"
+          className="w-full max-w-md max-h-[92dvh] sm:max-h-[88vh] bg-surface dark:bg-stone-900 border-[2.5px] border-ink dark:border-stone-700 rounded-t-[28px] sm:rounded-3xl p-6 sm:p-7 shadow-brutal-lg dark:shadow-brutal-dark-lg overflow-y-auto no-scrollbar modal-scroll-contain relative"
         >
           {/* Mobile Bottom Sheet Pull Bar */}
-          <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto -mt-2 mb-4 shrink-0" />
+          <div className="sm:hidden w-12 h-1.5 bg-stone-300 dark:bg-stone-700 rounded-full mx-auto -mt-2 mb-4 shrink-0" />
           {step === "ask" && (
             <div className="space-y-5 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-saffron-300 border-2 border-ink text-ink flex items-center justify-center mx-auto shadow-brutal-sm">
+              <div className="w-14 h-14 rounded-2xl bg-saffron-300 dark:bg-amber-950/60 border-2 border-ink dark:border-amber-500/40 text-ink dark:text-amber-300 flex items-center justify-center mx-auto shadow-brutal-sm dark:shadow-brutal-dark-sm">
                 <Package size={28} weight="bold" />
               </div>
 
               <div>
-                <h3 id="leftover-modal-title" className="text-2xl font-display font-extrabold text-ink">
+                <h3 id="leftover-modal-title" className="text-2xl font-display font-extrabold text-ink dark:text-stone-100">
                   Any leftovers for later?
                 </h3>
-                <p className="text-xs sm:text-sm text-stone-600 font-medium mt-1.5 max-w-xs mx-auto leading-relaxed">
+                <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 font-medium mt-1.5 max-w-xs mx-auto leading-relaxed">
                   {source === "Ready Meal"
                     ? "If yes, this stays available in your ready meals. If no, we'll mark it finished so you don't see it next time."
                     : "If yes, we'll automatically package this as a ready meal for next time so you won't have to cook."}
@@ -126,15 +126,15 @@ export const LeftoverModal: React.FC<LeftoverModalProps> = ({
               <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3 pt-2">
                 <button
                   onClick={() => handleAnswer(false)}
-                  className="min-h-[48px] py-3.5 px-5 rounded-2xl border-2 border-ink bg-stone-100 hover:bg-stone-200 text-ink font-extrabold text-sm transition-all shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none flex items-center justify-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                  className="min-h-[48px] py-3.5 px-5 rounded-2xl border-2 border-ink dark:border-stone-700 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-ink dark:text-stone-100 font-extrabold text-sm transition-all shadow-brutal-sm dark:shadow-brutal-dark-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none flex items-center justify-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                 >
-                  <XCircle size={20} weight="bold" className="text-stone-500 shrink-0" />
+                  <XCircle size={20} weight="bold" className="text-stone-500 dark:text-stone-400 shrink-0" />
                   <span className="whitespace-nowrap">All finished</span>
                 </button>
 
                 <button
                   onClick={() => handleAnswer(true)}
-                  className="min-h-[48px] py-3.5 px-5 rounded-2xl border-2 border-ink bg-emerald-300 hover:bg-emerald-400 text-ink font-extrabold text-sm transition-all shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none flex items-center justify-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                  className="min-h-[48px] py-3.5 px-5 rounded-2xl border-2 border-ink dark:border-emerald-600/60 bg-emerald-300 hover:bg-emerald-400 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-ink dark:text-stone-950 font-extrabold text-sm transition-all shadow-brutal-sm dark:shadow-brutal-dark-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none flex items-center justify-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                 >
                   <CheckCircle size={20} weight="bold" className="shrink-0" />
                   <span className="whitespace-nowrap">Yes, saved some</span>
@@ -146,19 +146,19 @@ export const LeftoverModal: React.FC<LeftoverModalProps> = ({
           {step === "name_built" && (
             <div className="space-y-4">
               <div className="text-center">
-                <div className="w-14 h-14 rounded-2xl bg-lavender-200 border-2 border-ink text-ink flex items-center justify-center mx-auto mb-3 shadow-brutal-sm">
+                <div className="w-14 h-14 rounded-2xl bg-lavender-200 dark:bg-purple-950/60 border-2 border-ink dark:border-purple-500/40 text-ink dark:text-purple-300 flex items-center justify-center mx-auto mb-3 shadow-brutal-sm dark:shadow-brutal-dark-sm">
                   <Sparkle size={28} weight="bold" />
                 </div>
-                <h3 className="text-2xl font-display font-extrabold text-ink">
+                <h3 className="text-2xl font-display font-extrabold text-ink dark:text-stone-100">
                   Name your ready meal
                 </h3>
-                <p className="text-xs text-stone-600 font-medium mt-1">
+                <p className="text-xs text-stone-600 dark:text-stone-400 font-medium mt-1">
                   This will now appear in your ready meals pool next time you need a zero-effort meal.
                 </p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-ink uppercase tracking-wider">
+                <label className="text-xs font-extrabold text-ink dark:text-stone-200 uppercase tracking-wider">
                   Meal Title
                 </label>
                 <input
@@ -166,13 +166,13 @@ export const LeftoverModal: React.FC<LeftoverModalProps> = ({
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
                   placeholder={defaultNewName}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-ink bg-white text-ink text-sm font-bold placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-ink shadow-brutal-sm"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-ink dark:border-stone-700 bg-white dark:bg-stone-800 text-ink dark:text-stone-100 text-sm font-bold placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-ink dark:focus:ring-stone-600 shadow-brutal-sm dark:shadow-brutal-dark-sm"
                 />
               </div>
 
               <button
                 onClick={handleSaveBuiltLeftovers}
-                className="w-full py-3.5 px-4 rounded-xl border-2 border-ink bg-emerald-300 hover:bg-emerald-400 text-ink font-extrabold text-sm transition-all shadow-brutal hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-4 rounded-xl border-2 border-ink dark:border-emerald-600/60 bg-emerald-300 hover:bg-emerald-400 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-ink dark:text-stone-950 font-extrabold text-sm transition-all shadow-brutal dark:shadow-brutal-dark hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 flex items-center justify-center gap-2"
               >
                 <span>Save to Ready Meals</span>
                 <Check size={18} weight="bold" />
@@ -182,15 +182,15 @@ export const LeftoverModal: React.FC<LeftoverModalProps> = ({
 
           {step === "done" && (
             <div className="space-y-5 text-center py-2">
-              <div className="w-16 h-16 rounded-2xl bg-emerald-200 border-2 border-ink text-ink flex items-center justify-center mx-auto shadow-brutal-sm">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-200 dark:bg-emerald-950/60 border-2 border-ink dark:border-emerald-500/40 text-ink dark:text-emerald-300 flex items-center justify-center mx-auto shadow-brutal-sm dark:shadow-brutal-dark-sm">
                 <CheckCircle size={36} weight="bold" />
               </div>
 
               <div>
-                <h3 className="text-2xl font-display font-extrabold text-ink">
+                <h3 className="text-2xl font-display font-extrabold text-ink dark:text-stone-100">
                   Enjoy your meal{owner ? `, ${owner}` : ""}!
                 </h3>
-                <p className="text-xs sm:text-sm text-stone-600 font-medium mt-1.5 max-w-xs mx-auto">
+                <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 font-medium mt-1.5 max-w-xs mx-auto">
                   {hadLeftovers
                     ? "Leftovers successfully added to your ready meals."
                     : "Meal logged. Kitchen catalogue kept completely up to date."}
@@ -199,7 +199,7 @@ export const LeftoverModal: React.FC<LeftoverModalProps> = ({
 
               <button
                 onClick={onClose}
-                className="w-full py-3.5 px-5 rounded-2xl border-2 border-ink bg-saffron-300 hover:bg-saffron-400 text-ink font-extrabold text-sm transition-all shadow-brutal hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
+                className="w-full py-3.5 px-5 rounded-2xl border-2 border-ink dark:border-stone-700 bg-saffron-300 hover:bg-saffron-400 dark:bg-amber-400 dark:hover:bg-amber-300 text-ink dark:text-stone-950 font-extrabold text-sm transition-all shadow-brutal dark:shadow-brutal-dark hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5"
               >
                 Done
               </button>

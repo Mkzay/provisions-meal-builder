@@ -1,4 +1,5 @@
 import { SessionWrapper } from "@/components/SessionWrapper";
+import { ThemeProvider } from "@/lib/theme-context";
 import { UpdateNotification } from "@/components/UpdateNotification";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
@@ -83,11 +84,18 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var s=localStorage.getItem('provisions-theme');var p=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='dark'||(s!=='light'&&p)){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}else{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';}}catch(e){}`,
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground selection:bg-saffron-200 selection:text-foreground">
         <SessionWrapper>
-          {children}
-          <UpdateNotification />
+          <ThemeProvider>
+            {children}
+            <UpdateNotification />
+          </ThemeProvider>
         </SessionWrapper>
         <script
           dangerouslySetInnerHTML={{

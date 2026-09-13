@@ -116,21 +116,21 @@ function LoginForm() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 bg-[#FAF8F5] overflow-hidden select-none">
+    <div className="relative min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 bg-[#FAF8F5] dark:bg-[#141210] overflow-hidden select-none">
       {/* 1. Transparent Culinary Backdrop SVG */}
       <CulinaryBackdropSvg />
 
       {/* 2. Neo-brutalist Dotted Background Grid */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.05] z-0"
+        className="absolute inset-0 pointer-events-none opacity-[0.05] dark:opacity-[0.12] text-stone-900 dark:text-stone-100 z-0"
         style={{
-          backgroundImage: "radial-gradient(#1C1917 1.5px, transparent 1.5px)",
+          backgroundImage: "radial-gradient(currentColor 1.5px, transparent 1.5px)",
           backgroundSize: "24px 24px",
         }}
       />
 
       {/* 3. Warm Ambient Center Glow */}
-      <div className="absolute w-[360px] sm:w-[540px] h-[360px] sm:h-[540px] rounded-full bg-amber-200/40 blur-3xl pointer-events-none z-0" />
+      <div className="absolute w-[360px] sm:w-[540px] h-[360px] sm:h-[540px] rounded-full bg-amber-200/40 dark:bg-amber-500/10 blur-3xl pointer-events-none z-0" />
 
       {/* 4. Floating Kitchen Stickers (Active on both Mobile & Desktop) */}
       <div className="absolute inset-0 pointer-events-none max-w-6xl mx-auto overflow-hidden z-10">
@@ -206,7 +206,7 @@ function LoginForm() {
         transition={{ type: "spring", stiffness: 320, damping: 24, delay: 0.15 }}
         className="w-full max-w-sm z-20"
       >
-        <div className="relative p-5 sm:p-8 bg-white rounded-3xl border-[2.5px] border-stone-900 shadow-brutal-lg space-y-5 sm:space-y-6">
+        <div className="relative p-5 sm:p-8 bg-white dark:bg-stone-900/90 rounded-3xl border-[2.5px] border-stone-900 dark:border-stone-700 shadow-brutal-lg dark:shadow-brutal-dark space-y-5 sm:space-y-6">
           {/* Brand Header */}
           <div className="text-center space-y-2">
             <motion.div
@@ -224,10 +224,10 @@ function LoginForm() {
                 />
               </div>
             </motion.div>
-            <h1 className="font-display text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+            <h1 className="font-display text-2xl sm:text-3xl font-black text-stone-900 dark:text-stone-100 tracking-tight">
               Welcome Back
             </h1>
-            <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 font-medium leading-relaxed">
               Sign in to access your kitchen catalogue and meals.
             </p>
           </div>
@@ -238,7 +238,7 @@ function LoginForm() {
               initial={{ opacity: 0, y: -8, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1, x: [-8, 8, -6, 6, -3, 3, 0] }}
               transition={{ duration: 0.4 }}
-              className="p-3.5 bg-rose-50 border-2 border-rose-600 rounded-2xl text-rose-950 text-xs font-black flex items-center gap-2.5 shadow-brutal-xs"
+              className="p-3.5 bg-rose-50 dark:bg-rose-950/60 border-2 border-rose-600 dark:border-rose-700 rounded-2xl text-rose-950 dark:text-rose-200 text-xs font-black flex items-center gap-2.5 shadow-brutal-xs"
             >
               <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-stone-900 shrink-0" />
               <span>{errorMessage}</span>
@@ -250,7 +250,7 @@ function LoginForm() {
             <div className="space-y-1.5">
               <label
                 htmlFor="username"
-                className="block text-xs font-black uppercase tracking-wider text-stone-700"
+                className="block text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300"
               >
                 Username
               </label>
@@ -263,14 +263,14 @@ function LoginForm() {
                 placeholder="Enter your username"
                 required
                 disabled={isLoading}
-                className="w-full px-4 py-2.5 sm:py-3 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all disabled:opacity-50"
+                className="w-full px-4 py-2.5 sm:py-3 bg-[#FAF8F5] dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 rounded-xl text-sm font-bold text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white dark:focus:bg-stone-700 transition-all disabled:opacity-50"
               />
             </div>
 
             <div className="space-y-1.5">
               <label
                 htmlFor="password"
-                className="block text-xs font-black uppercase tracking-wider text-stone-700"
+                className="block text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300"
               >
                 Password
               </label>
@@ -284,14 +284,14 @@ function LoginForm() {
                   placeholder="••••••••"
                   required
                   disabled={isLoading}
-                  className="w-full px-4 py-2.5 sm:py-3 pr-11 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all disabled:opacity-50"
+                  className="w-full px-4 py-2.5 sm:py-3 pr-11 bg-[#FAF8F5] dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 rounded-xl text-sm font-bold text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white dark:focus:bg-stone-700 transition-all disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   tabIndex={-1}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-stone-500 hover:text-stone-900 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
                 >
                   {showPassword ? (
                     <EyeSlash size={18} weight="bold" />
@@ -307,15 +307,15 @@ function LoginForm() {
               disabled={isLoading}
               whileHover={{ scale: 1.015 }}
               whileTap={{ scale: 0.985 }}
-              className={`w-full py-3.5 px-4 rounded-2xl font-black text-sm border-2 border-stone-900 shadow-brutal transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none mt-2 flex items-center justify-center gap-2 ${
+              className={`w-full py-3.5 px-4 rounded-2xl font-black text-sm border-2 border-stone-900 dark:border-stone-950 shadow-brutal dark:shadow-brutal-dark-sm transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none mt-2 flex items-center justify-center gap-2 ${
                 isLoading
-                  ? "bg-amber-200 text-amber-900 cursor-wait"
-                  : "bg-amber-300 hover:bg-amber-400 text-amber-950"
+                  ? "bg-amber-200 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 cursor-wait"
+                  : "bg-amber-300 dark:bg-amber-400 hover:bg-amber-400 dark:hover:bg-amber-300 text-amber-950 dark:text-stone-950"
               }`}
             >
               {isLoading ? (
                 <>
-                  <div className="w-4 h-4 rounded-full border-2 border-stone-900 border-t-transparent animate-spin shrink-0" />
+                  <div className="w-4 h-4 rounded-full border-2 border-stone-900 dark:border-stone-950 border-t-transparent animate-spin shrink-0" />
                   <span>Entering Kitchen...</span>
                 </>
               ) : (
@@ -328,15 +328,15 @@ function LoginForm() {
           </form>
 
           {/* Info note & Signup link */}
-          <div className="pt-3 border-t-2 border-stone-100 flex flex-col gap-2 text-center text-xs font-bold text-stone-600">
+          <div className="pt-3 border-t-2 border-stone-100 dark:border-stone-800 flex flex-col gap-2 text-center text-xs font-bold text-stone-600 dark:text-stone-400">
             <div>
               Don&apos;t have an account?{" "}
-              <Link href="/signup" className="text-stone-950 underline decoration-amber-400 decoration-2 font-black">
+              <Link href="/signup" className="text-stone-950 dark:text-stone-100 underline decoration-amber-400 decoration-2 font-black">
                 Sign Up
               </Link>
             </div>
-            <div className="flex items-center justify-between text-[10px] text-stone-400 pt-1">
-              <Link href="/" className="hover:text-stone-950 transition-colors">
+            <div className="flex items-center justify-between text-[10px] text-stone-400 dark:text-stone-500 pt-1">
+              <Link href="/" className="hover:text-stone-950 dark:hover:text-stone-200 transition-colors">
                 ← Back to Home
               </Link>
               <span>Cloud Synced</span>
@@ -352,8 +352,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5]">
-          <div className="w-8 h-8 rounded-full border-3 border-stone-900 border-t-transparent animate-spin" />
+        <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5] dark:bg-[#141210]">
+          <div className="w-8 h-8 rounded-full border-3 border-stone-900 dark:border-amber-400 border-t-transparent animate-spin" />
         </div>
       }
     >

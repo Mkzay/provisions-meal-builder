@@ -20,14 +20,14 @@ export const MissingUpgradesCard: React.FC<MissingUpgradesCardProps> = ({
   return (
     <div className="space-y-3 pt-2">
       <div className="flex items-center gap-2 px-1">
-        <div className="w-8 h-8 rounded-xl bg-amber-300 border-2 border-stone-900 text-stone-900 flex items-center justify-center shadow-brutal-sm">
-          <Sparkle size={18} weight="fill" className="text-amber-800" />
+        <div className="w-8 h-8 rounded-xl bg-amber-300 dark:bg-amber-950/60 border-2 border-stone-900 dark:border-amber-500/40 text-stone-900 dark:text-amber-300 flex items-center justify-center shadow-brutal-sm dark:shadow-brutal-dark-sm">
+          <Sparkle size={18} weight="fill" className="text-amber-800 dark:text-amber-300" />
         </div>
         <div>
-          <h4 className="font-display font-black text-base text-stone-900 leading-tight">
+          <h4 className="font-display font-black text-base text-stone-900 dark:text-stone-100 leading-tight">
             Upgrade Ideas for Next Time
           </h4>
-          <p className="text-[11px] text-stone-600 font-medium">
+          <p className="text-[11px] text-stone-600 dark:text-stone-400 font-medium">
             Not currently in your kitchen, but would give this meal optimal balance.
           </p>
         </div>
@@ -39,18 +39,18 @@ export const MissingUpgradesCard: React.FC<MissingUpgradesCardProps> = ({
           return (
             <div
               key={upgrade.id}
-              className="p-4 rounded-3xl bg-[#FEF9C3] border-2 border-stone-900 shadow-brutal-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              className="p-4 rounded-3xl bg-[#FEF9C3] dark:bg-stone-900 border-2 border-stone-900 dark:border-amber-500/30 shadow-brutal-sm dark:shadow-brutal-dark-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
             >
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-display font-black text-sm text-stone-900">
+                  <span className="font-display font-black text-sm text-stone-900 dark:text-stone-100">
                     {upgrade.name}
                   </span>
-                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white border border-stone-900 text-stone-800 shadow-xs">
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white dark:bg-stone-800 border border-stone-900 dark:border-stone-700 text-stone-800 dark:text-stone-200 shadow-xs">
                     {upgrade.role === "Protein" ? "Protein Boost" : "Fiber & Greens"}
                   </span>
                 </div>
-                <p className="text-xs text-stone-700 font-medium leading-relaxed">
+                <p className="text-xs text-stone-700 dark:text-stone-300 font-medium leading-relaxed">
                   {upgrade.reason}
                 </p>
               </div>
@@ -66,10 +66,10 @@ export const MissingUpgradesCard: React.FC<MissingUpgradesCardProps> = ({
                     onQuickRestockUpgrade(upgrade.name, upgrade.role);
                     setRestockedIds((prev) => [...prev, upgrade.id]);
                   }}
-                  className={`shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl font-black text-xs border-2 border-stone-900 transition-all ${
+                  className={`shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl font-black text-xs border-2 border-stone-900 dark:border-stone-700 transition-all ${
                     isRestocked
-                      ? "bg-emerald-300 text-stone-900 cursor-default"
-                      : "bg-white hover:bg-stone-50 text-stone-900 shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none"
+                      ? "bg-emerald-300 text-stone-900 dark:bg-emerald-500 dark:text-stone-950 cursor-default"
+                      : "bg-white hover:bg-stone-50 text-stone-900 dark:bg-stone-800 dark:hover:bg-stone-700 dark:text-stone-100 shadow-brutal-sm dark:shadow-brutal-dark-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none"
                   }`}
                 >
                   {isRestocked ? (

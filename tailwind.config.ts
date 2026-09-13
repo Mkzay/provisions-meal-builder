@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -81,9 +82,13 @@ const config: Config = {
       boxShadow: {
         brutal: "4px 4px 0px #1C1917",
         "brutal-sm": "2px 2px 0px #1C1917",
+        "brutal-xs": "1.5px 1.5px 0px #1C1917",
         "brutal-lg": "6px 6px 0px #1C1917",
         "brutal-hover": "5px 5px 0px #1C1917",
         "brutal-pressed": "1px 1px 0px #1C1917",
+        "brutal-dark": "4px 4px 0px #000000",
+        "brutal-dark-sm": "2px 2px 0px #000000",
+        "brutal-white": "3px 3px 0px rgba(255, 255, 255, 0.2)",
         vibrant: "0 10px 30px -10px rgba(245, 158, 11, 0.15), 0 4px 12px -4px rgba(16, 185, 129, 0.12)",
         "vibrant-lg": "0 20px 40px -15px rgba(245, 158, 11, 0.22), 0 10px 20px -8px rgba(244, 63, 94, 0.15)",
         card: "0 2px 10px -2px rgba(28, 25, 23, 0.05), 0 1px 3px -1px rgba(28, 25, 23, 0.03)",

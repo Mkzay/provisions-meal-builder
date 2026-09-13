@@ -200,15 +200,15 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 28 }}
           transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-          className="relative w-full max-w-lg max-h-[92dvh] sm:max-h-[88vh] flex flex-col bg-[#FAF8F5] border-[2.5px] border-stone-900 rounded-t-[28px] sm:rounded-3xl shadow-brutal-lg overflow-hidden"
+          className="relative w-full max-w-lg max-h-[92dvh] sm:max-h-[88vh] flex flex-col bg-[#FAF8F5] dark:bg-[#141210] border-[2.5px] border-stone-900 dark:border-stone-700 rounded-t-[28px] sm:rounded-3xl shadow-brutal-lg dark:shadow-brutal-dark overflow-hidden"
         >
           {/* Mobile Pull Bar */}
-          <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto mt-2.5 mb-0.5 shrink-0" />
+          <div className="sm:hidden w-12 h-1.5 bg-stone-300 dark:bg-stone-700 rounded-full mx-auto mt-2.5 mb-0.5 shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b-2 border-stone-900 shrink-0 bg-[#FAF8F5]">
+          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b-2 border-stone-900 dark:border-stone-700 shrink-0 bg-[#FAF8F5] dark:bg-[#141210]">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-300 border-2 border-stone-900 shadow-brutal-sm flex items-center justify-center text-stone-900 shrink-0">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-300 dark:bg-emerald-950/60 border-2 border-stone-900 dark:border-emerald-700 shadow-brutal-sm dark:shadow-brutal-dark-sm flex items-center justify-center text-stone-900 dark:text-emerald-300 shrink-0">
                 {tabMode === "single" ? (
                   <Plus size={22} weight="bold" />
                 ) : (
@@ -218,11 +218,11 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
               <div>
                 <h3
                   id="add-supply-modal-title"
-                  className="text-lg sm:text-xl font-display font-black tracking-tight text-stone-900"
+                  className="text-lg sm:text-xl font-display font-black tracking-tight text-stone-900 dark:text-stone-100"
                 >
                   Restock Kitchen
                 </h3>
-                <p className="text-xs text-stone-600 mt-0.5 font-medium flex items-center gap-1.5 flex-wrap">
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5 font-medium flex items-center gap-1.5 flex-wrap">
                   <span>Add groceries to {owner ? `${owner}'s` : "your"} kitchen.</span>
                   {onOpenFoodIdeas && (
                     <button
@@ -231,7 +231,7 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
                         onClose();
                         onOpenFoodIdeas();
                       }}
-                      className="text-amber-800 font-bold underline hover:text-amber-900 transition-colors"
+                      className="text-amber-800 dark:text-amber-400 font-bold underline hover:text-amber-900 dark:hover:text-amber-300 transition-colors"
                     >
                       Browse Ideas →
                     </button>
@@ -242,7 +242,7 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
             <button
               onClick={onClose}
               aria-label="Close restock modal"
-              className="p-2 rounded-xl border-2 border-stone-900 bg-white shadow-brutal-sm hover:bg-stone-100 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all shrink-0"
+              className="p-2 rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-brutal-sm dark:shadow-brutal-dark-sm hover:bg-stone-100 dark:hover:bg-stone-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all shrink-0"
             >
               <X size={18} weight="bold" />
             </button>
@@ -252,14 +252,14 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
             {/* Scrollable Form Body */}
             <div className="flex-1 overflow-y-auto no-scrollbar modal-scroll-contain p-5 sm:p-6 space-y-4 min-h-0">
               {/* Single vs Bulk Toggle */}
-              <div className="grid grid-cols-2 gap-2 p-1 bg-stone-200 border-2 border-stone-900 rounded-2xl shadow-brutal-sm">
+              <div className="grid grid-cols-2 gap-2 p-1 bg-stone-200 dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 rounded-2xl shadow-brutal-sm dark:shadow-brutal-dark-sm">
                 <button
                   type="button"
                   onClick={() => setTabMode("single")}
                   className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-black text-xs transition-all ${
                     tabMode === "single"
-                      ? "bg-white text-stone-900 border-2 border-stone-900 shadow-brutal-sm"
-                      : "text-stone-600 hover:text-stone-900"
+                      ? "bg-white dark:bg-amber-400 text-stone-900 dark:text-stone-950 border-2 border-stone-900 dark:border-stone-950 shadow-brutal-sm dark:shadow-brutal-dark-sm"
+                      : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
                   }`}
                 >
                   <Plus size={15} weight="bold" />
@@ -270,8 +270,8 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
                   onClick={() => setTabMode("bulk")}
                   className={`flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-black text-xs transition-all ${
                     tabMode === "bulk"
-                      ? "bg-amber-300 text-stone-900 border-2 border-stone-900 shadow-brutal-sm"
-                      : "text-stone-600 hover:text-stone-900"
+                      ? "bg-amber-300 dark:bg-amber-400 text-stone-900 dark:text-stone-950 border-2 border-stone-900 dark:border-stone-950 shadow-brutal-sm dark:shadow-brutal-dark-sm"
+                      : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
                   }`}
                 >
                   <Package size={15} weight="bold" />
@@ -280,14 +280,14 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
               </div>
 
               {/* Kind Selector */}
-              <div className="grid grid-cols-2 gap-2 p-1.5 bg-stone-100 border-2 border-stone-900 rounded-2xl shadow-brutal-sm">
+              <div className="grid grid-cols-2 gap-2 p-1.5 bg-stone-100 dark:bg-stone-900/80 border-2 border-stone-900 dark:border-stone-700 rounded-2xl shadow-brutal-sm dark:shadow-brutal-dark-sm">
                 <button
                   type="button"
                   onClick={() => setKind("ingredient")}
                   className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs transition-all whitespace-nowrap min-h-[42px] ${
                     kind === "ingredient"
-                      ? "bg-white text-stone-900 border-2 border-stone-900 shadow-brutal-sm"
-                      : "text-stone-600 hover:text-stone-900"
+                      ? "bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 border-2 border-stone-900 dark:border-stone-700 shadow-brutal-sm dark:shadow-brutal-dark-sm"
+                      : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
                   }`}
                 >
                   <BowlFood size={16} weight="duotone" className="shrink-0" />
@@ -298,8 +298,8 @@ export const AddSupplyModal: React.FC<AddSupplyModalProps> = ({
                   onClick={() => setKind("ready_meal")}
                   className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs transition-all whitespace-nowrap min-h-[42px] ${
                     kind === "ready_meal"
-                      ? "bg-white text-stone-900 border-2 border-stone-900 shadow-brutal-sm"
-                      : "text-stone-600 hover:text-stone-900"
+                      ? "bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 border-2 border-stone-900 dark:border-stone-700 shadow-brutal-sm dark:shadow-brutal-dark-sm"
+                      : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
                   }`}
                 >
                   <CookingPot size={16} weight="duotone" className="shrink-0" />

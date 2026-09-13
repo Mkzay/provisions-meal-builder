@@ -8,6 +8,7 @@ import {
   User,
 } from "@/components/icons";
 import { ProvisionsLogo } from "@/components/ProvisionsLogo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import React from "react";
 
 interface AppHeaderProps {
@@ -143,6 +144,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               </button>
             )}
 
+            {/* Quick Dark/Light Theme Toggle */}
+            <ThemeToggle className="shrink-0 h-9 w-9 lg:h-10 lg:w-10" />
+
             {/* Personal Hub Button (Unified Eating Goal & Weight Log) */}
             {(onOpenPersonalHub || onOpenProfile || onOpenProgressLog) && (
               <button
@@ -168,9 +172,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       </header>
 
       {/* 2. Page Welcome & Daily Pulse (Distinct hero section with its own clear dividing boundary) */}
-      <section className="w-full pt-4 sm:pt-5 pb-5 sm:pb-6 border-b-2 border-stone-900/10 mb-5 sm:mb-7">
+      <section className="w-full pt-4 sm:pt-5 pb-5 sm:pb-6 border-b-2 border-stone-900/10 dark:border-stone-800 mb-5 sm:mb-7">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-black tracking-tight text-stone-900 leading-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-black tracking-tight text-stone-900 dark:text-stone-100 leading-tight">
             {greeting.text}
           </h1>
           <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2 sm:px-2.5 py-0.5 rounded-full bg-amber-300 text-stone-900 border border-stone-900 shadow-brutal-xs">
@@ -178,7 +182,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             <span>Studio</span>
           </span>
         </div>
-        <p className="text-[13px] sm:text-sm lg:text-base text-stone-700 font-semibold mt-1 sm:mt-1.5 leading-relaxed max-w-2xl">
+        <p className="text-[13px] sm:text-sm lg:text-base text-stone-700 dark:text-stone-300 font-semibold mt-1 sm:mt-1.5 leading-relaxed max-w-2xl">
           {greeting.subtitle}
         </p>
       </section>

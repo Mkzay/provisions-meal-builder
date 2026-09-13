@@ -140,7 +140,7 @@ export default function MealBuilderAppPage() {
         )}
 
         {currentStep === "meal_type" && (
-          <div className="lg:hidden mb-6 sm:mb-8 pb-6 sm:pb-8 border-b-2 border-stone-900/10">
+          <div className="lg:hidden mb-6 sm:mb-8 pb-6 sm:pb-8 border-b-2 border-stone-900/10 dark:border-stone-800">
             <PantryStatCard
               readyMealsCount={availableReadyMeals.length}
               ingredientsCount={catalogue.ingredients.filter((i) => i.available).length}
@@ -178,7 +178,7 @@ export default function MealBuilderAppPage() {
               <div className="mb-4">
                 <button
                   onClick={handleResetToHome}
-                  className="inline-flex items-center gap-1.5 text-xs font-black text-stone-900 bg-white border-2 border-stone-900 px-3.5 py-2 rounded-xl shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none transition-all"
+                  className="inline-flex items-center gap-1.5 text-xs font-black text-stone-900 dark:text-stone-100 bg-white dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 px-3.5 py-2 rounded-xl shadow-brutal-xs dark:shadow-brutal-dark-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none transition-all"
                   aria-label="Back to meal selection"
                 >
                   <ArrowLeft size={15} weight="bold" />

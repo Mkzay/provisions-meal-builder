@@ -82,28 +82,28 @@ export const MainIngredientGrid: React.FC<MainIngredientGridProps> = ({
         {tags.map((t) => {
           if (t === "High Fiber") {
             return (
-              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 border border-emerald-800/40">
+              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-300 border border-emerald-800/40 dark:border-emerald-600/50">
                 🌾 Fiber
               </span>
             );
           }
           if (t === "High Protein") {
             return (
-              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-sky-100 text-sky-900 border border-sky-800/40">
+              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950/80 text-sky-900 dark:text-sky-300 border border-sky-800/40 dark:border-sky-600/50">
                 🍗 Protein
               </span>
             );
           }
           if (t === "High Carb") {
             return (
-              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-800/40">
+              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border border-amber-800/40 dark:border-amber-600/50">
                 ⚡ Carb
               </span>
             );
           }
           if (t === "High Fat") {
             return (
-              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-rose-100 text-rose-900 border border-rose-800/40">
+              <span key={t} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-rose-100 dark:bg-rose-950/80 text-rose-900 dark:text-rose-300 border border-rose-800/40 dark:border-rose-600/50">
                 🥑 Fat
               </span>
             );
@@ -119,21 +119,21 @@ export const MainIngredientGrid: React.FC<MainIngredientGridProps> = ({
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-black text-stone-900 py-2 px-3.5 rounded-xl bg-white border-2 border-stone-900 shadow-brutal-sm hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all active:translate-x-[1px] active:translate-y-[1px]"
+          className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-black text-stone-900 dark:text-stone-100 py-2 px-3.5 rounded-xl bg-white dark:bg-stone-900 border-2 border-stone-900 dark:border-stone-700 shadow-brutal-sm dark:shadow-brutal-dark-sm hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all active:translate-x-[1px] active:translate-y-[1px]"
         >
           <ArrowLeft size={16} weight="bold" />
           <span>Back to modes</span>
         </button>
-        <span className="text-xs font-black px-2.5 py-1 rounded-full bg-emerald-200 text-stone-900 border-2 border-stone-900 shadow-brutal-sm">
+        <span className="text-xs font-black px-2.5 py-1 rounded-full bg-emerald-200 dark:bg-emerald-950 text-stone-900 dark:text-emerald-200 border-2 border-stone-900 dark:border-emerald-600/60 shadow-brutal-sm">
           {mains.length} {mains.length === 1 ? "base available" : "bases available"}
         </span>
       </div>
 
       <div className="px-1">
-        <h3 className="text-2xl sm:text-3xl font-display font-black text-stone-900 tracking-tight">
+        <h3 className="text-2xl sm:text-3xl font-display font-black text-stone-900 dark:text-stone-100 tracking-tight">
           What are you craving?
         </h3>
-        <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
+        <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 font-medium mt-0.5">
           Pick your anchor base. We&apos;ll automatically match wholesome proteins, greens, and sides next.
         </p>
       </div>
@@ -153,14 +153,14 @@ export const MainIngredientGrid: React.FC<MainIngredientGridProps> = ({
                 }
                 onSelectMain(main);
               }}
-              className="flex flex-col items-center justify-center p-4 sm:p-5 min-h-[135px] rounded-3xl border-2 border-stone-900 bg-white shadow-brutal-sm hover:shadow-brutal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 transition-all text-center group active:translate-x-[1px] active:translate-y-[1px]"
+              className="flex flex-col items-center justify-center p-4 sm:p-5 min-h-[135px] rounded-3xl border-2 border-stone-900 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-brutal-sm dark:shadow-brutal-dark-sm hover:shadow-brutal dark:hover:shadow-brutal-dark focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 transition-all text-center group active:translate-x-[1px] active:translate-y-[1px]"
             >
               <div
-                className={`w-13 h-13 rounded-2xl ${visual.bg} border-2 border-stone-900 flex items-center justify-center mb-2.5 shadow-brutal-sm group-hover:scale-105 transition-transform`}
+                className={`w-13 h-13 rounded-2xl ${visual.bg} dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 flex items-center justify-center mb-2.5 shadow-brutal-sm group-hover:scale-105 transition-transform`}
               >
                 {visual.icon}
               </div>
-              <span className="font-display font-black text-stone-900 text-sm sm:text-base leading-snug">
+              <span className="font-display font-black text-stone-900 dark:text-stone-100 text-sm sm:text-base leading-snug">
                 {main.name}
               </span>
               {renderMicroTags(main.nutrientTags)}

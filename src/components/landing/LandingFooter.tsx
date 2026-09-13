@@ -23,24 +23,24 @@ export const LandingFooter: React.FC = () => {
   };
 
   return (
-    <footer className="bg-stone-900 text-stone-100 border-t-2 border-stone-900">
+    <footer className="bg-stone-900 dark:bg-stone-950 text-stone-100 border-t-2 border-stone-900 dark:border-stone-700">
       {/* Pre-Footer Action Banner */}
-      <div className="bg-amber-300 text-stone-950 py-12 sm:py-16 border-b-2 border-stone-900">
+      <div className="bg-amber-300 dark:bg-[#1C1815] text-stone-950 dark:text-stone-100 py-12 sm:py-16 border-b-2 border-stone-900 dark:border-stone-700">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <span className="inline-block text-xs font-black uppercase tracking-wider bg-white px-3 py-1 rounded-full border-2 border-stone-900 shadow-brutal-xs">
+          <span className="inline-block text-xs font-black uppercase tracking-wider bg-white dark:bg-stone-800 text-stone-900 dark:text-amber-300 px-3 py-1 rounded-full border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm">
             Start Right Now
           </span>
-          <h2 className="font-display font-black text-3xl sm:text-5xl tracking-tight leading-tight">
+          <h2 className="font-display font-black text-3xl sm:text-5xl tracking-tight leading-tight text-stone-950 dark:text-stone-100">
             Your kitchen is already stocked. <br className="hidden sm:block" />
             Let&apos;s build tonight&apos;s dinner.
           </h2>
-          <p className="text-stone-800 text-sm sm:text-base font-semibold max-w-xl mx-auto">
+          <p className="text-stone-800 dark:text-stone-300 text-sm sm:text-base font-semibold max-w-xl mx-auto">
             No grocery runs required. See your in-stock staples come together in an authentic Nigerian meal within 30 seconds.
           </p>
           <div className="pt-2">
             <Link
               href="/app"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-emerald-400 hover:bg-emerald-500 text-stone-950 text-xs sm:text-sm font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal hover:shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.98] transition-all text-center leading-snug"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-emerald-400 hover:bg-emerald-500 text-stone-950 text-xs sm:text-sm font-black uppercase tracking-wider border-2 border-stone-900 dark:border-stone-700 shadow-brutal dark:shadow-brutal-dark hover:shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.98] transition-all text-center leading-snug"
             >
               <span>Launch Provisions App</span>
               <span className="text-base sm:text-lg">→</span>

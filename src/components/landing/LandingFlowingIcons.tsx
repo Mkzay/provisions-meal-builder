@@ -131,7 +131,7 @@ export const LandingFlowingIcons: React.FC = () => {
         <motion.div
           key={token.id}
           animate={token.floatAnim}
-          className={`absolute ${token.pos} hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border-2 border-stone-900 shadow-brutal-xs text-[10px] font-black uppercase tracking-wider ${token.bg} ${token.textColor} opacity-85 hover:opacity-100 transition-opacity`}
+          className={`absolute ${token.pos} hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm text-[10px] font-black uppercase tracking-wider ${token.bg} ${token.textColor} opacity-85 hover:opacity-100 transition-opacity`}
         >
           {token.icon}
           <span>{token.label}</span>

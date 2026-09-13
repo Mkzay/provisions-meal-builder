@@ -64,14 +64,14 @@ export const LandingInteractiveDemo: React.FC = () => {
   const currentProtein = isOutOfPrimaryProtein ? activeDish.proteinAlt : activeDish.protein;
 
   return (
-    <section id="demo" className="scroll-mt-16 sm:scroll-mt-20 py-16 sm:py-24 border-b-2 border-stone-900 bg-white">
+    <section id="demo" className="scroll-mt-16 sm:scroll-mt-20 py-16 sm:py-24 border-b-2 border-stone-900 dark:border-stone-700 bg-white dark:bg-[#141210]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
           <motion.span
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="inline-block text-xs font-black uppercase tracking-wider text-amber-800 bg-amber-200 px-3 py-1 rounded-full border border-stone-900 mb-3 shadow-brutal-xs"
+            className="inline-block text-xs font-black uppercase tracking-wider text-amber-800 dark:text-amber-300 bg-amber-200 dark:bg-amber-950/80 px-3 py-1 rounded-full border border-stone-900 dark:border-stone-700 mb-3 shadow-brutal-xs dark:shadow-brutal-dark-sm"
           >
             Interactive Live Demo
           </motion.span>
@@ -80,11 +80,11 @@ export const LandingInteractiveDemo: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.45 }}
-            className="font-display font-black text-2xl sm:text-4xl text-stone-950 tracking-tight mb-4"
+            className="font-display font-black text-2xl sm:text-4xl text-stone-950 dark:text-stone-100 tracking-tight mb-4"
           >
             See the Nigerian Pairing Engine in action.
           </motion.h2>
-          <p className="text-sm sm:text-base text-stone-600 font-medium">
+          <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 font-medium">
             Select a kitchen base below to watch how Provisions pairs proteins, sides, and nutritional balance in real time.
           </p>
         </div>
@@ -103,10 +103,10 @@ export const LandingInteractiveDemo: React.FC = () => {
                   setSelectedId(dish.id);
                   setIsOutOfPrimaryProtein(false);
                 }}
-                className={`px-4 py-2.5 rounded-2xl border-2 border-stone-900 text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
+                className={`px-4 py-2.5 rounded-2xl border-2 border-stone-900 dark:border-stone-700 text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
                   isSelected
-                    ? "bg-amber-300 text-stone-950 shadow-brutal translate-x-[-1px] translate-y-[-1px]"
-                    : "bg-stone-100 text-stone-600 hover:bg-stone-200 shadow-brutal-xs"
+                    ? "bg-amber-300 dark:bg-amber-400 text-stone-950 shadow-brutal dark:shadow-brutal-dark translate-x-[-1px] translate-y-[-1px]"
+                    : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm"
                 }`}
               >
                 <span className="text-lg">{dish.emoji}</span>
@@ -123,13 +123,13 @@ export const LandingInteractiveDemo: React.FC = () => {
             <motion.div
               animate={{ y: [-4, 4, -4], rotate: [-2, 1, -2] }}
               transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-              className="w-56 p-3.5 rounded-2xl bg-white border-2 border-stone-900 shadow-brutal-xs"
+              className="w-56 p-3.5 rounded-2xl bg-white dark:bg-stone-900 border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm"
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-base">🇳🇬</span>
-                <span className="text-[11px] font-black uppercase text-stone-900">Cultural Blueprints</span>
+                <span className="text-[11px] font-black uppercase text-stone-900 dark:text-stone-100">Cultural Blueprints</span>
               </div>
-              <p className="text-[10px] text-stone-600 font-medium leading-relaxed">
+              <p className="text-[10px] text-stone-600 dark:text-stone-400 font-medium leading-relaxed">
                 Authentic Nigerian pairings. No awkward AI suggestions.
               </p>
             </motion.div>
@@ -137,13 +137,13 @@ export const LandingInteractiveDemo: React.FC = () => {
             <motion.div
               animate={{ y: [5, -5, 5], rotate: [1.5, -1.5, 1.5] }}
               transition={{ repeat: Infinity, duration: 5.4, ease: "easeInOut", delay: 0.4 }}
-              className="w-56 p-3.5 rounded-2xl bg-amber-100 border-2 border-stone-900 shadow-brutal-xs"
+              className="w-56 p-3.5 rounded-2xl bg-amber-100 dark:bg-amber-950/70 border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm"
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-base">♻️</span>
-                <span className="text-[11px] font-black uppercase text-stone-900">Leftover Memory</span>
+                <span className="text-[11px] font-black uppercase text-stone-900 dark:text-amber-200">Leftover Memory</span>
               </div>
-              <p className="text-[10px] text-stone-700 font-medium leading-relaxed">
+              <p className="text-[10px] text-stone-700 dark:text-amber-300/80 font-medium leading-relaxed">
                 Dinner leftovers auto-promote into tomorrow&apos;s 2-minute lunch.
               </p>
             </motion.div>
@@ -154,13 +154,13 @@ export const LandingInteractiveDemo: React.FC = () => {
             <motion.div
               animate={{ y: [-5, 5, -5], rotate: [2, -1, 2] }}
               transition={{ repeat: Infinity, duration: 4.6, ease: "easeInOut", delay: 0.2 }}
-              className="w-56 p-3.5 rounded-2xl bg-emerald-100 border-2 border-stone-900 shadow-brutal-xs"
+              className="w-56 p-3.5 rounded-2xl bg-emerald-100 dark:bg-emerald-950/70 border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm"
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-base">⚡</span>
-                <span className="text-[11px] font-black uppercase text-stone-900">In-Stock Only</span>
+                <span className="text-[11px] font-black uppercase text-stone-900 dark:text-emerald-200">In-Stock Only</span>
               </div>
-              <p className="text-[10px] text-stone-700 font-medium leading-relaxed">
+              <p className="text-[10px] text-stone-700 dark:text-emerald-300/80 font-medium leading-relaxed">
                 Zero shopping runs. Built from whatever you currently have.
               </p>
             </motion.div>
@@ -168,20 +168,20 @@ export const LandingInteractiveDemo: React.FC = () => {
             <motion.div
               animate={{ y: [4, -4, 4], rotate: [-1.5, 2, -1.5] }}
               transition={{ repeat: Infinity, duration: 5.8, ease: "easeInOut", delay: 0.6 }}
-              className="w-56 p-3.5 rounded-2xl bg-purple-100 border-2 border-stone-900 shadow-brutal-xs"
+              className="w-56 p-3.5 rounded-2xl bg-purple-100 dark:bg-purple-950/70 border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm"
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-base">🥗</span>
-                <span className="text-[11px] font-black uppercase text-stone-900">Balanced Nutrition</span>
+                <span className="text-[11px] font-black uppercase text-stone-900 dark:text-purple-200">Balanced Nutrition</span>
               </div>
-              <p className="text-[10px] text-stone-700 font-medium leading-relaxed">
+              <p className="text-[10px] text-stone-700 dark:text-purple-300/80 font-medium leading-relaxed">
                 Automatic tracking for high protein, fiber, and iron.
               </p>
             </motion.div>
           </div>
 
           {/* Live Result Card with Framer Motion Transitions */}
-          <div className="w-full max-w-3xl bg-amber-50 rounded-3xl border-2 border-stone-900 p-5 sm:p-8 shadow-brutal">
+          <div className="w-full max-w-3xl bg-amber-50 dark:bg-stone-900 rounded-3xl border-2 border-stone-900 dark:border-stone-700 p-5 sm:p-8 shadow-brutal dark:shadow-brutal-dark">
           <AnimatePresence mode="wait">
             <motion.div
               key={`${activeDish.id}-${isOutOfPrimaryProtein}`}
@@ -190,20 +190,20 @@ export const LandingInteractiveDemo: React.FC = () => {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-5 border-b-2 border-stone-900/15">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-5 border-b-2 border-stone-900/15 dark:border-stone-700">
                 <div>
-                  <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-stone-500 dark:text-stone-400">
                     Curated Combination
                   </span>
-                  <h3 className="font-display font-black text-xl sm:text-2xl text-stone-950 mt-0.5">
+                  <h3 className="font-display font-black text-xl sm:text-2xl text-stone-950 dark:text-stone-100 mt-0.5">
                     {activeDish.main} + {currentProtein}
                   </h3>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-stone-600 bg-white px-2.5 py-1.5 rounded-xl border border-stone-900 shadow-brutal-xs">
+                  <span className="text-xs font-bold text-stone-600 dark:text-stone-300 bg-white dark:bg-stone-800 px-2.5 py-1.5 rounded-xl border border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm">
                     ⏱️ {activeDish.time}
                   </span>
-                  <span className="text-xs font-bold text-stone-600 bg-white px-2.5 py-1.5 rounded-xl border border-stone-900 shadow-brutal-xs">
+                  <span className="text-xs font-bold text-stone-600 dark:text-stone-300 bg-white dark:bg-stone-800 px-2.5 py-1.5 rounded-xl border border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm">
                     🧼 {activeDish.cleanup}
                   </span>
                 </div>
@@ -211,51 +211,51 @@ export const LandingInteractiveDemo: React.FC = () => {
 
               {/* Breakdown Items */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-5">
-                <div className="bg-white p-3.5 rounded-2xl border-2 border-stone-900 shadow-brutal-xs">
-                  <span className="block text-[10px] font-black uppercase text-stone-500">Base / Main</span>
-                  <span className="font-black text-stone-900 text-sm mt-1 block">{activeDish.main}</span>
-                  <span className="inline-block text-[10px] font-bold text-emerald-700 mt-1 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-300">
+                <div className="bg-white dark:bg-stone-800/90 p-3.5 rounded-2xl border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm">
+                  <span className="block text-[10px] font-black uppercase text-stone-500 dark:text-stone-400">Base / Main</span>
+                  <span className="font-black text-stone-900 dark:text-stone-100 text-sm mt-1 block">{activeDish.main}</span>
+                  <span className="inline-block text-[10px] font-bold text-emerald-700 dark:text-emerald-300 mt-1 bg-emerald-50 dark:bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-800">
                     ✓ In Kitchen Pantry
                   </span>
                 </div>
 
-                <div className="bg-white p-3.5 rounded-2xl border-2 border-stone-900 shadow-brutal-xs">
-                  <span className="block text-[10px] font-black uppercase text-stone-500">Curated Protein</span>
-                  <span className="font-black text-stone-900 text-sm mt-1 block">{currentProtein}</span>
-                  <span className="inline-block text-[10px] font-bold text-emerald-700 mt-1 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-300">
+                <div className="bg-white dark:bg-stone-800/90 p-3.5 rounded-2xl border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm">
+                  <span className="block text-[10px] font-black uppercase text-stone-500 dark:text-stone-400">Curated Protein</span>
+                  <span className="font-black text-stone-900 dark:text-stone-100 text-sm mt-1 block">{currentProtein}</span>
+                  <span className="inline-block text-[10px] font-bold text-emerald-700 dark:text-emerald-300 mt-1 bg-emerald-50 dark:bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-800">
                     ✓ High Protein
                   </span>
                 </div>
 
-                <div className="bg-white p-3.5 rounded-2xl border-2 border-stone-900 shadow-brutal-xs">
-                  <span className="block text-[10px] font-black uppercase text-stone-500">Sides / Balance</span>
-                  <span className="font-black text-stone-900 text-sm mt-1 block">{activeDish.side}</span>
-                  <span className="inline-block text-[10px] font-bold text-amber-800 mt-1 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">
+                <div className="bg-white dark:bg-stone-800/90 p-3.5 rounded-2xl border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm">
+                  <span className="block text-[10px] font-black uppercase text-stone-500 dark:text-stone-400">Sides / Balance</span>
+                  <span className="font-black text-stone-900 dark:text-stone-100 text-sm mt-1 block">{activeDish.side}</span>
+                  <span className="inline-block text-[10px] font-bold text-amber-800 dark:text-amber-300 mt-1 bg-amber-100 dark:bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-300 dark:border-amber-800">
                     Authentic Pairing
                   </span>
                 </div>
               </div>
 
               {/* Intelligent Simulation Toggle */}
-              <div className="bg-white/90 p-3.5 rounded-2xl border border-stone-900 mb-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div className="bg-white/90 dark:bg-stone-800/80 p-3.5 rounded-2xl border border-stone-900 dark:border-stone-700 mb-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <span className="text-sm">🔄</span>
-                  <span className="text-xs font-bold text-stone-800">
+                  <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
                     Simulate: What if you run out of {activeDish.protein}?
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsOutOfPrimaryProtein(!isOutOfPrimaryProtein)}
-                  className="text-xs font-black px-3.5 py-2 rounded-xl border border-stone-900 bg-amber-200 hover:bg-amber-300 shadow-brutal-xs active:translate-x-0.5 active:translate-y-0.5 transition-all text-center"
+                  className="text-xs font-black px-3.5 py-2 rounded-xl border border-stone-900 dark:border-stone-700 bg-amber-200 dark:bg-amber-400 hover:bg-amber-300 dark:hover:bg-amber-300 text-stone-950 shadow-brutal-xs dark:shadow-brutal-dark-sm active:translate-x-0.5 active:translate-y-0.5 transition-all text-center"
                 >
                   {isOutOfPrimaryProtein ? "Restock Primary" : "Test Fallback Match"}
                 </button>
               </div>
 
               {/* Culinary Note Quote */}
-              <div className="p-4 bg-amber-200/60 rounded-2xl border-2 border-stone-900 mb-6 text-xs text-stone-800 font-medium leading-relaxed">
-                <span className="font-black text-stone-950 block mb-1">👩🏾‍🍳 Culinary Intelligence Note:</span>
+              <div className="p-4 bg-amber-200/60 dark:bg-amber-950/40 rounded-2xl border-2 border-stone-900 dark:border-stone-700 mb-6 text-xs text-stone-800 dark:text-stone-300 font-medium leading-relaxed">
+                <span className="font-black text-stone-950 dark:text-amber-300 block mb-1">👩🏾‍🍳 Culinary Intelligence Note:</span>
                 &ldquo;{activeDish.note}&rdquo;
               </div>
             </motion.div>
@@ -266,7 +266,7 @@ export const LandingInteractiveDemo: React.FC = () => {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="inline-block w-full sm:w-auto">
               <Link
                 href="/app"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-8 py-3.5 rounded-2xl bg-emerald-400 hover:bg-emerald-500 text-stone-950 text-xs sm:text-sm font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal hover:shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-center leading-snug"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-8 py-3.5 rounded-2xl bg-emerald-400 hover:bg-emerald-500 text-stone-950 text-xs sm:text-sm font-black uppercase tracking-wider border-2 border-stone-900 dark:border-stone-700 shadow-brutal dark:shadow-brutal-dark hover:shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-center leading-snug"
               >
                 <span>Build Your Next Meal in Provisions</span>
                 <span className="text-base shrink-0">→</span>

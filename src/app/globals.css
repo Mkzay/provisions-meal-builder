@@ -7,6 +7,12 @@
   --foreground: #1C1917;
 }
 
+:root.dark,
+.dark {
+  --background: #141210;
+  --foreground: #F5F2EB;
+}
+
 body {
   background-color: var(--background);
   background-image: 
@@ -21,6 +27,16 @@ body {
   user-select: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+.dark body,
+html.dark body {
+  background-color: #141210;
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(217, 119, 6, 0.14) 0%, transparent 40%),
+    radial-gradient(circle at 85% 20%, rgba(16, 185, 129, 0.10) 0%, transparent 40%),
+    radial-gradient(circle at 50% 85%, rgba(244, 63, 94, 0.10) 0%, transparent 45%);
+  color: #F5F2EB;
 }
 
 h1, h2, h3, h4, .font-heading {

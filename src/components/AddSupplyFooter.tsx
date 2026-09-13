@@ -23,11 +23,11 @@ export const AddSupplyFooter: React.FC<AddSupplyFooterProps> = ({
   onAddSingle,
 }) => {
   return (
-    <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 bg-stone-100/95 shrink-0 flex items-center justify-between gap-2.5 safe-area-bottom">
+    <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 dark:border-stone-700 bg-stone-100/95 dark:bg-stone-900/95 shrink-0 flex items-center justify-between gap-2.5 safe-area-bottom">
       <button
         type="button"
         onClick={onClose}
-        className="min-h-[44px] px-3.5 py-2.5 rounded-xl border-2 border-stone-900 bg-white font-bold text-xs text-stone-700 hover:bg-stone-100 transition-all"
+        className="min-h-[44px] px-3.5 py-2.5 rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-white dark:bg-stone-800 font-bold text-xs text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-all"
       >
         Cancel
       </button>
@@ -39,7 +39,7 @@ export const AddSupplyFooter: React.FC<AddSupplyFooterProps> = ({
               type="button"
               disabled={isSubmitting || !name.trim()}
               onClick={() => onAddSingle(true)}
-              className="min-h-[44px] inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border-2 border-stone-900 font-black text-xs bg-amber-300 hover:bg-amber-200 text-stone-900 shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
+              className="min-h-[44px] inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border-2 border-stone-900 dark:border-stone-700 font-black text-xs bg-amber-300 dark:bg-amber-400 hover:bg-amber-200 dark:hover:bg-amber-300 text-stone-900 dark:text-stone-950 shadow-brutal-sm dark:shadow-brutal-dark-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
             >
               <Plus size={15} weight="bold" />
               <span>Add & Next</span>
@@ -47,7 +47,7 @@ export const AddSupplyFooter: React.FC<AddSupplyFooterProps> = ({
             <button
               type="submit"
               disabled={isSubmitting || !name.trim()}
-              className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-stone-900 font-black text-xs bg-emerald-400 hover:bg-emerald-300 text-stone-900 shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
+              className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-stone-900 dark:border-stone-700 font-black text-xs bg-emerald-400 dark:bg-emerald-500 hover:bg-emerald-300 dark:hover:bg-emerald-400 text-stone-900 dark:text-stone-950 shadow-brutal-sm dark:shadow-brutal-dark-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
             >
               {success ? (
                 <>
@@ -63,7 +63,7 @@ export const AddSupplyFooter: React.FC<AddSupplyFooterProps> = ({
           <button
             type="submit"
             disabled={isSubmitting || itemsCount === 0}
-            className="min-h-[44px] inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl border-2 border-stone-900 font-black text-xs bg-emerald-400 hover:bg-emerald-300 text-stone-900 shadow-brutal-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
+            className="min-h-[44px] inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl border-2 border-stone-900 dark:border-stone-700 font-black text-xs bg-emerald-400 dark:bg-emerald-500 hover:bg-emerald-300 dark:hover:bg-emerald-400 text-stone-900 dark:text-stone-950 shadow-brutal-sm dark:shadow-brutal-dark-sm active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all disabled:opacity-50"
           >
             {success ? (
               <>

@@ -82,20 +82,20 @@ export default function SignupPage() {
   )}`;
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 bg-[#FAF8F5] overflow-x-clip select-none py-10">
+    <div className="relative min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 bg-[#FAF8F5] dark:bg-[#141210] overflow-x-clip select-none py-10">
       <CulinaryBackdropSvg />
 
       {/* Retro Dotted Background Grid */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.05] z-0"
+        className="absolute inset-0 pointer-events-none opacity-[0.05] dark:opacity-[0.12] text-stone-900 dark:text-stone-100 z-0"
         style={{
-          backgroundImage: "radial-gradient(#1C1917 1.5px, transparent 1.5px)",
+          backgroundImage: "radial-gradient(currentColor 1.5px, transparent 1.5px)",
           backgroundSize: "24px 24px",
         }}
       />
 
       {/* Ambient Center Glow */}
-      <div className="absolute w-[360px] sm:w-[540px] h-[360px] sm:h-[540px] rounded-full bg-emerald-200/40 blur-3xl pointer-events-none z-0" />
+      <div className="absolute w-[360px] sm:w-[540px] h-[360px] sm:h-[540px] rounded-full bg-emerald-200/40 dark:bg-emerald-500/10 blur-3xl pointer-events-none z-0" />
 
       {/* Floating Kitchen Stickers */}
       <div className="absolute inset-0 pointer-events-none max-w-6xl mx-auto overflow-hidden z-10">
@@ -158,16 +158,16 @@ export default function SignupPage() {
         transition={{ type: "spring", stiffness: 320, damping: 24, delay: 0.15 }}
         className="w-full max-w-md z-20"
       >
-        <div className="relative p-5 sm:p-7 bg-white rounded-3xl border-[2.5px] border-stone-900 shadow-brutal-lg space-y-5">
+        <div className="relative p-5 sm:p-7 bg-white dark:bg-stone-900/90 rounded-3xl border-[2.5px] border-stone-900 dark:border-stone-700 shadow-brutal-lg dark:shadow-brutal-dark space-y-5">
           {/* Brand Header */}
           <div className="text-center space-y-1.5">
             <div className="flex justify-center mb-1">
               <ProvisionsLogo size={46} />
             </div>
-            <h1 className="font-display text-2xl sm:text-3xl font-black text-stone-900 tracking-tight">
+            <h1 className="font-display text-2xl sm:text-3xl font-black text-stone-900 dark:text-stone-100 tracking-tight">
               Create Your Kitchen
             </h1>
-            <p className="text-xs sm:text-sm text-stone-600 font-medium">
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 font-medium">
               Join Provisions to organize your household meals.
             </p>
           </div>
@@ -176,20 +176,20 @@ export default function SignupPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-4 bg-amber-100/90 border-2 border-stone-900 rounded-2xl shadow-brutal-xs space-y-2.5"
+            className="p-4 bg-amber-100/90 dark:bg-amber-950/40 border-2 border-stone-900 dark:border-stone-700 rounded-2xl shadow-brutal-xs space-y-2.5"
           >
             <div className="flex items-center gap-2">
               <span className="text-lg">🔒</span>
-              <span className="text-xs font-black uppercase tracking-wide text-amber-950">
+              <span className="text-xs font-black uppercase tracking-wide text-amber-950 dark:text-amber-300">
                 Signup is Currently Disabled
               </span>
             </div>
-            <p className="text-xs text-stone-800 font-medium leading-relaxed">
+            <p className="text-xs text-stone-800 dark:text-stone-300 font-medium leading-relaxed">
               New account registration is currently invite-only. If you would like to test Provisions for your kitchen, please reach out directly to the developer:
             </p>
             <a
               href={mailtoLink}
-              className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-amber-300 hover:bg-amber-400 text-stone-950 text-xs font-black border-2 border-stone-900 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.98] transition-all text-center"
+              className="w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-amber-300 dark:bg-amber-400 hover:bg-amber-400 dark:hover:bg-amber-300 text-stone-950 dark:text-stone-950 text-xs font-black border-2 border-stone-900 dark:border-stone-950 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.98] transition-all text-center"
             >
               <Envelope size={16} weight="bold" />
               <span className="truncate">Email Developer: @{developerEmail}</span>
@@ -205,7 +205,7 @@ export default function SignupPage() {
             className="space-y-3 pt-1"
           >
             <div className="space-y-1">
-              <label className="block text-[11px] font-black uppercase tracking-wider text-stone-700">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-stone-700 dark:text-stone-300">
                 Household Name
               </label>
               <input
@@ -213,13 +213,13 @@ export default function SignupPage() {
                 value={household}
                 onChange={(e) => setHousehold(e.target.value)}
                 placeholder="e.g. The Adelekes Kitchen"
-                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all"
+                className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 rounded-xl text-xs font-bold text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white dark:focus:bg-stone-700 transition-all"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-black uppercase tracking-wider text-stone-700">
+                <label className="block text-[11px] font-black uppercase tracking-wider text-stone-700 dark:text-stone-300">
                   Your Name
                 </label>
                 <input
@@ -227,12 +227,12 @@ export default function SignupPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Esther"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 rounded-xl text-xs font-bold text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white dark:focus:bg-stone-700 transition-all"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-black uppercase tracking-wider text-stone-700">
+                <label className="block text-[11px] font-black uppercase tracking-wider text-stone-700 dark:text-stone-300">
                   Email
                 </label>
                 <input
@@ -240,13 +240,13 @@ export default function SignupPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@email.com"
-                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all"
+                  className="w-full px-3.5 py-2.5 bg-[#FAF8F5] dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 rounded-xl text-xs font-bold text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white dark:focus:bg-stone-700 transition-all"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="block text-[11px] font-black uppercase tracking-wider text-stone-700">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-stone-700 dark:text-stone-300">
                 Preferred Password
               </label>
               <div className="relative">
@@ -255,13 +255,13 @@ export default function SignupPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 pr-10 bg-[#FAF8F5] border-2 border-stone-900 rounded-xl text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition-all"
+                  className="w-full px-3.5 py-2.5 pr-10 bg-[#FAF8F5] dark:bg-stone-800 border-2 border-stone-900 dark:border-stone-700 rounded-xl text-xs font-bold text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white dark:focus:bg-stone-700 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-stone-500 hover:text-stone-900 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
                 >
                   {showPassword ? <EyeSlash size={16} weight="bold" /> : <Eye size={16} weight="bold" />}
                 </button>
@@ -272,7 +272,7 @@ export default function SignupPage() {
             <div className="pt-2 space-y-2">
               <button
                 type="submit"
-                className="w-full py-3 px-4 rounded-2xl font-black text-xs uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs bg-stone-200 text-stone-500 cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 rounded-2xl font-black text-xs uppercase tracking-wider border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 cursor-not-allowed flex items-center justify-center gap-2"
                 title="Public signups are currently closed. Use the email link to request test access."
               >
                 <span>Sign Up (Invite Only)</span>
@@ -281,14 +281,14 @@ export default function SignupPage() {
           </form>
 
           {/* Links back to Login and Landing Page */}
-          <div className="pt-3 border-t-2 border-stone-100 flex flex-col sm:flex-row items-center justify-between text-xs font-bold text-stone-600 gap-2">
+          <div className="pt-3 border-t-2 border-stone-100 dark:border-stone-800 flex flex-col sm:flex-row items-center justify-between text-xs font-bold text-stone-600 dark:text-stone-400 gap-2">
             <span>
               Already have an account?{" "}
-              <Link href="/login" className="text-stone-950 underline decoration-amber-400 decoration-2 font-black">
+              <Link href="/login" className="text-stone-950 dark:text-stone-100 underline decoration-amber-400 decoration-2 font-black">
                 Sign In
               </Link>
             </span>
-            <Link href="/" className="text-stone-500 hover:text-stone-950 transition-colors text-[11px]">
+            <Link href="/" className="text-stone-500 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-100 transition-colors text-[11px]">
               ← Back to Home
             </Link>
           </div>

@@ -102,30 +102,30 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
   const renderInlineAdd = (role: "Main" | "Protein" | "Supplementary", placeholder: string) => {
     if (creatingRole !== role) return null;
     return (
-      <div className="p-2.5 bg-amber-50 rounded-xl border-2 border-amber-400 mb-2 space-y-2">
+      <div className="p-2.5 bg-amber-50 dark:bg-amber-950/40 rounded-xl border-2 border-amber-400 dark:border-amber-700 mb-2 space-y-2">
         <div className="flex gap-2">
           <input
             type="text"
             placeholder={placeholder}
             value={newIngredientName}
             onChange={(e) => setNewIngredientName(e.target.value)}
-            className="flex-1 px-2.5 py-1 text-xs border border-stone-900 rounded-lg bg-white"
+            className="flex-1 px-2.5 py-1 text-xs border border-stone-900 dark:border-stone-700 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100"
           />
           <button
             type="button"
             disabled={isCreatingIngredient || !newIngredientName.trim()}
             onClick={handleInlineCreate}
-            className="px-3 py-1 bg-amber-300 border border-stone-900 rounded-lg text-xs font-black shadow-brutal-xs"
+            className="px-3 py-1 bg-amber-300 dark:bg-amber-400 border border-stone-900 dark:border-amber-700 rounded-lg text-xs font-black text-stone-900 dark:text-stone-950 shadow-brutal-xs"
           >
             {isCreatingIngredient ? "Adding..." : "Add"}
           </button>
         </div>
-        <label className="flex items-center gap-1.5 text-[11px] font-bold text-stone-700 cursor-pointer">
+        <label className="flex items-center gap-1.5 text-[11px] font-bold text-stone-700 dark:text-stone-300 cursor-pointer">
           <input
             type="checkbox"
             checked={newIngredientInStock}
             onChange={(e) => setNewIngredientInStock(e.target.checked)}
-            className="rounded border-stone-400"
+            className="rounded border-stone-400 dark:border-stone-600"
           />
           I have this in stock now
         </label>
@@ -136,7 +136,7 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4 pt-1">
       <div>
-        <label className="block text-xs font-black uppercase tracking-wider text-stone-700 mb-1">
+        <label className="block text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
           Recipe Name *
         </label>
         <input
@@ -145,12 +145,12 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Auntie Lola's Fried Rice"
-          className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 bg-stone-50 focus:bg-white focus:outline-none shadow-brutal-xs"
+          className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:bg-white dark:focus:bg-stone-700 text-stone-900 dark:text-stone-100 focus:outline-none shadow-brutal-xs dark:shadow-brutal-dark-sm"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-wider text-stone-700 mb-1.5">
+        <label className="block text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1.5">
           Suitable Meal Times *
         </label>
         <div className="flex flex-wrap gap-2">
@@ -159,8 +159,8 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
               key={mt}
               type="button"
               onClick={() => toggleMealType(mt)}
-              className={`px-3 py-1.5 rounded-xl border-2 border-stone-900 text-xs font-black transition-all shadow-brutal-xs ${
-                mealTypes.includes(mt) ? "bg-amber-300 text-stone-900" : "bg-stone-100 text-stone-500 hover:bg-stone-200"
+              className={`px-3 py-1.5 rounded-xl border-2 border-stone-900 dark:border-stone-700 text-xs font-black transition-all shadow-brutal-xs ${
+                mealTypes.includes(mt) ? "bg-amber-300 dark:bg-amber-400 text-stone-900 dark:text-stone-950" : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700"
               }`}
             >
               {mt}
@@ -172,13 +172,13 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
       {/* Main Ingredient */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label className="text-xs font-black uppercase tracking-wider text-stone-700">
+          <label className="text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300">
             Main / Base Ingredient *
           </label>
           <button
             type="button"
             onClick={() => setCreatingRole(creatingRole === "Main" ? null : "Main")}
-            className="text-[11px] font-black text-amber-700 hover:underline"
+            className="text-[11px] font-black text-amber-700 dark:text-amber-400 hover:underline"
           >
             {creatingRole === "Main" ? "Cancel" : "+ Add New Main"}
           </button>
@@ -188,7 +188,7 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
           required
           value={mainId}
           onChange={(e) => setMainId(e.target.value)}
-          className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 bg-stone-50 focus:bg-white focus:outline-none shadow-brutal-xs"
+          className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:bg-white dark:focus:bg-stone-700 text-stone-900 dark:text-stone-100 focus:outline-none shadow-brutal-xs dark:shadow-brutal-dark-sm"
         >
           <option value="">Select Main Ingredient...</option>
           {mains.map((m) => (
@@ -202,13 +202,13 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
       {/* Proteins (Multiple Supported) */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label className="text-xs font-black uppercase tracking-wider text-stone-700">
+          <label className="text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300">
             Proteins (Optional, Multi-select)
           </label>
           <button
             type="button"
             onClick={() => setCreatingRole(creatingRole === "Protein" ? null : "Protein")}
-            className="text-[11px] font-black text-amber-700 hover:underline"
+            className="text-[11px] font-black text-amber-700 dark:text-amber-400 hover:underline"
           >
             {creatingRole === "Protein" ? "Cancel" : "+ Add New Protein"}
           </button>
@@ -221,13 +221,13 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
               return (
                 <span
                   key={id}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border-2 border-stone-900 bg-amber-200 text-stone-900 text-xs font-black shadow-brutal-xs"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border-2 border-stone-900 dark:border-amber-700 bg-amber-200 dark:bg-amber-950/60 text-stone-900 dark:text-amber-300 text-xs font-black shadow-brutal-xs"
                 >
                   {p ? p.name : "Protein"}
                   <button
                     type="button"
                     onClick={() => removeProtein(id)}
-                    className="hover:text-red-600 font-black ml-0.5 text-sm"
+                    className="hover:text-red-600 dark:hover:text-red-400 font-black ml-0.5 text-sm"
                   >
                     ×
                   </button>
@@ -243,7 +243,7 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
               setProteinIds([...proteinIds, e.target.value]);
             }
           }}
-          className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 bg-stone-50 focus:bg-white focus:outline-none shadow-brutal-xs"
+          className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:bg-white dark:focus:bg-stone-700 text-stone-900 dark:text-stone-100 focus:outline-none shadow-brutal-xs dark:shadow-brutal-dark-sm"
         >
           <option value="">+ Add Protein...</option>
           {proteins
@@ -259,13 +259,13 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
       {/* Sides / Supplementary (Multiple Supported) */}
       <div>
         <div className="flex items-center justify-between mb-1">
-          <label className="text-xs font-black uppercase tracking-wider text-stone-700">
+          <label className="text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300">
             Sides / Supplementary (Optional, Multi-select)
           </label>
           <button
             type="button"
             onClick={() => setCreatingRole(creatingRole === "Supplementary" ? null : "Supplementary")}
-            className="text-[11px] font-black text-amber-700 hover:underline"
+            className="text-[11px] font-black text-amber-700 dark:text-amber-400 hover:underline"
           >
             {creatingRole === "Supplementary" ? "Cancel" : "+ Add New Side"}
           </button>
@@ -278,13 +278,13 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
               return (
                 <span
                   key={id}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border-2 border-stone-900 bg-orange-200 text-stone-900 text-xs font-black shadow-brutal-xs"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border-2 border-stone-900 dark:border-orange-700 bg-orange-200 dark:bg-orange-950/60 text-stone-900 dark:text-orange-300 text-xs font-black shadow-brutal-xs"
                 >
                   {s ? s.name : "Side"}
                   <button
                     type="button"
                     onClick={() => removeSide(id)}
-                    className="hover:text-red-600 font-black ml-0.5 text-sm"
+                    className="hover:text-red-600 dark:hover:text-red-400 font-black ml-0.5 text-sm"
                   >
                     ×
                   </button>
@@ -300,7 +300,7 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
               setSupplementaryIds([...supplementaryIds, e.target.value]);
             }
           }}
-          className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 bg-stone-50 focus:bg-white focus:outline-none shadow-brutal-xs"
+          className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:bg-white dark:focus:bg-stone-700 text-stone-900 dark:text-stone-100 focus:outline-none shadow-brutal-xs dark:shadow-brutal-dark-sm"
         >
           <option value="">+ Add Side Dish...</option>
           {sides
@@ -314,7 +314,7 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
       </div>
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-wider text-stone-700 mb-1">
+        <label className="block text-xs font-black uppercase tracking-wider text-stone-700 dark:text-stone-300 mb-1">
           Source URL (Optional reference link)
         </label>
         <input
@@ -322,7 +322,7 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
           value={sourceUrl}
           onChange={(e) => setSourceUrl(e.target.value)}
           placeholder="https://example.com/recipe"
-          className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 bg-stone-50 focus:bg-white focus:outline-none shadow-brutal-xs"
+          className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:bg-white dark:focus:bg-stone-700 text-stone-900 dark:text-stone-100 focus:outline-none shadow-brutal-xs dark:shadow-brutal-dark-sm"
         />
       </div>
 
@@ -330,14 +330,14 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 rounded-xl border-2 border-stone-900 bg-stone-100 hover:bg-stone-200 text-xs font-black text-stone-700"
+          className="px-4 py-2 rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-xs font-black text-stone-700 dark:text-stone-300"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting || !name.trim() || !mainId}
-          className="px-5 py-2 rounded-xl border-2 border-stone-900 bg-emerald-300 hover:bg-emerald-400 text-stone-900 text-xs font-black shadow-brutal-xs active:translate-x-0.5 active:translate-y-0.5 transition-all disabled:opacity-50"
+          className="px-5 py-2 rounded-xl border-2 border-stone-900 dark:border-stone-950 bg-emerald-300 dark:bg-emerald-400 hover:bg-emerald-400 dark:hover:bg-emerald-300 text-stone-900 dark:text-stone-950 text-xs font-black shadow-brutal-xs dark:shadow-brutal-dark-sm active:translate-x-0.5 active:translate-y-0.5 transition-all disabled:opacity-50"
         >
           {isSubmitting ? "Saving..." : "Save to My Recipes"}
         </button>

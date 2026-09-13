@@ -51,48 +51,48 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
     subtitle: string;
     icon: React.ReactNode;
     cardBg: string;
-    badgeBg: string;
     tagText: string;
+    tagBg: string;
   }> = [
     {
       type: "Breakfast",
       label: "Breakfast",
       emphasis: "morning warmth",
       subtitle: "Gentle start with quick warm comforts & tea.",
-      icon: <SunHorizon size={26} weight="duotone" className="text-amber-800" />,
-      cardBg: "bg-[#FEF08A]", // Rich Buttercup Yellow
-      badgeBg: "bg-amber-100 text-amber-950 border-amber-800",
+      icon: <SunHorizon size={26} weight="duotone" className="text-amber-800 dark:text-amber-300" />,
+      cardBg: "bg-[#FEF08A] dark:bg-[#2D1B03] dark:border-amber-500/70",
       tagText: "Morning Fuel",
+      tagBg: "bg-white/90 dark:bg-amber-950/90 dark:text-amber-200 dark:border-amber-600/50",
     },
     {
       type: "Lunch",
       label: "Lunch",
       emphasis: "midday refuel",
       subtitle: "Hearty, nourishing plate to power your focus.",
-      icon: <BowlFood size={26} weight="duotone" className="text-emerald-800" />,
-      cardBg: "bg-[#A7F3D0]", // Vibrant Fresh Mint
-      badgeBg: "bg-emerald-100 text-emerald-950 border-emerald-800",
+      icon: <BowlFood size={26} weight="duotone" className="text-emerald-800 dark:text-emerald-300" />,
+      cardBg: "bg-[#A7F3D0] dark:bg-[#04261B] dark:border-emerald-500/70",
       tagText: "Peak Energy",
+      tagBg: "bg-white/90 dark:bg-emerald-950/90 dark:text-emerald-200 dark:border-emerald-600/50",
     },
     {
       type: "Dinner",
       label: "Dinner",
       emphasis: "cozy comfort",
       subtitle: "Unwind from the day with a satisfying warm meal.",
-      icon: <MoonStars size={26} weight="duotone" className="text-rose-900" />,
-      cardBg: "bg-[#FECDD3]", // Sunset Terracotta Peach Coral
-      badgeBg: "bg-rose-100 text-rose-950 border-rose-900",
+      icon: <MoonStars size={26} weight="duotone" className="text-rose-900 dark:text-rose-300" />,
+      cardBg: "bg-[#FECDD3] dark:bg-[#330812] dark:border-rose-500/70",
       tagText: "Evening Unwind",
+      tagBg: "bg-white/90 dark:bg-rose-950/90 dark:text-rose-200 dark:border-rose-600/50",
     },
     {
       type: "Snack",
       label: "Snack & Craving",
       emphasis: "zero hassle",
       subtitle: "Quick 2-minute nibbles, fruit bowls & sweet bites.",
-      icon: <Cookie size={26} weight="duotone" className="text-purple-900" />,
-      cardBg: "bg-[#DDD6FE]", // Electric Lavender Lilac
-      badgeBg: "bg-purple-100 text-purple-950 border-purple-900",
+      icon: <Cookie size={26} weight="duotone" className="text-purple-900 dark:text-purple-300" />,
+      cardBg: "bg-[#DDD6FE] dark:bg-[#1C0938] dark:border-purple-500/70",
       tagText: "Quick Bites",
+      tagBg: "bg-white/90 dark:bg-purple-950/90 dark:text-purple-200 dark:border-purple-600/50",
     },
   ];
 
@@ -144,23 +144,23 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
       {/* Title & Description Row */}
       <div className="space-y-1.5 px-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-stone-900">
+          <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-stone-900 dark:text-stone-100">
             What meal are we having?
           </h2>
           {isTwoMealsPlan && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full bg-amber-200 border-2 border-stone-900 shadow-brutal-xs text-stone-900">
-              <Sparkle size={12} weight="fill" className="text-amber-700" />
+            <span className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full bg-amber-200 dark:bg-amber-950/80 border-2 border-stone-900 dark:border-amber-600/70 shadow-brutal-xs text-stone-900 dark:text-amber-200">
+              <Sparkle size={12} weight="fill" className="text-amber-700 dark:text-amber-400" />
               <span>2 Meals / Day</span>
             </span>
           )}
           {isThreeMealsPlan && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full bg-emerald-200 border-2 border-stone-900 shadow-brutal-xs text-stone-900">
-              <Sparkle size={12} weight="fill" className="text-emerald-700" />
+            <span className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full bg-emerald-200 dark:bg-emerald-950/80 border-2 border-stone-900 dark:border-emerald-600/70 shadow-brutal-xs text-stone-900 dark:text-emerald-200">
+              <Sparkle size={12} weight="fill" className="text-emerald-700 dark:text-emerald-400" />
               <span>3 Meals / Day</span>
             </span>
           )}
         </div>
-        <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
+        <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 font-medium leading-relaxed">
           {isTwoMealsPlan
             ? `Calibrated to your 2-meals schedule (${
                 twoMealSchedule === "breakfast_dinner"
@@ -201,32 +201,32 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
                 isThirdInThree ? "sm:col-span-2 sm:w-[calc(50%-0.625rem)] sm:mx-auto" : ""
               } ${
                 isSelected
-                  ? "shadow-[6px_6px_0px_#1C1917] ring-2 ring-stone-900 -translate-y-1"
-                  : "shadow-brutal hover:shadow-[6px_6px_0px_#1C1917]"
+                  ? "shadow-[6px_6px_0px_#1C1917] dark:shadow-[6px_6px_0px_#000000] ring-2 ring-stone-900 dark:ring-amber-400/40 -translate-y-1"
+                  : "shadow-brutal dark:shadow-brutal-dark hover:shadow-[6px_6px_0px_#1C1917] dark:hover:shadow-[6px_6px_0px_#000000]"
               }`}
             >
               {/* Card Top Row: Icon & Status Badge */}
               <div className="w-full flex items-center justify-between gap-2 mb-3.5">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white border-2 border-stone-900 shadow-brutal-sm flex items-center justify-center p-2 shrink-0">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white dark:bg-stone-900 border-2 border-stone-900 dark:border-stone-700 shadow-brutal-sm dark:shadow-brutal-dark-sm flex items-center justify-center p-2 shrink-0">
                   {opt.icon}
                 </div>
 
                 <div className="flex items-center justify-end shrink-0">
                   {isNow && isSelected ? (
-                    <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
-                      <Sparkle size={11} weight="fill" className="text-amber-400 shrink-0" />
+                    <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-stone-900 dark:bg-amber-300 text-white dark:text-stone-950 border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
+                      <Sparkle size={11} weight="fill" className="text-amber-400 dark:text-stone-950 shrink-0" />
                       <span>Now</span>
-                      <span className="w-1 h-1 rounded-full bg-stone-500 shrink-0" />
-                      <CheckFat size={11} weight="fill" className="text-emerald-400 shrink-0" />
+                      <span className="w-1 h-1 rounded-full bg-stone-500 dark:bg-stone-800 shrink-0" />
+                      <CheckFat size={11} weight="fill" className="text-emerald-400 dark:text-emerald-700 shrink-0" />
                     </span>
                   ) : isNow ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-white text-stone-900 border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
-                      <Sparkle size={11} weight="fill" className="text-amber-500 shrink-0" />
+                    <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-white dark:bg-stone-900 text-stone-900 dark:text-amber-300 border-2 border-stone-900 dark:border-stone-700 shadow-brutal-xs whitespace-nowrap shrink-0">
+                      <Sparkle size={11} weight="fill" className="text-amber-500 dark:text-amber-400 shrink-0" />
                       <span>Now</span>
                     </span>
                   ) : isSelected ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
-                      <CheckFat size={11} weight="fill" className="text-emerald-400 shrink-0" />
+                    <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-stone-900 dark:bg-amber-300 text-white dark:text-stone-950 border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
+                      <CheckFat size={11} weight="fill" className="text-emerald-400 dark:text-emerald-700 shrink-0" />
                       <span>Selected</span>
                     </span>
                   ) : null}
@@ -235,20 +235,20 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
 
               {/* Card Core Content */}
               <div className="space-y-1.5 my-2 min-w-0">
-                <div className="text-xl sm:text-2xl font-display font-black text-stone-900 tracking-tight flex items-baseline gap-2">
+                <div className="text-xl sm:text-2xl font-display font-black text-stone-900 dark:text-stone-100 tracking-tight flex items-baseline gap-2">
                   <span>{opt.label}</span>
                 </div>
-                <p className="text-xs sm:text-sm text-stone-800 font-medium leading-relaxed">
+                <p className="text-xs sm:text-sm text-stone-800 dark:text-stone-300 font-medium leading-relaxed">
                   {opt.subtitle}
                 </p>
               </div>
 
               {/* Card Footer */}
-              <div className="mt-4 pt-3 border-t-2 border-stone-900/15 w-full flex items-center justify-between gap-2 min-w-0">
-                <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-stone-900 bg-white/90 px-2.5 py-1 rounded-xl border border-stone-900/30 whitespace-nowrap shrink-0">
+              <div className="mt-4 pt-3 border-t-2 border-stone-900/15 dark:border-white/20 w-full flex items-center justify-between gap-2 min-w-0">
+                <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl border whitespace-nowrap shrink-0 ${opt.tagBg}`}>
                   {opt.tagText}
                 </span>
-                <span className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                <span className="text-xs sm:text-sm font-black text-stone-900 dark:text-stone-100 flex items-center gap-1.5 whitespace-nowrap shrink-0">
                   <span>Explore</span>
                   <span>→</span>
                 </span>
@@ -264,7 +264,7 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
           <button
             type="button"
             onClick={() => setShowSnack((prev) => !prev)}
-            className="text-xs font-bold text-stone-600 hover:text-stone-900 underline underline-offset-2 transition-colors"
+            className="text-xs font-bold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 underline underline-offset-2 transition-colors"
           >
             {showSnack ? "← Hide snack slot" : "+ Need a snack craving today? Show snack option"}
           </button>

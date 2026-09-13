@@ -3,6 +3,7 @@
 import { Scales, SignOut, User, X } from "@/components/icons";
 import { MealProfileSection } from "@/components/MealProfileSection";
 import { ProgressLogSection } from "@/components/ProgressLogSection";
+import { ThemeSegmentedControl } from "@/components/ThemeToggle";
 import { MealProfile } from "@/lib/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { signOut } from "next-auth/react";
@@ -61,15 +62,15 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 28 }}
           transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-          className="relative w-full max-w-lg max-h-[92dvh] sm:max-h-[88vh] flex flex-col bg-[#FAF8F5] border-[2.5px] border-stone-900 rounded-t-[28px] sm:rounded-3xl shadow-brutal-lg overflow-hidden"
+          className="relative w-full max-w-lg max-h-[92dvh] sm:max-h-[88vh] flex flex-col bg-[#FAF8F5] dark:bg-[#181614] border-[2.5px] border-stone-900 dark:border-stone-700 rounded-t-[28px] sm:rounded-3xl shadow-brutal-lg dark:shadow-[6px_6px_0px_#000000] overflow-hidden"
         >
           {/* Mobile Bottom Sheet Pull Bar */}
-          <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto mt-2.5 mb-0.5 shrink-0" />
+          <div className="sm:hidden w-12 h-1.5 bg-stone-300 dark:bg-stone-700 rounded-full mx-auto mt-2.5 mb-0.5 shrink-0" />
 
           {/* Header */}
-          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b-2 border-stone-900 shrink-0 bg-[#FAF8F5]">
+          <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b-2 border-stone-900 dark:border-stone-800 shrink-0 bg-[#FAF8F5] dark:bg-[#181614]">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-rose-200 border-2 border-stone-900 shadow-brutal-sm flex items-center justify-center text-stone-900 shrink-0">
+              <div className="w-11 h-11 rounded-2xl bg-rose-200 dark:bg-rose-950/80 border-2 border-stone-900 dark:border-rose-600/70 shadow-brutal-sm dark:shadow-brutal-dark-sm flex items-center justify-center text-stone-900 dark:text-rose-200 shrink-0">
                 {activeTab === "profile" ? (
                   <User size={22} weight="bold" />
                 ) : (
@@ -79,11 +80,11 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
               <div>
                 <h3
                   id="personal-hub-modal-title"
-                  className="text-lg sm:text-xl font-display font-black tracking-tight text-stone-900"
+                  className="text-lg sm:text-xl font-display font-black tracking-tight text-stone-900 dark:text-stone-100"
                 >
                   {owner}&apos;s Personal Space
                 </h3>
-                <p className="text-xs text-stone-600 mt-0.5 font-medium">
+                <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5 font-medium">
                   {activeTab === "profile"
                     ? "Eating goal & personal context"
                     : "Standalone weight progress log"}
@@ -93,15 +94,24 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
             <button
               onClick={onClose}
               aria-label="Close personal space"
-              className="p-2 rounded-xl border-2 border-stone-900 bg-white shadow-brutal-sm hover:bg-stone-100 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all shrink-0"
+              className="p-2 rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-brutal-sm dark:shadow-brutal-dark-sm hover:bg-stone-100 dark:hover:bg-stone-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all shrink-0"
             >
               <X size={18} weight="bold" />
             </button>
           </div>
 
-          {/* Segmented Tab Switcher */}
-          <div className="px-5 sm:px-6 pt-3 pb-2 border-b-2 border-stone-900/10 bg-[#FAF8F5] shrink-0">
-            <div className="grid grid-cols-2 gap-2 p-1 bg-stone-200/80 rounded-2xl border-2 border-stone-900">
+          {/* Theme & Segmented Tab Switcher */}
+          <div className="px-5 sm:px-6 pt-3 pb-2 border-b-2 border-stone-900/10 dark:border-stone-800 bg-[#FAF8F5] dark:bg-[#181614] shrink-0 space-y-2.5">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] font-black uppercase tracking-wider text-stone-700 dark:text-stone-300">
+                Color Theme
+              </span>
+              <div className="w-56">
+                <ThemeSegmentedControl />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 p-1 bg-stone-200/80 dark:bg-stone-800/80 rounded-2xl border-2 border-stone-900 dark:border-stone-700">
               <button
                 type="button"
                 onClick={() => {
@@ -112,8 +122,8 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
                 }}
                 className={`py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
                   activeTab === "profile"
-                    ? "bg-amber-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs"
-                    : "text-stone-700 hover:text-stone-900"
+                    ? "bg-amber-300 dark:bg-amber-400 text-stone-900 dark:text-stone-950 border-2 border-stone-900 dark:border-stone-900 shadow-brutal-xs"
+                    : "text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white"
                 }`}
               >
                 <User size={15} weight="bold" />
@@ -130,8 +140,8 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
                 }}
                 className={`py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
                   activeTab === "progress"
-                    ? "bg-purple-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs"
-                    : "text-stone-700 hover:text-stone-900"
+                    ? "bg-purple-300 dark:bg-purple-400 text-stone-900 dark:text-stone-950 border-2 border-stone-900 dark:border-stone-900 shadow-brutal-xs"
+                    : "text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white"
                 }`}
               >
                 <Scales size={15} weight="bold" />
@@ -161,14 +171,14 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
 
           {/* Auto-save bar directly above the bottom footer of the modal */}
           {activeTab === "profile" && (
-            <div className="px-5 sm:px-6 py-2.5 bg-[#FEF9C3] border-t-2 border-stone-900 flex items-center justify-between gap-3 shrink-0">
+            <div className="px-5 sm:px-6 py-2.5 bg-[#FEF9C3] dark:bg-[#261E0A] border-t-2 border-stone-900 dark:border-stone-800 flex items-center justify-between gap-3 shrink-0">
               <div className="flex items-center gap-2 min-w-0">
                 <span
                   className={`w-2.5 h-2.5 rounded-full shrink-0 ${
                     isProfileJustSaved ? "bg-emerald-500 animate-pulse" : "bg-emerald-500"
                   }`}
                 />
-                <span className="text-[11px] sm:text-xs font-bold text-stone-800 truncate">
+                <span className="text-[11px] sm:text-xs font-bold text-stone-800 dark:text-amber-200 truncate">
                   {isProfileJustSaved ? "✓ Profile & weight saved to cloud!" : "Auto-saves on selection"}
                 </span>
               </div>
@@ -180,8 +190,8 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
                   isProfileJustSaved
                     ? "bg-emerald-400 text-stone-900"
                     : isProfileSaving
-                    ? "bg-amber-200 text-stone-700 cursor-wait"
-                    : "bg-amber-300 hover:bg-amber-400 text-stone-900"
+                    ? "bg-amber-200 dark:bg-amber-950 text-stone-700 dark:text-amber-200 cursor-wait"
+                    : "bg-amber-300 dark:bg-amber-400 hover:bg-amber-400 dark:hover:bg-amber-300 text-stone-900 dark:text-stone-950"
                 }`}
               >
                 <span>
@@ -196,24 +206,24 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
           )}
 
           {/* Pinned Footer */}
-          <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 bg-stone-100/90 shrink-0 flex items-center justify-between gap-2 sm:gap-3 safe-area-bottom">
+          <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 dark:border-stone-800 bg-stone-100/90 dark:bg-stone-900 shrink-0 flex items-center justify-between gap-2 sm:gap-3 safe-area-bottom">
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: "/login" })}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs bg-rose-100 hover:bg-rose-200 text-rose-900 border-2 border-stone-900 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs bg-rose-100 dark:bg-rose-950/80 hover:bg-rose-200 dark:hover:bg-rose-900 text-rose-900 dark:text-rose-200 border-2 border-stone-900 dark:border-rose-700 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none transition-all"
               title="Sign out of current account"
             >
               <SignOut size={14} weight="bold" />
               <span>Sign Out</span>
             </button>
             <div className="flex items-center gap-2 sm:gap-3">
-              <span className="hidden sm:inline text-[11px] font-bold text-stone-500">
+              <span className="hidden sm:inline text-[11px] font-bold text-stone-500 dark:text-stone-400">
                 {owner}&apos;s instance · No calorie counting
               </span>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-sm hover:bg-stone-800 transition-all"
+                className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs bg-stone-900 dark:bg-amber-400 text-white dark:text-stone-950 border-2 border-stone-900 dark:border-stone-900 shadow-brutal-sm hover:bg-stone-800 dark:hover:bg-amber-300 transition-all"
               >
                 Done
               </button>

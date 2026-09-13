@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 font-sans text-stone-900 selection:bg-amber-300 selection:text-stone-900">
+    <div className="min-h-screen flex flex-col bg-stone-50 dark:bg-[#141210] font-sans text-stone-900 dark:text-stone-100 selection:bg-amber-300 selection:text-stone-900">
       <LandingHeader />
       <main className="w-full relative">
         <LandingFlowingIcons />
