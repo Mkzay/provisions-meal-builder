@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Check } from "@/components/icons";
 import { ProfileMetricsInputs } from "@/components/ProfileMetricsInputs";
@@ -27,6 +27,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
   const owner = propOwner || getCurrentOwner();
   const cachedInitial = getClientProfileCached(owner);
   const [selectedGoal, setSelectedGoal] = useState<UserGoal>(() => cachedInitial?.goal || getDefaultGoalForOwner(owner));
+  const [mealsPerDay, setMealsPerDay] = useState<number>(() => cachedInitial?.mealsPerDay || 3);
   const [selectedPriorities, setSelectedPriorities] = useState<NutrientTag[]>(() => cachedInitial?.nutrientPriorities || []);
   const [heightUnit, setHeightUnit] = useState<"cm" | "ft">("cm");
   const [heightCm, setHeightCm] = useState<string>(() => cachedInitial?.height ? String(cachedInitial.height) : "");
@@ -89,6 +90,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
         if (!active) return;
         if (existing) {
           setSelectedGoal(existing.goal || getDefaultGoalForOwner(owner));
+          if (existing.mealsPerDay) setMealsPerDay(existing.mealsPerDay);
           setSelectedPriorities(existing.nutrientPriorities || []);
           if (existing.height) {
             const cmVal = existing.height;
@@ -149,6 +151,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
       height: validHeight,
       weight: validWeight,
       nutrientPriorities: selectedPriorities,
+      mealsPerDay,
     });
 
     if (res.success && validWeight) {
@@ -236,6 +239,52 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                 >
                   {isSelected && <Check size={12} weight="bold" />}
                 </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Meals Per Day Configuration */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between px-0.5">
+          <label className="text-xs font-black uppercase tracking-wider text-stone-900">
+            Meals Per Day
+          </label>
+          <span className="text-[10px] font-bold text-stone-500">Daily rhythm</span>
+        </div>
+        <p className="text-xs text-stone-600">
+          How many meals you aim to eat daily (calibrates target intake and reminders).
+        </p>
+
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { count: 2, label: "2", sub: "Light" },
+            { count: 3, label: "3", sub: "Standard" },
+            { count: 4, label: "4", sub: "+ Snack" },
+            { count: 5, label: "5+", sub: "Athlete" },
+          ].map((item) => {
+            const isSelected = mealsPerDay === item.count;
+            return (
+              <button
+                key={item.count}
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined" && window.navigator?.vibrate) {
+                    window.navigator.vibrate(8);
+                  }
+                  setMealsPerDay(item.count);
+                }}
+                className={`py-2.5 px-1.5 rounded-xl border-2 border-stone-900 text-center transition-all flex flex-col items-center justify-center ${
+                  isSelected
+                    ? "bg-amber-200 shadow-brutal-xs -translate-y-0.5 font-black text-stone-900"
+                    : "bg-white hover:bg-stone-50 font-bold text-stone-700 shadow-xs"
+                }`}
+              >
+                <span className="text-base font-black font-display leading-tight">{item.label}</span>
+                <span className="text-[10px] font-bold tracking-tight text-stone-600 mt-0.5 leading-none">
+                  {item.sub}
+                </span>
               </button>
             );
           })}
