@@ -9,6 +9,7 @@ interface MobileHeaderProps {
   mealType: MealType;
   onOpenNotification: () => void;
   onOpenProfile: () => void;
+  onOpenWalkthrough?: () => void;
 }
 
 export const MobileHeader: React.FC<MobileHeaderProps> = ({
@@ -16,6 +17,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   mealType,
   onOpenNotification,
   onOpenProfile,
+  onOpenWalkthrough,
 }) => {
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -54,8 +56,19 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
         </div>
       </div>
 
-      {/* Right: Quick Notifications & Profile Avatar */}
-      <div className="flex items-center gap-2">
+      {/* Right: Tour, Quick Notifications & Profile Avatar */}
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        {onOpenWalkthrough && (
+          <button
+            type="button"
+            onClick={onOpenWalkthrough}
+            className="w-8 h-8 rounded-xl border-2 border-stone-900 bg-purple-200 hover:bg-purple-300 text-stone-900 font-display font-black text-xs shadow-brutal-xs flex items-center justify-center active:translate-x-0.5 active:translate-y-0.5 transition-transform shrink-0"
+            title="How Provisions Works"
+            aria-label="How Provisions Works"
+          >
+            ?
+          </button>
+        )}
         <button
           type="button"
           onClick={onOpenNotification}

@@ -111,6 +111,7 @@ export default function MealBuilderAppPage() {
         mealType={mealType}
         onOpenNotification={() => setIsNotificationOpen(true)}
         onOpenProfile={() => handleOpenPersonalHub("profile")}
+        onOpenWalkthrough={() => setIsWalkthroughOpen(true)}
       />
 
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-6">
