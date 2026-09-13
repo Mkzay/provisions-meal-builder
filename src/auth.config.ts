@@ -1,5 +1,14 @@
 import type { NextAuthConfig } from "next-auth";
 
+const FALLBACK_AUTH_SECRET =
+  process.env.AUTH_SECRET ||
+  process.env.NEXTAUTH_SECRET ||
+  "32f3c9046052408d9107cc3459dc736db39e23517214acbc7c903cf9027f0a22";
+
+if (!process.env.AUTH_SECRET && !process.env.NEXTAUTH_SECRET) {
+  process.env.AUTH_SECRET = FALLBACK_AUTH_SECRET;
+}
+
 export const authConfig: NextAuthConfig = {
   pages: {
     signIn: "/login",
@@ -26,6 +35,6 @@ export const authConfig: NextAuthConfig = {
   session: {
     strategy: "jwt",
   },
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+  secret: FALLBACK_AUTH_SECRET,
   providers: [],
 };

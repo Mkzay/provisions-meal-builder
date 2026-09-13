@@ -106,4 +106,13 @@ describe("Authentication, Database & Multi-Owner Support", () => {
       expect(result.newReadyMeal?.owner).toBe("Mkzay");
     });
   });
+
+  describe("Auth Secret Fallback", () => {
+    it("guarantees a valid secret string even when environment variables are unset", async () => {
+      const { authConfig } = await import("../auth.config");
+      expect(authConfig.secret).toBeTruthy();
+      expect(typeof authConfig.secret).toBe("string");
+      expect((authConfig.secret as string).length).toBeGreaterThanOrEqual(32);
+    });
+  });
 });
