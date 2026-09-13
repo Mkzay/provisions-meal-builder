@@ -4,12 +4,12 @@ import { findBestPairings } from "./pairings";
 import { suggestNutrientAwareCombo } from "./nutrient-curation";
 import { getClientProfileCached } from "./profile-storage";
 import { SEED_CATALOGUE } from "./seed-data";
-import { AddSupplyInput, EMPTY_CATALOGUE, Ingredient, KitchenCatalogue, LeftoverDecision, MealLogEntry, MealRating, MealSource, MealType, NutrientTag, PairingResult, RatedMealRecord, ReadyMeal } from "./types";
+import { AddSupplyInput, EMPTY_CATALOGUE, Ingredient, KitchenCatalogue, LeftoverDecision, MealLogEntry, MealRating, MealSource, MealType, NutrientTag, PairingResult, RatedMealRecord, ReadyMeal, SavedRecipe } from "./types";
 import { useEffect, useState } from "react";
 
 export type FlowStep = "meal_type" | "ready_meal" | "mode_select" | "manual_pick" | "pairing" | "confirm";
 
-export function useMealBuilder(owner: string = "User", nutrientPriorities?: NutrientTag[]) {
+export function useMealBuilder(owner: string = "User", nutrientPriorities?: NutrientTag[], savedRecipes?: SavedRecipe[]) {
   const [catalogue, setCatalogue] = useState<KitchenCatalogue>(EMPTY_CATALOGUE);
   const [isClientReady, setIsClientReady] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -42,12 +42,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
 
     fetch(`/api/notion/catalogue?owner=${encodeURIComponent(owner)}`)
       .then((res) => (res.ok ? res.json() : null))
-      .then((freshCatalogue: KitchenCatalogue | null) => {
-        if (freshCatalogue) {
-          setCatalogue(freshCatalogue);
-          saveCachedCatalogue(freshCatalogue, owner);
-        }
-      })
+      .then((fresh) => { if (fresh) { setCatalogue(fresh); saveCachedCatalogue(fresh, owner); } })
       .catch((err) => console.log("Using cached catalogue snapshot:", err));
 
     fetch(`/api/notion/log?owner=${encodeURIComponent(owner)}`)
@@ -86,9 +81,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
         setCatalogue(fresh);
         saveCachedCatalogue(fresh, owner);
       }
-    } catch (e) {
-      console.error("Refresh failed:", e);
-    }
+    } catch (e) { console.error("Refresh failed:", e); }
   };
 
   const handleResetSeedData = () => {
@@ -144,6 +137,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
       mealType,
       nutrientPriorities: activePriorities,
       ratedHistory,
+      savedRecipes,
     });
     if (!combo) return;
 
@@ -152,6 +146,29 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     setSelectedProtein(combo.protein);
     setSelectedSupplementary(combo.supplementary);
     setSelectedSupplementaries(combo.supplementary ? [combo.supplementary] : []);
+    setSelectedSource("Built");
+    setSelectedReadyMeal(undefined);
+    setCurrentStep("pairing");
+  };
+
+  const handleCookSavedRecipe = (recipe: SavedRecipe) => {
+    const main = catalogue.ingredients.find((i) => i.id === recipe.mainIngredientId);
+    if (!main) return;
+    const prot = recipe.proteinId ? catalogue.ingredients.find((i) => i.id === recipe.proteinId) : undefined;
+    const supp = recipe.supplementaryId ? catalogue.ingredients.find((i) => i.id === recipe.supplementaryId) : undefined;
+    const supps = supp ? [supp] : [];
+    const basePairings = findBestPairings(main, catalogue.ingredients, mealType);
+    setSelectedMain(main);
+    setSelectedProtein(prot);
+    setSelectedSupplementary(supp);
+    setSelectedSupplementaries(supps);
+    setPairingResult({
+      ...basePairings,
+      dishName: recipe.name,
+      recommendedProtein: prot,
+      recommendedSupplementary: supp,
+      recommendedSupplementaries: supps,
+    });
     setSelectedSource("Built");
     setSelectedReadyMeal(undefined);
     setCurrentStep("pairing");
@@ -273,25 +290,12 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     const newIngredients: Ingredient[] = [];
     const newReadyMeals: ReadyMeal[] = [];
 
-    inputs.forEach((input, index) => {
-      const supplyOwner = input.owner || owner;
-      if (input.kind === "ingredient") {
-        newIngredients.push({
-          id: `ing-${now}-${index}`,
-          name: input.name,
-          mealTypes: input.mealTypes,
-          role: input.role || "Main",
-          owner: supplyOwner,
-          available: true,
-        });
+    inputs.forEach((inp, idx) => {
+      const sOwner = inp.owner || owner;
+      if (inp.kind === "ingredient") {
+        newIngredients.push({ id: `ing-${now}-${idx}`, name: inp.name, mealTypes: inp.mealTypes, role: inp.role || "Main", owner: sOwner, available: true });
       } else {
-        newReadyMeals.push({
-          id: `ready-${now}-${index}`,
-          name: input.name,
-          mealTypes: input.mealTypes,
-          owner: supplyOwner,
-          available: true,
-        });
+        newReadyMeals.push({ id: `ready-${now}-${idx}`, name: inp.name, mealTypes: inp.mealTypes, owner: sOwner, available: true });
       }
     });
 
@@ -358,9 +362,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     };
     setCatalogue(nextCatalogue);
     saveCachedCatalogue(nextCatalogue, owner);
-    try {
-      await fetch("/api/notion/supplies", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, available }) });
-    } catch {}
+    try { await fetch("/api/notion/supplies", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, available }) }); } catch {}
   };
 
   const handleDeleteSupply = async (id: string, kind: "ingredient" | "ready_meal") => {
@@ -371,9 +373,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     };
     setCatalogue(nextCatalogue);
     saveCachedCatalogue(nextCatalogue, owner);
-    try {
-      await fetch(`/api/notion/supplies?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-    } catch {}
+    try { await fetch(`/api/notion/supplies?id=${encodeURIComponent(id)}`, { method: "DELETE" }); } catch {}
   };
 
   return {
@@ -389,7 +389,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     handleSuggestForMe, handleManualPickMode, handleSelectMain,
     handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision,
     handleQuickAddStaples, handleAddSupply, handleAddBulkSupplies,
-    handleToggleAvailability, handleDeleteSupply,
+    handleToggleAvailability, handleDeleteSupply, handleCookSavedRecipe,
     isRatingCardOpen, setIsRatingCardOpen, activeLogId, handleRateMeal, handleSkipRating, ratedHistory,
   };
 }

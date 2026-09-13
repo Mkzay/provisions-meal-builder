@@ -378,7 +378,7 @@ export async function deleteSupplyFromNotion(
   }
 }
 
-// Re-export Database 4 (Meal Profile) and Database 5 (Progress Log) methods
+// Re-export methods
 export {
   fetchMealProfile,
   saveMealProfile,
@@ -386,10 +386,5 @@ export {
   addWeightLogEntry,
   deleteWeightLogEntry,
 } from "./notion-profile";
-
-export {
-  updateMealRating,
-  fetchOwnerMealRatings,
-} from "./notion-ratings";
-
-
+export { updateMealRating, fetchOwnerMealRatings } from "./notion-ratings";
+export { fetchSavedRecipes, createSavedRecipe, deleteSavedRecipe } from "./notion-recipes";

@@ -1,6 +1,6 @@
 import { cleanBase, findMatchingDishBlueprint, isCookingOil, isSideCompatibleWithBase } from "./dish-blueprints";
 import { findBestPairings, getSuggestedComboName } from "./pairings";
-import { Ingredient, MealType, NutrientTag, PairingResult, RatedMealRecord, ReadyMeal } from "./types";
+import { Ingredient, MealType, NutrientTag, PairingResult, RatedMealRecord, ReadyMeal, SavedRecipe } from "./types";
 
 export interface SuggestNutrientComboInput {
   availableMains: Ingredient[];
@@ -8,6 +8,7 @@ export interface SuggestNutrientComboInput {
   mealType: MealType;
   nutrientPriorities?: NutrientTag[];
   ratedHistory?: RatedMealRecord[];
+  savedRecipes?: SavedRecipe[];
 }
 
 export interface SuggestedNutrientComboResult {
@@ -119,6 +120,65 @@ export function getComboNutrientTags(
 }
 
 /**
+ * Checks if a combination of main, protein, and supplementary ingredients
+ * matches a user's saved recipe and all required ingredients are currently in stock.
+ */
+export function findMatchingSavedRecipe(
+  main: Ingredient,
+  protein?: Ingredient,
+  supplementary?: Ingredient,
+  savedRecipes?: SavedRecipe[],
+  allIngredients?: Ingredient[]
+): SavedRecipe | undefined {
+  if (!savedRecipes || savedRecipes.length === 0) return undefined;
+
+  const stockMap = new Map<string, boolean>();
+  if (allIngredients && allIngredients.length > 0) {
+    allIngredients.forEach((i) => stockMap.set(i.id, i.available));
+  } else {
+    stockMap.set(main.id, main.available);
+    if (protein) stockMap.set(protein.id, protein.available);
+    if (supplementary) stockMap.set(supplementary.id, supplementary.available);
+  }
+
+  // Check that candidate ingredients are themselves in stock
+  if (stockMap.get(main.id) === false) return undefined;
+  if (protein && stockMap.get(protein.id) === false) return undefined;
+  if (supplementary && stockMap.get(supplementary.id) === false) return undefined;
+
+  const currentOwner = allIngredients?.[0]?.owner || main.owner;
+
+  for (const recipe of savedRecipes) {
+    // Owner isolation
+    if (recipe.owner && currentOwner && recipe.owner !== currentOwner) {
+      continue;
+    }
+
+    // Check main ingredient match
+    if (recipe.mainIngredientId !== main.id) continue;
+
+    // Check protein match
+    if (recipe.proteinId && recipe.proteinId !== protein?.id) continue;
+    if (!recipe.proteinId && protein) continue;
+
+    // Check supplementary match
+    if (recipe.supplementaryId && recipe.supplementaryId !== supplementary?.id) continue;
+    if (!recipe.supplementaryId && supplementary) continue;
+
+    // Verify all required components in recipe are available in stock
+    const mainInStock = stockMap.get(recipe.mainIngredientId) ?? false;
+    const proteinInStock = recipe.proteinId ? (stockMap.get(recipe.proteinId) ?? false) : true;
+    const suppInStock = recipe.supplementaryId ? (stockMap.get(recipe.supplementaryId) ?? false) : true;
+
+    if (mainInStock && proteinInStock && suppInStock) {
+      return recipe;
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * Suggestion weighting factoring nutrient priorities, affinity, and historical feedback.
  * Disliked dishes are bounded-penalized but NEVER hard excluded when options are limited.
  */
@@ -148,7 +208,9 @@ export function suggestNutrientAwareCombo(
     priorityCount: number;
     affinityScore: number;
     feedbackScore: number;
+    recipeBonus: number;
     totalScore: number;
+    matchedRecipe?: SavedRecipe;
   }
 
   const candidates: Candidate[] = [];
@@ -179,8 +241,17 @@ export function suggestNutrientAwareCombo(
           affinityScore += 3;
         }
 
+        const matchedRecipe = findMatchingSavedRecipe(
+          main,
+          prot,
+          supp,
+          input.savedRecipes,
+          allIngredients
+        );
+        const recipeBonus = matchedRecipe ? 8.0 : 0;
+
         const feedbackScore = calculateFeedbackScore(main, prot, ratedHistory);
-        const totalScore = matched.length * 10 + affinityScore + feedbackScore;
+        const totalScore = matched.length * 10 + affinityScore + feedbackScore + recipeBonus;
 
         candidates.push({
           main,
@@ -192,7 +263,9 @@ export function suggestNutrientAwareCombo(
           priorityCount: matched.length,
           affinityScore,
           feedbackScore,
+          recipeBonus,
           totalScore,
+          matchedRecipe,
         });
       }
     }
@@ -219,7 +292,9 @@ export function suggestNutrientAwareCombo(
         ? chosen.pairings.recommendedSupplementaries
         : [chosen.supplementary])
     : [];
-  const dishName = bp
+  const dishName = chosen.matchedRecipe
+    ? chosen.matchedRecipe.name
+    : bp
     ? bp.generateTitle(chosen.main, chosen.protein, chosenSides)
     : getSuggestedComboName(chosen.main, chosen.protein, chosenSides);
 

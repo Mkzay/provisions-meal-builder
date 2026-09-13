@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  BookmarkSimple,
   BowlFood,
   CheckCircle,
   Clock,
@@ -23,6 +24,8 @@ interface KitchenSidebarProps {
   onOpenStaples: () => void;
   onOpenFoodIdeas?: () => void;
   onOpenInventory?: () => void;
+  onOpenSavedRecipes?: () => void;
+  savedRecipesCount?: number;
 }
 
 export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
@@ -35,6 +38,8 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
   onOpenStaples,
   onOpenFoodIdeas,
   onOpenInventory,
+  onOpenSavedRecipes,
+  savedRecipesCount,
 }) => {
   const availableReadyMeals = readyMeals.filter((m) => m.available);
   const availableIngredients = ingredients.filter((i) => i.available);
@@ -97,6 +102,16 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
           >
             <Package size={15} weight="bold" />
             <span>Manage Kitchen Stock ({readyMeals.length + ingredients.length})</span>
+          </button>
+        )}
+
+        {onOpenSavedRecipes && (
+          <button
+            onClick={onOpenSavedRecipes}
+            className="w-full py-2.5 px-3 rounded-xl border-2 border-stone-900 bg-orange-100 hover:bg-orange-200 text-xs font-black text-stone-900 transition-all shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] flex items-center justify-center gap-2"
+          >
+            <BookmarkSimple size={15} weight="bold" />
+            <span>Saved Recipes {savedRecipesCount !== undefined ? `(${savedRecipesCount})` : ""}</span>
           </button>
         )}
       </div>

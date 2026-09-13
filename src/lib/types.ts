@@ -176,4 +176,29 @@ export interface WeightLogEntry {
   createdAt?: string;
 }
 
+export interface SavedRecipe {
+  id: string;
+  name: string;
+  mealTypes: MealType[];
+  mainIngredientId?: string;
+  mainIngredientName?: string;
+  proteinId?: string;
+  proteinName?: string;
+  supplementaryId?: string;
+  supplementaryName?: string;
+  owner: string;
+  sourceUrl?: string;
+  createdAt?: string;
+}
+
+export interface CreateSavedRecipeInput {
+  name: string;
+  mealTypes: MealType[];
+  mainIngredientId?: string;
+  proteinId?: string;
+  supplementaryId?: string;
+  owner: string;
+  sourceUrl?: string;
+}
+
 

@@ -2,6 +2,7 @@
 
 import {
   Bell,
+  BookmarkSimple,
   Plus,
   Sparkle,
   User,
@@ -15,6 +16,7 @@ interface AppHeaderProps {
   onResetToHome: () => void;
   onOpenNotifications: () => void;
   onOpenAddSupply: () => void;
+  onOpenSavedRecipes?: () => void;
   onOpenPersonalHub?: (initialTab?: "profile" | "progress") => void;
   onOpenProfile?: () => void;
   onOpenProgressLog?: () => void;
@@ -28,6 +30,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onResetToHome,
   onOpenNotifications,
   onOpenAddSupply,
+  onOpenSavedRecipes,
   onOpenPersonalHub,
   onOpenProfile,
   onOpenProgressLog,
@@ -104,6 +107,19 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <Plus size={16} weight="bold" />
               <span className="hidden sm:inline">Restock</span>
             </button>
+
+            {/* Saved Recipes Button */}
+            {onOpenSavedRecipes && (
+              <button
+                onClick={onOpenSavedRecipes}
+                className="inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 sm:min-h-[42px] text-xs font-black px-2.5 sm:px-3.5 rounded-xl bg-orange-200 hover:bg-orange-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0"
+                title="My Saved Recipes"
+                aria-label="My Saved Recipes"
+              >
+                <BookmarkSimple size={16} weight="bold" />
+                <span className="hidden sm:inline">Recipes</span>
+              </button>
+            )}
 
             {/* Meal Reminders Button */}
             <button

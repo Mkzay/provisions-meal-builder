@@ -1,14 +1,12 @@
 "use client";
 
-import { AddSupplyModal } from "@/components/AddSupplyModal";
 import { AppHeader } from "@/components/AppHeader";
-import { AppWalkthroughModal, WALKTHROUGH_STORAGE_KEY } from "@/components/AppWalkthroughModal";
+import { AppModals } from "@/components/AppModals";
+import { WALKTHROUGH_STORAGE_KEY } from "@/components/AppWalkthroughModal";
 import { CompanionNoteCard } from "@/components/CompanionNoteCard";
 import { CulinaryCompanion } from "@/components/CulinaryCompanion";
-import { FoodIdeasModal } from "@/components/FoodIdeasModal";
 import { GentleSafetyNet } from "@/components/GentleSafetyNet";
 import { ArrowLeft } from "@/components/icons";
-import { KitchenInventoryModal } from "@/components/KitchenInventoryModal";
 import { KitchenSidebar } from "@/components/KitchenSidebar";
 import { LeftoverModal } from "@/components/LeftoverModal";
 import { MainIngredientGrid } from "@/components/MainIngredientGrid";
@@ -19,12 +17,13 @@ import { ModeSelect } from "@/components/ModeSelect";
 import { NotificationModal } from "@/components/NotificationModal";
 import { PairingCustomizer } from "@/components/PairingCustomizer";
 import { PantryStatCard } from "@/components/PantryStatCard";
-import { PersonalHubModal, PersonalHubTab } from "@/components/PersonalHubModal";
+import { PersonalHubTab } from "@/components/PersonalHubModal";
 import { ProfileOnboardingBanner } from "@/components/ProfileOnboardingBanner";
 import { PulsingLogoLoader } from "@/components/PulsingLogoLoader";
 import { ReadyMealHero } from "@/components/ReadyMealHero";
 import { fetchClientProfile, hasProfilePromptBeenDismissed } from "@/lib/profile-storage";
 import { useMealBuilder } from "@/lib/useMealBuilder";
+import { useSavedRecipes } from "@/lib/useSavedRecipes";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
@@ -62,6 +61,16 @@ export default function MealBuilderPage() {
     setPersonalHubTab(tab);
     setIsPersonalHubOpen(true);
   };
+
+  const {
+    savedRecipes,
+    isOpen: isSavedRecipesOpen,
+    openSavedRecipes,
+    closeSavedRecipes,
+    createRecipe,
+    deleteRecipe,
+  } = useSavedRecipes();
+
   const {
     catalogue, isClientReady, isNotificationOpen, setIsNotificationOpen,
     isAddSupplyOpen, setIsAddSupplyOpen, mealType, currentStep, setCurrentStep,
@@ -74,9 +83,9 @@ export default function MealBuilderPage() {
     handleSuggestForMe, handleManualPickMode, handleSelectMain,
     handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision,
     handleQuickAddStaples, handleAddSupply, handleAddBulkSupplies,
-    handleToggleAvailability, handleDeleteSupply,
+    handleToggleAvailability, handleDeleteSupply, handleCookSavedRecipe,
     isRatingCardOpen, setIsRatingCardOpen, handleRateMeal, handleSkipRating,
-  } = useMealBuilder(owner);
+  } = useMealBuilder(owner, undefined, savedRecipes);
 
   const [isStaplesDrawerOpen, setIsStaplesDrawerOpen] = useState(false);
 
@@ -99,6 +108,7 @@ export default function MealBuilderPage() {
           onResetToHome={handleResetToHome}
           onOpenNotifications={() => setIsNotificationOpen(true)}
           onOpenAddSupply={() => setIsAddSupplyOpen(true)}
+          onOpenSavedRecipes={openSavedRecipes}
           onOpenPersonalHub={handleOpenPersonalHub}
           onOpenWalkthrough={() => setIsWalkthroughOpen(true)}
         />
@@ -137,6 +147,8 @@ export default function MealBuilderPage() {
               onOpenStaples={() => setIsStaplesDrawerOpen(true)}
               onOpenFoodIdeas={() => setIsFoodIdeasOpen(true)}
               onOpenInventory={() => setIsInventoryOpen(true)}
+              onOpenSavedRecipes={openSavedRecipes}
+              savedRecipesCount={savedRecipes.length}
             />
           </div>
 
@@ -342,53 +354,34 @@ export default function MealBuilderPage() {
         owner={owner}
       />
 
-      {/* In-App Supplies Restock Modal */}
-      <AddSupplyModal
-        isOpen={isAddSupplyOpen}
-        onClose={() => setIsAddSupplyOpen(false)}
+      {/* Modals Container */}
+      <AppModals
+        owner={owner}
+        catalogue={catalogue}
+        isAddSupplyOpen={isAddSupplyOpen}
+        onCloseAddSupply={() => setIsAddSupplyOpen(false)}
         onAddSupply={handleAddSupply}
         onAddBulkSupplies={handleAddBulkSupplies}
+        isFoodIdeasOpen={isFoodIdeasOpen}
+        onCloseFoodIdeas={() => setIsFoodIdeasOpen(false)}
         onOpenFoodIdeas={() => setIsFoodIdeasOpen(true)}
-        owner={owner}
-      />
-
-      {/* Food Ideas & Inspiration Catalogue Modal */}
-      <FoodIdeasModal
-        isOpen={isFoodIdeasOpen}
-        onClose={() => setIsFoodIdeasOpen(false)}
-        onAddSupply={handleAddSupply}
-        ingredients={catalogue.ingredients}
-        readyMeals={catalogue.readyMeals}
-        owner={owner}
-      />
-
-      {/* Kitchen Stock & Inventory Modal */}
-      <KitchenInventoryModal
-        isOpen={isInventoryOpen}
-        onClose={() => setIsInventoryOpen(false)}
-        ingredients={catalogue.ingredients}
-        readyMeals={catalogue.readyMeals}
+        isInventoryOpen={isInventoryOpen}
+        onCloseInventory={() => setIsInventoryOpen(false)}
+        onOpenAddSupply={() => setIsAddSupplyOpen(true)}
         onToggleAvailability={handleToggleAvailability}
         onDeleteSupply={handleDeleteSupply}
-        onOpenAddSupply={() => setIsAddSupplyOpen(true)}
-        onOpenFoodIdeas={() => setIsFoodIdeasOpen(true)}
-        owner={owner}
-      />
-
-      {/* Personal Hub: Eating Goal & Weight Progress Log */}
-      <PersonalHubModal
-        isOpen={isPersonalHubOpen}
-        initialTab={personalHubTab}
-        owner={owner}
-        onClose={() => setIsPersonalHubOpen(false)}
+        isPersonalHubOpen={isPersonalHubOpen}
+        personalHubTab={personalHubTab}
+        onClosePersonalHub={() => setIsPersonalHubOpen(false)}
         onProfileSaved={() => setHasProfile(true)}
-      />
-
-      {/* First-Time User Onboarding Walkthrough */}
-      <AppWalkthroughModal
-        isOpen={isWalkthroughOpen}
-        onClose={() => setIsWalkthroughOpen(false)}
-        owner={owner}
+        isWalkthroughOpen={isWalkthroughOpen}
+        onCloseWalkthrough={() => setIsWalkthroughOpen(false)}
+        isSavedRecipesOpen={isSavedRecipesOpen}
+        onCloseSavedRecipes={closeSavedRecipes}
+        savedRecipes={savedRecipes}
+        onCreateRecipe={createRecipe}
+        onDeleteRecipe={deleteRecipe}
+        onCookRecipe={handleCookSavedRecipe}
       />
     </div>
   );
