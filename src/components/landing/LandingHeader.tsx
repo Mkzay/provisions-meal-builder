@@ -70,17 +70,17 @@ export const LandingHeader: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-stone-50/95 backdrop-blur-md border-b-2 border-stone-900 transition-colors pt-[max(0.75rem,env(safe-area-inset-top,14px))] pb-2.5 sm:pb-3.5 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+    <header className="sticky top-0 z-50 bg-stone-50/95 backdrop-blur-md border-b-2 border-stone-900 transition-colors pt-[max(1.125rem,env(safe-area-inset-top,20px))] pb-2.5 sm:pb-3.5 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
       <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand Logo & Name */}
-        <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
+        <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink min-w-0">
           <ProvisionsLogo className="w-8 h-8 sm:w-10 sm:h-10 shrink-0" />
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-display font-black text-lg sm:text-xl tracking-tight text-stone-900 group-hover:text-emerald-700 transition-colors">
+              <span className="font-display font-black text-lg sm:text-xl tracking-tight text-stone-900 group-hover:text-emerald-700 transition-colors truncate">
                 Provisions
               </span>
-              <span className="text-[9px] uppercase font-black px-1.5 py-0.5 rounded-md bg-emerald-200 border border-stone-900 text-emerald-950 leading-none">
+              <span className="hidden sm:inline-flex text-[9px] uppercase font-black px-1.5 py-0.5 rounded-md bg-emerald-200 border border-stone-900 text-emerald-950 leading-none shrink-0">
                 Nigerian Kitchen
               </span>
             </div>
@@ -105,7 +105,7 @@ export const LandingHeader: React.FC = () => {
         </nav>
 
         {/* CTAs & Mobile Menu Toggle */}
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Distinctive Colorful Sign In Button */}
           <Link
             href="/login"
@@ -115,18 +115,19 @@ export const LandingHeader: React.FC = () => {
           </Link>
           <Link
             href="/app"
-            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-amber-300 hover:bg-amber-400 text-stone-900 text-[11px] sm:text-xs font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.97] transition-all flex items-center gap-1.5"
+            className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-amber-300 hover:bg-amber-400 text-stone-900 text-[11px] sm:text-xs font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.97] transition-all flex items-center gap-1 shrink-0"
           >
-            <span>Launch App</span>
-            <span className="text-sm">→</span>
+            <span>Launch</span>
+            <span className="hidden xs:inline">App</span>
+            <span className="text-xs sm:text-sm">→</span>
           </Link>
 
-          {/* Mobile & Tablet Hamburger Toggle */}
+          {/* Mobile & Tablet Hamburger Toggle - Guaranteed visible & shrink-proof */}
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle navigation menu"
-            className="lg:hidden p-2 rounded-xl border-2 border-stone-900 bg-white hover:bg-amber-100 text-stone-900 shadow-brutal-xs active:translate-x-0.5 active:translate-y-0.5 transition-transform flex items-center justify-center"
+            className="lg:hidden p-2 rounded-xl border-2 border-stone-900 bg-white hover:bg-amber-100 text-stone-900 shadow-brutal-xs active:translate-x-0.5 active:translate-y-0.5 transition-transform flex items-center justify-center shrink-0"
           >
             <motion.div animate={{ rotate: isMobileMenuOpen ? 90 : 0 }} transition={{ duration: 0.18 }}>
               {isMobileMenuOpen ? <X size={18} weight="bold" /> : <List size={18} weight="bold" />}
@@ -161,9 +162,17 @@ export const LandingHeader: React.FC = () => {
 
               <motion.div variants={menuItemVariants} className="pt-2 border-t border-stone-900/20 flex flex-col gap-2">
                 <Link
+                  href="/app"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 rounded-xl bg-amber-300 hover:bg-amber-400 text-stone-950 font-black text-xs uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs active:scale-[0.99] transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span>Launch Provisions App</span>
+                  <span>→</span>
+                </Link>
+                <Link
                   href="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-center py-2.5 rounded-xl bg-emerald-300 hover:bg-emerald-400 text-emerald-950 font-black text-xs uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs active:scale-[0.99] transition-all block"
+                  className="w-full text-center py-2.5 rounded-xl bg-emerald-200 hover:bg-emerald-300 text-emerald-950 font-black text-xs uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs active:scale-[0.99] transition-all block"
                 >
                   Sign In to Your Kitchen
                 </Link>
