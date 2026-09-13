@@ -157,6 +157,10 @@ describe("Component import integrity", () => {
     await import("../components/landing/LandingFooter");
   });
 
+  it("imports LandingFlowingIcons", async () => {
+    await import("../components/landing/LandingFlowingIcons");
+  });
+
   it("imports LandingPage", async () => {
     await import("../app/page");
   });

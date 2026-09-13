@@ -22,7 +22,11 @@ export const LandingFeatures: React.FC = () => {
                 Pillar 1: Cultural Intelligence
               </span>
               <h2 className="font-display font-black text-2xl sm:text-4xl text-stone-950 tracking-tight leading-tight">
-                Built on 15 verified Nigerian dish blueprints. Not generic AI slop.
+                Built on{" "}
+                <span className="bg-amber-200 px-1.5 py-0.5 border border-stone-900 rounded-lg inline-block rotate-[-0.5deg]">
+                  15 verified blueprints
+                </span>
+                . Not generic AI slop.
               </h2>
               <p className="text-sm sm:text-base text-stone-700 font-medium leading-relaxed">
                 Generic recipe apps assume Western pantry staples and suggest bizarre pairings. Provisions is programmed with shared, verified Nigerian culinary rules: it knows why Vegetable Soup requires Assorted Meat, why Boiled Yam calls for Garden Egg or Pepper Sauce, and how Jollof pairs with Dodo.
@@ -79,12 +83,21 @@ export const LandingFeatures: React.FC = () => {
       <section className="py-16 sm:py-24 bg-amber-100/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <span className="inline-block text-xs font-black uppercase tracking-wider text-orange-800 bg-orange-200 px-3 py-1 rounded-full border border-stone-900 mb-3">
+            <span className="inline-block text-xs font-black uppercase tracking-wider text-orange-800 bg-orange-200 px-3 py-1 rounded-full border border-stone-900 mb-3 shadow-brutal-xs">
               Pillar 2: Zero Food Waste
             </span>
-            <h2 className="font-display font-black text-2xl sm:text-4xl text-stone-950 tracking-tight mb-4">
-              Turn tonight’s big batch into tomorrow’s instant 2-minute lunch.
-            </h2>
+            <motion.h2
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="font-display font-black text-2xl sm:text-4xl text-stone-950 tracking-tight mb-4"
+            >
+              Turn tonight’s big batch into tomorrow’s instant{" "}
+              <span className="bg-emerald-200 px-1.5 py-0.5 border border-stone-900 rounded-lg inline-block rotate-[0.5deg]">
+                2-minute lunch
+              </span>
+              .
+            </motion.h2>
             <p className="text-sm sm:text-base text-stone-700 font-medium">
               Nigerian cooking is batch cooking. When you confirm dinner in Provisions, one quick tap logs your leftovers into your Ready Meals inventory so nothing ever spoils in the back of the fridge.
             </p>
@@ -140,12 +153,22 @@ export const LandingFeatures: React.FC = () => {
       <section id="personal-recipes" className="py-16 sm:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-6 space-y-4">
-              <span className="inline-block text-xs font-black uppercase tracking-wider text-rose-800 bg-rose-200 px-3 py-1 rounded-full border border-stone-900">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.45 }}
+              className="lg:col-span-6 space-y-4"
+            >
+              <span className="inline-block text-xs font-black uppercase tracking-wider text-rose-800 bg-rose-200 px-3 py-1 rounded-full border border-stone-900 shadow-brutal-xs">
                 Pillar 3: Personal Taste
               </span>
               <h2 className="font-display font-black text-2xl sm:text-4xl text-stone-950 tracking-tight leading-tight">
-                Your private recipe vault. Surfaced only when ingredients are in stock.
+                Your private recipe vault. Surfaced only when{" "}
+                <span className="bg-rose-200 px-1.5 py-0.5 border border-stone-900 rounded-lg inline-block rotate-[-0.5deg]">
+                  ingredients are in stock
+                </span>
+                .
               </h2>
               <p className="text-sm sm:text-base text-stone-700 font-medium leading-relaxed">
                 Found a great recipe on TikTok or got Auntie&apos;s secret spice ratio? Save it in your personal catalogue. It supports multiple proteins and sides, and only appears in suggestions when every required ingredient is present in your kitchen.
@@ -153,7 +176,7 @@ export const LandingFeatures: React.FC = () => {
               <div className="space-y-2 pt-2 text-xs font-bold text-stone-800">
                 <div className="flex items-center gap-2">
                   <span className="text-emerald-600">✓</span>
-                  <span>Multi-protein (e.g. Chicken + Beef) & multi-side support</span>
+                  <span>Multi-protein (e.g. Chicken + Beef) &amp; multi-side support</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-emerald-600">✓</span>
@@ -164,7 +187,7 @@ export const LandingFeatures: React.FC = () => {
                   <span>One-click &quot;Cook This&quot; pre-selects all pairing steps</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Recipe Card Mockup */}
             <div className="lg:col-span-6">

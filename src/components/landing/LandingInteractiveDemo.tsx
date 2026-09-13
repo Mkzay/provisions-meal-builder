@@ -66,26 +66,39 @@ export const LandingInteractiveDemo: React.FC = () => {
   return (
     <section id="demo" className="py-16 sm:py-24 border-b-2 border-stone-900 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="inline-block text-xs font-black uppercase tracking-wider text-amber-800 bg-amber-200 px-3 py-1 rounded-full border border-stone-900 mb-3">
+        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+          <motion.span
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="inline-block text-xs font-black uppercase tracking-wider text-amber-800 bg-amber-200 px-3 py-1 rounded-full border border-stone-900 mb-3 shadow-brutal-xs"
+          >
             Interactive Live Demo
-          </span>
-          <h2 className="font-display font-black text-2xl sm:text-4xl text-stone-950 tracking-tight mb-4">
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45 }}
+            className="font-display font-black text-2xl sm:text-4xl text-stone-950 tracking-tight mb-4"
+          >
             See the Nigerian Pairing Engine in action.
-          </h2>
+          </motion.h2>
           <p className="text-sm sm:text-base text-stone-600 font-medium">
             Select a kitchen base below to watch how Provisions pairs proteins, sides, and nutritional balance in real time.
           </p>
         </div>
 
         {/* Base Selector Tabs */}
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
+        <div className="flex flex-wrap justify-center gap-2.5 sm:gap-3 mb-8 px-2">
           {DEMO_DISHES.map((dish) => {
             const isSelected = dish.id === selectedId;
             return (
-              <button
+              <motion.button
                 key={dish.id}
                 type="button"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setSelectedId(dish.id);
                   setIsOutOfPrimaryProtein(false);
@@ -98,13 +111,77 @@ export const LandingInteractiveDemo: React.FC = () => {
               >
                 <span className="text-lg">{dish.emoji}</span>
                 <span>{dish.name}</span>
-              </button>
+              </motion.button>
             );
           })}
         </div>
 
-        {/* Live Result Card with Framer Motion Transitions */}
-        <div className="max-w-3xl mx-auto bg-amber-50 rounded-3xl border-2 border-stone-900 p-5 sm:p-8 shadow-brutal">
+        {/* Demo Stage Container with Flanking Neo-Brutalist Callout Cards */}
+        <div className="relative max-w-6xl mx-auto flex items-center justify-center">
+          {/* Left Flanking Cards (Visible on large screens) */}
+          <div className="hidden xl:flex flex-col gap-5 absolute -left-2 top-8 z-10 pointer-events-none">
+            <motion.div
+              animate={{ y: [-5, 5, -5], rotate: [-2, 1, -2] }}
+              transition={{ repeat: Infinity, duration: 4.8, ease: "easeInOut" }}
+              className="w-56 p-3.5 rounded-2xl bg-white border-2 border-stone-900 shadow-brutal-xs"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-base">🇳🇬</span>
+                <span className="text-[11px] font-black uppercase text-stone-900">Cultural Blueprints</span>
+              </div>
+              <p className="text-[10px] text-stone-600 font-medium leading-relaxed">
+                Authentic Nigerian pairings. No awkward AI suggestions.
+              </p>
+            </motion.div>
+
+            <motion.div
+              animate={{ y: [6, -6, 6], rotate: [1, -2, 1] }}
+              transition={{ repeat: Infinity, duration: 5.2, ease: "easeInOut", delay: 0.4 }}
+              className="w-56 p-3.5 rounded-2xl bg-amber-100 border-2 border-stone-900 shadow-brutal-xs"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-base">♻️</span>
+                <span className="text-[11px] font-black uppercase text-stone-900">Leftover Memory</span>
+              </div>
+              <p className="text-[10px] text-stone-700 font-medium leading-relaxed">
+                Dinner leftovers auto-promote into tomorrow&apos;s 2-minute lunch.
+              </p>
+            </motion.div>
+          </div>
+
+          {/* Right Flanking Cards (Visible on large screens) */}
+          <div className="hidden xl:flex flex-col gap-5 absolute -right-2 top-8 z-10 pointer-events-none">
+            <motion.div
+              animate={{ y: [-6, 6, -6], rotate: [2, -1, 2] }}
+              transition={{ repeat: Infinity, duration: 4.4, ease: "easeInOut", delay: 0.2 }}
+              className="w-56 p-3.5 rounded-2xl bg-emerald-100 border-2 border-stone-900 shadow-brutal-xs"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-base">⚡</span>
+                <span className="text-[11px] font-black uppercase text-stone-900">In-Stock Only</span>
+              </div>
+              <p className="text-[10px] text-stone-700 font-medium leading-relaxed">
+                Zero shopping runs. Built from whatever you currently have.
+              </p>
+            </motion.div>
+
+            <motion.div
+              animate={{ y: [5, -5, 5], rotate: [-2, 1, -2] }}
+              transition={{ repeat: Infinity, duration: 5.6, ease: "easeInOut", delay: 0.6 }}
+              className="w-56 p-3.5 rounded-2xl bg-purple-100 border-2 border-stone-900 shadow-brutal-xs"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-base">🥗</span>
+                <span className="text-[11px] font-black uppercase text-stone-900">Balanced Nutrition</span>
+              </div>
+              <p className="text-[10px] text-stone-700 font-medium leading-relaxed">
+                Automatic tracking for high protein, fiber, and iron.
+              </p>
+            </motion.div>
+          </div>
+
+          {/* Live Result Card with Framer Motion Transitions */}
+          <div className="w-full max-w-3xl bg-amber-50 rounded-3xl border-2 border-stone-900 p-5 sm:p-8 shadow-brutal">
           <AnimatePresence mode="wait">
             <motion.div
               key={`${activeDish.id}-${isOutOfPrimaryProtein}`}
@@ -198,6 +275,7 @@ export const LandingInteractiveDemo: React.FC = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 };

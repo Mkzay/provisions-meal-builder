@@ -2,7 +2,7 @@
 
 import { List, Sparkle, X } from "@/components/icons";
 import { ProvisionsLogo } from "@/components/ProvisionsLogo";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import Link from "next/link";
 import React, { useState } from "react";
 
@@ -16,11 +16,42 @@ export const LandingHeader: React.FC = () => {
     { label: "Saved Recipes", href: "#personal-recipes" },
   ];
 
+  const menuContainerVariants: Variants = {
+    hidden: { opacity: 0, height: 0 },
+    visible: {
+      opacity: 1,
+      height: "auto",
+      transition: {
+        height: { type: "spring", stiffness: 320, damping: 28 },
+        opacity: { duration: 0.2 },
+        staggerChildren: 0.05,
+        delayChildren: 0.03,
+      },
+    },
+    exit: {
+      opacity: 0,
+      height: 0,
+      transition: {
+        height: { duration: 0.2 },
+        opacity: { duration: 0.15 },
+      },
+    },
+  };
+
+  const menuItemVariants: Variants = {
+    hidden: { opacity: 0, x: -14 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { type: "spring", stiffness: 350, damping: 25 },
+    },
+  };
+
   return (
-    <header className="sticky top-0 z-50 bg-stone-50/95 backdrop-blur-md border-b-2 border-stone-900 transition-colors pt-[env(safe-area-inset-top,0px)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
+    <header className="sticky top-0 z-50 bg-stone-50/95 backdrop-blur-md border-b-2 border-stone-900 transition-colors pt-[max(0.75rem,env(safe-area-inset-top,14px))] pb-2.5 sm:pb-3.5 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand Logo & Name */}
-        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+        <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
           <ProvisionsLogo className="w-8 h-8 sm:w-10 sm:h-10 shrink-0" />
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -51,16 +82,17 @@ export const LandingHeader: React.FC = () => {
         </nav>
 
         {/* CTAs & Mobile Menu Toggle */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Distinctive Colorful Sign In Button */}
           <Link
             href="/login"
-            className="hidden sm:inline-block px-3 py-2 text-xs font-black text-stone-800 hover:text-stone-950 uppercase tracking-wider transition-colors"
+            className="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-xl bg-emerald-200 hover:bg-emerald-300 text-emerald-950 text-xs font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.97] transition-all"
           >
             Sign In
           </Link>
           <Link
             href="/app"
-            className="px-3 sm:px-4 py-2 rounded-xl bg-amber-300 hover:bg-amber-400 text-stone-900 text-[11px] sm:text-xs font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.97] transition-all flex items-center gap-1.5"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-amber-300 hover:bg-amber-400 text-stone-900 text-[11px] sm:text-xs font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.97] transition-all flex items-center gap-1.5"
           >
             <span>Launch App</span>
             <span className="text-sm">→</span>
@@ -73,7 +105,9 @@ export const LandingHeader: React.FC = () => {
             aria-label="Toggle navigation menu"
             className="lg:hidden p-2 rounded-xl border-2 border-stone-900 bg-white hover:bg-amber-100 text-stone-900 shadow-brutal-xs active:translate-x-0.5 active:translate-y-0.5 transition-transform flex items-center justify-center"
           >
-            {isMobileMenuOpen ? <X size={18} weight="bold" /> : <List size={18} weight="bold" />}
+            <motion.div animate={{ rotate: isMobileMenuOpen ? 90 : 0 }} transition={{ duration: 0.18 }}>
+              {isMobileMenuOpen ? <X size={18} weight="bold" /> : <List size={18} weight="bold" />}
+            </motion.div>
           </button>
         </div>
       </div>
@@ -82,34 +116,39 @@ export const LandingHeader: React.FC = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="lg:hidden border-t-2 border-stone-900 bg-amber-50/95 backdrop-blur-md px-4 py-4 overflow-hidden"
+            variants={menuContainerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="lg:hidden border-t-2 border-stone-900 bg-amber-50/98 backdrop-blur-lg px-4 py-4 overflow-hidden mt-2.5 shadow-brutal"
           >
             <div className="flex flex-col gap-2 max-w-md mx-auto">
               {navLinks.map((link) => (
-                <a
+                <motion.a
                   key={link.href}
+                  variants={menuItemVariants}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="px-3 py-2.5 rounded-xl border border-stone-900/20 bg-white hover:bg-amber-200 text-stone-900 text-xs font-black uppercase tracking-wider shadow-xs transition-colors flex items-center justify-between"
+                  className="px-3.5 py-2.5 rounded-xl border-2 border-stone-900/40 bg-white hover:bg-amber-200 text-stone-900 text-xs font-black uppercase tracking-wider shadow-brutal-xs active:scale-[0.99] transition-all flex items-center justify-between"
                 >
                   <span>{link.label}</span>
-                  <span className="text-stone-400">→</span>
-                </a>
+                  <span className="text-stone-400 text-sm">→</span>
+                </motion.a>
               ))}
-              <div className="pt-2 border-t border-stone-900/10 flex items-center justify-between">
+
+              <motion.div variants={menuItemVariants} className="pt-2 border-t border-stone-900/20 flex flex-col gap-2">
                 <Link
                   href="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="px-3 py-2 text-xs font-black text-stone-800 uppercase tracking-wider hover:underline"
+                  className="w-full text-center py-2.5 rounded-xl bg-emerald-300 hover:bg-emerald-400 text-emerald-950 font-black text-xs uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs active:scale-[0.99] transition-all block"
                 >
-                  Existing User? Sign In
+                  Sign In to Your Kitchen
                 </Link>
-                <span className="text-[10px] font-bold text-stone-500">v1.0 Nigerian Cuisine</span>
-              </div>
+                <div className="flex items-center justify-between text-[10px] font-bold text-stone-500 px-1 pt-1">
+                  <span>Provisions Intelligence</span>
+                  <span>v1.0 Nigerian Cuisine</span>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         )}

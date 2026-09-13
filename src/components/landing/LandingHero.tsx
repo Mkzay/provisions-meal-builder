@@ -42,13 +42,22 @@ export const LandingHero: React.FC = () => {
               <span className="truncate">The Intelligent Nigerian Kitchen Companion</span>
             </motion.div>
 
-            {/* Main Headline */}
-            <h1 className="font-display font-black text-3xl sm:text-5xl lg:text-5xl xl:text-6xl text-stone-950 tracking-tight leading-[1.12] mb-5 sm:mb-6 break-words">
+            {/* Main Headline with Animated Reveal */}
+            <motion.h1
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="font-display font-black text-3xl sm:text-5xl lg:text-5xl xl:text-6xl text-stone-950 tracking-tight leading-[1.12] mb-5 sm:mb-6 break-words"
+            >
               Cook what you actually have.{" "}
-              <span className="bg-amber-300 px-2 py-0.5 border-2 border-stone-900 inline-block shadow-brutal-xs rotate-[-1deg] mt-1 sm:mt-0">
+              <motion.span
+                animate={{ rotate: [-1.5, 0.5, -1.5], scale: [1, 1.02, 1] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                className="bg-amber-300 px-2 py-0.5 border-2 border-stone-900 inline-block shadow-brutal-xs rotate-[-1deg] mt-1 sm:mt-0"
+              >
                 Zero guesswork.
-              </span>
-            </h1>
+              </motion.span>
+            </motion.h1>
 
             {/* Subtitle */}
             <p className="text-sm sm:text-lg lg:text-xl text-stone-700 font-medium leading-relaxed mb-8 max-w-2xl mx-auto sm:mx-0">
@@ -114,34 +123,15 @@ export const LandingHero: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Right Column: Hero Culinary Visual Card (5 Cols on desktop) */}
+          {/* Right Column: Free-Standing Animated Culinary Illustration (No Card Container) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            className="hidden lg:flex lg:col-span-5 items-center justify-center relative"
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+            className="hidden lg:flex lg:col-span-5 items-center justify-center relative p-4"
           >
-            <div className="relative w-full max-w-[400px] p-6 rounded-3xl bg-amber-100/70 border-[2.5px] border-stone-900 shadow-brutal flex flex-col items-center">
-              {/* Card Header Pill */}
-              <div className="w-full flex items-center justify-between pb-3 mb-2 border-b-2 border-stone-900/15 text-[11px] font-black uppercase text-stone-800">
-                <span>Authentic Flavor</span>
-                <span className="bg-emerald-200 border border-stone-900 px-2 py-0.5 rounded-full text-emerald-950">
-                  Active Blueprint
-                </span>
-              </div>
-
-              {/* The Culinary Illustration */}
-              <LandingHeroIllustration className="w-full h-auto max-h-[300px]" />
-
-              {/* Card Footer Caption */}
-              <div className="mt-3 pt-3 border-t-2 border-stone-900/15 w-full text-center">
-                <span className="text-xs font-bold text-stone-800 block">
-                  Bubbling Isasūn Pot &amp; Sweet Dodo
-                </span>
-                <span className="text-[10px] font-medium text-stone-600">
-                  Real culinary knowledge, calibrated for real kitchens.
-                </span>
-              </div>
+            <div className="relative w-full max-w-[420px] flex items-center justify-center">
+              <LandingHeroIllustration className="w-full h-auto drop-shadow-md" />
             </div>
           </motion.div>
         </div>
