@@ -23,7 +23,8 @@ import { PersonalHubTab } from "@/components/PersonalHubModal";
 import { ProfileOnboardingBanner } from "@/components/ProfileOnboardingBanner";
 import { PulsingLogoLoader } from "@/components/PulsingLogoLoader";
 import { ReadyMealHero } from "@/components/ReadyMealHero";
-import { fetchClientProfile, hasProfilePromptBeenDismissed } from "@/lib/profile-storage";
+import { fetchClientProfile, getClientProfileCached, hasProfilePromptBeenDismissed } from "@/lib/profile-storage";
+import { MealProfile } from "@/lib/types";
 import { useMealBuilder } from "@/lib/useMealBuilder";
 import { useSavedRecipes } from "@/lib/useSavedRecipes";
 import { useNotificationRunner } from "@/lib/useNotificationRunner";
@@ -39,6 +40,7 @@ export default function MealBuilderAppPage() {
   const [personalHubTab, setPersonalHubTab] = useState<PersonalHubTab>("profile");
   const [isFoodIdeasOpen, setIsFoodIdeasOpen] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+  const [clientProfile, setClientProfile] = useState<MealProfile | null>(() => getClientProfileCached(owner));
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
   const [isPromptDismissed] = useState<boolean>(() => hasProfilePromptBeenDismissed());
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
@@ -52,7 +54,10 @@ export default function MealBuilderAppPage() {
   }, []);
 
   useEffect(() => {
-    fetchClientProfile(owner).then((p) => setHasProfile(!!p));
+    fetchClientProfile(owner).then((p) => {
+      setClientProfile(p);
+      setHasProfile(!!p);
+    });
   }, [owner]);
 
   const handleOpenPersonalHub = (tab: PersonalHubTab = "profile") => {
@@ -141,6 +146,7 @@ export default function MealBuilderAppPage() {
               isCachedFallback={catalogue.isCachedFallback}
               onOpenAddSupply={() => setIsAddSupplyOpen(true)}
               onOpenInventory={() => setIsInventoryOpen(true)}
+              mealsPerDay={clientProfile?.mealsPerDay}
             />
           </div>
         )}
@@ -158,6 +164,7 @@ export default function MealBuilderAppPage() {
               onOpenInventory={() => setIsInventoryOpen(true)}
               onOpenSavedRecipes={openSavedRecipes}
               savedRecipesCount={savedRecipes.length}
+              mealsPerDay={clientProfile?.mealsPerDay}
             />
           </div>
 
@@ -186,7 +193,7 @@ export default function MealBuilderAppPage() {
                 </motion.div>
               ) : currentStep === "meal_type" ? (
                 <motion.div key="step-meal-type" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                  <MealTypeSelector selectedType={mealType} onSelect={handleSelectMealType} />
+                  <MealTypeSelector selectedType={mealType} onSelect={handleSelectMealType} mealsPerDay={clientProfile?.mealsPerDay} />
                 </motion.div>
               ) : currentStep === "ready_meal" ? (
                 <motion.div key="step-ready-meal" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
@@ -345,7 +352,10 @@ export default function MealBuilderAppPage() {
           setIsPersonalHubOpen(false);
           setActiveNavTab("builder");
         }}
-        onProfileSaved={() => setHasProfile(true)}
+        onProfileSaved={() => {
+          setHasProfile(true);
+          fetchClientProfile(owner).then((p) => setClientProfile(p));
+        }}
         isWalkthroughOpen={isWalkthroughOpen}
         onCloseWalkthrough={() => setIsWalkthroughOpen(false)}
         isSavedRecipesOpen={isSavedRecipesOpen}

@@ -16,12 +16,24 @@ import React from "react";
 interface MealTypeSelectorProps {
   selectedType: MealType;
   onSelect: (type: MealType) => void;
+  mealsPerDay?: number;
 }
 
 export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
   selectedType,
   onSelect,
+  mealsPerDay,
 }) => {
+  const [showAll, setShowAll] = React.useState(false);
+  const isTwoMealsPlan = mealsPerDay === 2;
+
+  // If in 2-meals plan and breakfast was selected, auto-shift to Lunch
+  React.useEffect(() => {
+    if (isTwoMealsPlan && !showAll && selectedType === "Breakfast") {
+      onSelect("Lunch");
+    }
+  }, [isTwoMealsPlan, showAll, selectedType, onSelect]);
+
   const currentSuggested = getDefaultMealTypeByHour(new Date().getHours());
 
   const options: Array<{
@@ -76,22 +88,39 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
     },
   ];
 
+  const visibleOptions = React.useMemo(() => {
+    if (isTwoMealsPlan && !showAll) {
+      return options.filter((opt) => opt.type !== "Breakfast");
+    }
+    return options;
+  }, [isTwoMealsPlan, showAll, options]);
+
   return (
     <div className="w-full space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-stone-900">
-            What meal are we having?
-          </h2>
+          <div className="flex items-center gap-2 flex-wrap mb-1">
+            <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-stone-900">
+              What meal are we having?
+            </h2>
+            {isTwoMealsPlan && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full bg-amber-200 border-2 border-stone-900 shadow-brutal-xs text-stone-900">
+                <Sparkle size={12} weight="fill" className="text-amber-700" />
+                <span>2 Meals / Day Schedule</span>
+              </span>
+            )}
+          </div>
           <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
-            Select a meal to explore ready-cooked meals or delicious pantry pairings.
+            {isTwoMealsPlan && !showAll
+              ? "Calibrated to your 2-meals-a-day schedule: Lunch, Dinner & Snack craving."
+              : "Select a meal to explore ready-cooked meals or delicious pantry pairings."}
           </p>
         </div>
       </div>
 
-      {/* Spacious 2x2 Grid - No More Squeezed Cards! */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-        {options.map((opt) => {
+      {/* Responsive Grid: 3 Columns for 2-Meal plan, 2x2 for Standard */}
+      <div className={`grid grid-cols-1 ${visibleOptions.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"} gap-4 md:gap-5`}>
+        {visibleOptions.map((opt) => {
           const isSelected = selectedType === opt.type;
           const isNow = currentSuggested === opt.type;
 
@@ -168,6 +197,19 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
           );
         })}
       </div>
+
+      {/* Optional early breakfast toggle when on 2-meal schedule */}
+      {isTwoMealsPlan && (
+        <div className="pt-1 text-center">
+          <button
+            type="button"
+            onClick={() => setShowAll((prev) => !prev)}
+            className="text-xs font-bold text-stone-500 hover:text-stone-900 underline underline-offset-2 transition-colors"
+          >
+            {showAll ? "← Back to 2-meal schedule (hide breakfast)" : "Having an early breakfast today? Show all 4 meal slots"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

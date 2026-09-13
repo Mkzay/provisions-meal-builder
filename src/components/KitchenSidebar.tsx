@@ -26,6 +26,7 @@ interface KitchenSidebarProps {
   onOpenInventory?: () => void;
   onOpenSavedRecipes?: () => void;
   savedRecipesCount?: number;
+  mealsPerDay?: number;
 }
 
 export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
@@ -40,6 +41,7 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
   onOpenInventory,
   onOpenSavedRecipes,
   savedRecipesCount,
+  mealsPerDay,
 }) => {
   const availableReadyMeals = readyMeals.filter((m) => m.available);
   const availableIngredients = ingredients.filter((i) => i.available);
@@ -52,9 +54,9 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
           <span className="text-xs font-black uppercase tracking-wider text-stone-900">
             Your Pantry
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black border border-stone-900 bg-emerald-100 text-stone-900">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-700" />
-            <span>Active</span>
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black border border-stone-900 ${mealsPerDay ? "bg-amber-200 text-stone-900" : "bg-emerald-100 text-stone-900"}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${mealsPerDay ? "bg-amber-700" : "bg-emerald-700"}`} />
+            <span>{mealsPerDay ? `${mealsPerDay} Meals / Day` : "Active"}</span>
           </span>
         </div>
 

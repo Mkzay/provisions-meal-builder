@@ -15,6 +15,7 @@ interface PantryStatCardProps {
   onOpenAddSupply: () => void;
   onOpenSettings?: () => void;
   onOpenInventory?: () => void;
+  mealsPerDay?: number;
   className?: string;
 }
 
@@ -30,6 +31,7 @@ export const PantryStatCard: React.FC<PantryStatCardProps> = ({
   onOpenAddSupply,
   onOpenSettings,
   onOpenInventory,
+  mealsPerDay,
   className = "",
 }) => {
   return (
@@ -52,9 +54,9 @@ export const PantryStatCard: React.FC<PantryStatCardProps> = ({
           </div>
         </div>
 
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black border border-stone-900 shadow-brutal-xs bg-emerald-100 text-stone-900 shrink-0">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>{readyMealsCount + ingredientsCount} Ready</span>
+        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black border border-stone-900 shadow-brutal-xs ${mealsPerDay ? "bg-amber-100 text-stone-900" : "bg-emerald-100 text-stone-900"} shrink-0`}>
+          <span className={`w-2 h-2 rounded-full ${mealsPerDay ? "bg-amber-500" : "bg-emerald-500"}`} />
+          <span>{mealsPerDay ? `${mealsPerDay} Meals / Day` : `${readyMealsCount + ingredientsCount} Ready`}</span>
         </div>
       </div>
 
