@@ -232,23 +232,6 @@ function LoginForm() {
             </p>
           </div>
 
-          {/* Developer Test Invite Notice */}
-          <div className="p-3 bg-amber-100/90 border-2 border-stone-900 rounded-2xl text-left shadow-brutal-xs space-y-1">
-            <div className="flex items-center gap-1.5 text-stone-950 font-black text-xs">
-              <span>🔒</span>
-              <span>Signups are currently invite-only.</span>
-            </div>
-            <p className="text-[11px] text-stone-700 font-medium leading-tight">
-              To test Provisions, reach out to{" "}
-              <a
-                href="mailto:ayomikunwahab18@gmail.com?subject=Provisions%20Access%20Request"
-                className="font-black text-stone-950 underline decoration-amber-500 hover:text-emerald-800"
-              >
-                ayomikunwahab18@gmail.com
-              </a>
-            </p>
-          </div>
-
           {/* Error Alert with spring shake */}
           {errorMessage && (
             <motion.div
