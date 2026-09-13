@@ -1,9 +1,15 @@
-const CACHE_NAME = "esther-meal-builder-v1";
+const CACHE_NAME = "provisions-meal-builder-v2";
 const ASSETS_TO_CACHE = [
   "/",
   "/manifest.json",
   "/favicon.ico"
 ];
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

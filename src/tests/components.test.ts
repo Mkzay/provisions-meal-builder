@@ -177,6 +177,10 @@ describe("Component import integrity", () => {
     await import("../app/signup/page");
   });
 
+  it("imports UpdateNotification", async () => {
+    await import("../components/UpdateNotification");
+  });
+
   it("imports MealBuilderAppPage", async () => {
     await import("../app/app/page");
   });

@@ -1,4 +1,5 @@
 import { SessionWrapper } from "@/components/SessionWrapper";
+import { UpdateNotification } from "@/components/UpdateNotification";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
@@ -84,7 +85,10 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground selection:bg-saffron-200 selection:text-foreground">
-        <SessionWrapper>{children}</SessionWrapper>
+        <SessionWrapper>
+          {children}
+          <UpdateNotification />
+        </SessionWrapper>
         <script
           dangerouslySetInnerHTML={{
             __html: `
