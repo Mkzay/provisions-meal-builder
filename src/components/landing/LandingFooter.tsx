@@ -5,6 +5,23 @@ import Link from "next/link";
 import React from "react";
 
 export const LandingFooter: React.FC = () => {
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId);
+    if (!element) return;
+    const header = document.querySelector("header");
+    const headerHeight = header ? header.getBoundingClientRect().height : 64;
+    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+    const offsetPosition = elementPosition - headerHeight - 16;
+    window.scrollTo({
+      top: Math.max(0, offsetPosition),
+      behavior: "smooth",
+    });
+    if (window.history?.replaceState) {
+      window.history.replaceState(null, "", `#${targetId}`);
+    }
+  };
+
   return (
     <footer className="bg-stone-900 text-stone-100 border-t-2 border-stone-900">
       {/* Pre-Footer Action Banner */}
@@ -48,13 +65,25 @@ export const LandingFooter: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-6 text-xs font-bold text-stone-300">
-            <a href="#blueprints" className="hover:text-amber-300 transition-colors">
+            <a
+              href="#blueprints"
+              onClick={(e) => handleScrollTo(e, "blueprints")}
+              className="hover:text-amber-300 transition-colors cursor-pointer"
+            >
               Blueprints
             </a>
-            <a href="#demo" className="hover:text-amber-300 transition-colors">
+            <a
+              href="#demo"
+              onClick={(e) => handleScrollTo(e, "demo")}
+              className="hover:text-amber-300 transition-colors cursor-pointer"
+            >
               Live Demo
             </a>
-            <a href="#features" className="hover:text-amber-300 transition-colors">
+            <a
+              href="#features"
+              onClick={(e) => handleScrollTo(e, "features")}
+              className="hover:text-amber-300 transition-colors cursor-pointer"
+            >
               Features
             </a>
             <Link href="/login" className="hover:text-amber-300 transition-colors">

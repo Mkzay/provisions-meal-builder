@@ -6,6 +6,25 @@ import Link from "next/link";
 import React from "react";
 
 export const LandingHero: React.FC = () => {
+  const handleScrollToDemo = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const element = document.getElementById("demo");
+    if (!element) return;
+    const header = document.querySelector("header");
+    const headerHeight = header ? header.getBoundingClientRect().height : 64;
+    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+    const offsetPosition = elementPosition - headerHeight - 16;
+
+    window.scrollTo({
+      top: Math.max(0, offsetPosition),
+      behavior: "smooth",
+    });
+
+    if (window.history?.replaceState) {
+      window.history.replaceState(null, "", "#demo");
+    }
+  };
+
   return (
     <section className="relative overflow-hidden pt-10 pb-14 sm:pt-16 sm:pb-20 lg:pt-20 lg:pb-24 border-b-2 border-stone-900 bg-amber-50/40">
       {/* Subtle retro dot pattern background */}
@@ -76,14 +95,15 @@ export const LandingHero: React.FC = () => {
                 </Link>
               </motion.div>
 
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <a
-                  href="#demo"
-                  className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 text-xs sm:text-sm font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 transition-all text-center flex items-center justify-center"
-                >
-                  Try Interactive Demo ↓
-                </a>
-              </motion.div>
+              <motion.a
+                href="#demo"
+                onClick={handleScrollToDemo}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white hover:bg-stone-100 text-stone-900 text-xs sm:text-sm font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs hover:shadow-none active:scale-[0.98] transition-all text-center flex items-center justify-center cursor-pointer"
+              >
+                Try Interactive Demo ↓
+              </motion.a>
             </div>
 
             {/* Value Stats Grid */}

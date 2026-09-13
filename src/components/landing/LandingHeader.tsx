@@ -16,6 +16,28 @@ export const LandingHeader: React.FC = () => {
     { label: "Saved Recipes", href: "#personal-recipes" },
   ];
 
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      setIsMobileMenuOpen(false);
+      const targetId = href.substring(1);
+      const element = document.getElementById(targetId);
+      if (element) {
+        const header = document.querySelector("header");
+        const headerHeight = header ? header.getBoundingClientRect().height : 64;
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+        const offsetPosition = elementPosition - headerHeight - 16;
+        window.scrollTo({
+          top: Math.max(0, offsetPosition),
+          behavior: "smooth",
+        });
+        if (window.history?.replaceState) {
+          window.history.replaceState(null, "", href);
+        }
+      }
+    }
+  };
+
   const menuContainerVariants: Variants = {
     hidden: { opacity: 0, height: 0 },
     visible: {
@@ -74,7 +96,8 @@ export const LandingHeader: React.FC = () => {
             <a
               key={link.href}
               href={link.href}
-              className="text-xs font-black text-stone-700 hover:text-stone-950 uppercase tracking-wider transition-colors hover:underline decoration-amber-400 decoration-2 underline-offset-4"
+              onClick={(e) => handleNavClick(e, link.href)}
+              className="text-xs font-black text-stone-700 hover:text-stone-950 uppercase tracking-wider transition-colors hover:underline decoration-amber-400 decoration-2 underline-offset-4 cursor-pointer"
             >
               {link.label}
             </a>
@@ -128,8 +151,8 @@ export const LandingHeader: React.FC = () => {
                   key={link.href}
                   variants={menuItemVariants}
                   href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="px-3.5 py-2.5 rounded-xl border-2 border-stone-900/40 bg-white hover:bg-amber-200 text-stone-900 text-xs font-black uppercase tracking-wider shadow-brutal-xs active:scale-[0.99] transition-all flex items-center justify-between"
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  className="px-3.5 py-2.5 rounded-xl border-2 border-stone-900/40 bg-white hover:bg-amber-200 text-stone-900 text-xs font-black uppercase tracking-wider shadow-brutal-xs active:scale-[0.99] transition-all flex items-center justify-between cursor-pointer"
                 >
                   <span>{link.label}</span>
                   <span className="text-stone-400 text-sm">→</span>
