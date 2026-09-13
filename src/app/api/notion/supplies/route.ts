@@ -57,30 +57,34 @@ export async function PATCH(request: Request) {
   }
 }
 
+export const dynamic = "force-dynamic";
+
 export async function DELETE(request: Request) {
   try {
     const owner = getSessionOwner(await auth());
     if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { searchParams } = new URL(request.url);
     let id = searchParams.get("id");
+    let name = searchParams.get("name") || undefined;
 
-    if (!id) {
+    if (!id && !name) {
       try {
-        const body = (await request.json()) as { id?: string };
+        const body = (await request.json()) as { id?: string; name?: string };
         id = body?.id || null;
+        if (!name && body?.name) name = body.name;
       } catch {
         // no body
       }
     }
 
-    if (!id) {
+    if (!id && !name) {
       return NextResponse.json(
-        { error: "Missing required id parameter" },
+        { error: "Missing required id or name parameter" },
         { status: 400 }
       );
     }
 
-    const result = await deleteDbSupply(id, owner);
+    const result = await deleteDbSupply(id || "", owner, name);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error in DELETE /api/notion/supplies:", error);

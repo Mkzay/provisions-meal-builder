@@ -115,4 +115,13 @@ export async function initDatabaseSchema(): Promise<void> {
     );
   `;
   await sql`CREATE INDEX IF NOT EXISTS idx_meal_logs_owner ON meal_logs(owner);`;
+
+  // 8. User pantry settings (tracks whether starter inventory was seeded)
+  await sql`
+    CREATE TABLE IF NOT EXISTS user_pantry_settings (
+      owner TEXT PRIMARY KEY,
+      seeded BOOLEAN DEFAULT TRUE,
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `;
 }

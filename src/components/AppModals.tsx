@@ -23,7 +23,7 @@ interface AppModalsProps {
   onCloseInventory: () => void;
   onOpenAddSupply: () => void;
   onToggleAvailability: (id: string, kind: "ingredient" | "ready_meal", available: boolean) => void;
-  onDeleteSupply: (id: string, kind: "ingredient" | "ready_meal") => void;
+  onDeleteSupply: (id: string, kind: "ingredient" | "ready_meal", name?: string) => void;
   isPersonalHubOpen: boolean;
   personalHubTab: PersonalHubTab;
   onClosePersonalHub: () => void;

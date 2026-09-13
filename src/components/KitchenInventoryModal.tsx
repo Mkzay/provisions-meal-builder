@@ -20,7 +20,7 @@ interface KitchenInventoryModalProps {
   ingredients: Ingredient[];
   readyMeals: ReadyMeal[];
   onToggleAvailability: (id: string, kind: "ingredient" | "ready_meal", available: boolean) => void;
-  onDeleteSupply: (id: string, kind: "ingredient" | "ready_meal") => void;
+  onDeleteSupply: (id: string, kind: "ingredient" | "ready_meal", name?: string) => void;
   onOpenAddSupply: () => void;
   onOpenFoodIdeas?: () => void;
   owner: string;
@@ -90,7 +90,7 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
 
   const handleDelete = (item: InventoryRowItem) => {
     if (typeof window !== "undefined" && window.navigator?.vibrate) window.navigator.vibrate(15);
-    onDeleteSupply(item.id, item.kind);
+    onDeleteSupply(item.id, item.kind, item.name);
   };
 
   React.useEffect(() => {

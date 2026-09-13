@@ -367,15 +367,17 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     try { await fetch("/api/notion/supplies", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, available }) }); } catch {}
   };
 
-  const handleDeleteSupply = async (id: string, kind: "ingredient" | "ready_meal") => {
+  const handleDeleteSupply = async (id: string, kind: "ingredient" | "ready_meal", name?: string) => {
     const nextCatalogue = {
       ...catalogue,
-      ingredients: kind === "ingredient" ? catalogue.ingredients.filter((i) => i.id !== id) : catalogue.ingredients,
-      readyMeals: kind === "ready_meal" ? catalogue.readyMeals.filter((m) => m.id !== id) : catalogue.readyMeals,
+      ingredients: kind === "ingredient" ? catalogue.ingredients.filter((i) => i.id !== id && (!name || i.name !== name)) : catalogue.ingredients,
+      readyMeals: kind === "ready_meal" ? catalogue.readyMeals.filter((m) => m.id !== id && (!name || m.name !== name)) : catalogue.readyMeals,
     };
     setCatalogue(nextCatalogue);
     saveCachedCatalogue(nextCatalogue, owner);
-    try { await fetch(`/api/notion/supplies?id=${encodeURIComponent(id)}`, { method: "DELETE" }); } catch {}
+    const q = new URLSearchParams({ id });
+    if (name) q.set("name", name);
+    try { await fetch(`/api/notion/supplies?${q.toString()}`, { method: "DELETE" }); } catch {}
   };
 
   return {

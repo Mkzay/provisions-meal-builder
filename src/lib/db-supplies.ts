@@ -56,10 +56,15 @@ export async function fetchDbCatalogue(owner?: string): Promise<KitchenCatalogue
       ORDER BY name ASC;
     `;
 
-    // If owner has 0 ingredients and 0 ready meals, auto-seed with verified starter staples
+    // If owner has 0 ingredients and 0 ready meals, check if they have ever been seeded before
     if (ingRows.length === 0 && mealRows.length === 0 && owner) {
-      await seedStarterPantryForOwner(owner);
-      return fetchDbCatalogue(owner);
+      const settings = await sql`
+        SELECT seeded FROM user_pantry_settings WHERE LOWER(owner) = ${targetOwner} LIMIT 1;
+      `;
+      if (settings.length === 0) {
+        await seedStarterPantryForOwner(owner);
+        return fetchDbCatalogue(owner);
+      }
     }
 
     const ingredients: Ingredient[] = ingRows.map((r: any) => ({
@@ -140,6 +145,12 @@ export async function seedStarterPantryForOwner(owner: string): Promise<void> {
       ON CONFLICT (id) DO NOTHING;
     `;
   }
+
+  await sql`
+    INSERT INTO user_pantry_settings (owner, seeded)
+    VALUES (${targetOwner.toLowerCase()}, TRUE)
+    ON CONFLICT (owner) DO UPDATE SET updated_at = NOW();
+  `;
 }
 
 /**
@@ -239,7 +250,8 @@ export async function updateDbSupplyAvailability(
  */
 export async function deleteDbSupply(
   id: string,
-  owner: string
+  owner: string,
+  name?: string
 ): Promise<{ success: boolean }> {
   const sql = getSql();
   if (!sql) return { success: true };
@@ -247,16 +259,33 @@ export async function deleteDbSupply(
   try {
     await ensureSchema();
     const targetOwner = owner.trim().toLowerCase();
+    const cleanName = name?.trim().toLowerCase();
 
-    await sql`
-      DELETE FROM pantry_ingredients
-      WHERE id = ${id} AND LOWER(owner) = ${targetOwner};
-    `;
+    if (cleanName) {
+      await sql`
+        DELETE FROM pantry_ingredients
+        WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()} OR LOWER(name) = ${cleanName})
+          AND LOWER(owner) = ${targetOwner};
+      `;
 
-    await sql`
-      DELETE FROM ready_meals
-      WHERE id = ${id} AND LOWER(owner) = ${targetOwner};
-    `;
+      await sql`
+        DELETE FROM ready_meals
+        WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()} OR LOWER(name) = ${cleanName})
+          AND LOWER(owner) = ${targetOwner};
+      `;
+    } else {
+      await sql`
+        DELETE FROM pantry_ingredients
+        WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()})
+          AND LOWER(owner) = ${targetOwner};
+      `;
+
+      await sql`
+        DELETE FROM ready_meals
+        WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()})
+          AND LOWER(owner) = ${targetOwner};
+      `;
+    }
 
     return { success: true };
   } catch (error) {
