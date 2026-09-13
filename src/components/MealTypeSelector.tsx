@@ -280,24 +280,26 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
                 >
                   <span>{opt.label}</span>
                 </div>
-                <p
-                  className={`text-xs sm:text-sm text-stone-800 font-medium leading-relaxed ${
-                    isThreeColumns ? "line-clamp-2" : ""
-                  }`}
-                >
+                <p className="text-xs sm:text-sm text-stone-800 font-medium leading-relaxed min-h-[44px]">
                   {opt.subtitle}
                 </p>
               </div>
 
-              {/* Card Footer Pill Strip: unclipped, full text */}
-              <div className="mt-3 pt-2.5 border-t-2 border-stone-900/15 w-full flex items-center justify-between gap-2 min-w-0">
-                <span className="text-[10px] sm:text-[10.5px] font-black uppercase tracking-wider text-stone-900 bg-white/90 px-2.5 py-0.5 rounded-xl border border-stone-900/30 whitespace-nowrap shrink-0">
+              {/* Card Footer: clean brutalist action button in 3-col mode, Explore text in 2-col mode */}
+              <div className="mt-4 pt-2.5 border-t-2 border-stone-900/15 w-full flex items-center justify-between gap-1.5 min-w-0">
+                <span className="text-[10px] font-black uppercase tracking-wider text-stone-900 bg-white/90 px-2 py-0.5 rounded-xl border border-stone-900/30 whitespace-nowrap shrink-0">
                   {opt.tagText}
                 </span>
-                <span className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-1 whitespace-nowrap shrink-0">
-                  <span>Explore</span>
-                  <span>→</span>
-                </span>
+                {isThreeColumns ? (
+                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-stone-900 text-white font-black text-xs shadow-brutal-xs shrink-0" aria-hidden="true">
+                    →
+                  </span>
+                ) : (
+                  <span className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-1 whitespace-nowrap shrink-0">
+                    <span>Explore</span>
+                    <span>→</span>
+                  </span>
+                )}
               </div>
             </motion.button>
           );
