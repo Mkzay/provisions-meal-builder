@@ -118,11 +118,11 @@ export const LandingInteractiveDemo: React.FC = () => {
 
         {/* Demo Stage Container with Flanking Neo-Brutalist Callout Cards */}
         <div className="relative max-w-6xl mx-auto flex items-center justify-center">
-          {/* Left Flanking Cards (Visible on large screens) */}
-          <div className="hidden xl:flex flex-col gap-5 absolute -left-2 top-8 z-10 pointer-events-none">
+          {/* Left Flanking Cards (Visible on large screens - Two Up & Two Down) */}
+          <div className="hidden xl:flex flex-col justify-between absolute -left-2 top-8 bottom-12 z-10 pointer-events-none">
             <motion.div
-              animate={{ y: [-5, 5, -5], rotate: [-2, 1, -2] }}
-              transition={{ repeat: Infinity, duration: 4.8, ease: "easeInOut" }}
+              animate={{ y: [-4, 4, -4], rotate: [-2, 1, -2] }}
+              transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
               className="w-56 p-3.5 rounded-2xl bg-white border-2 border-stone-900 shadow-brutal-xs"
             >
               <div className="flex items-center gap-2 mb-1">
@@ -135,8 +135,8 @@ export const LandingInteractiveDemo: React.FC = () => {
             </motion.div>
 
             <motion.div
-              animate={{ y: [6, -6, 6], rotate: [1, -2, 1] }}
-              transition={{ repeat: Infinity, duration: 5.2, ease: "easeInOut", delay: 0.4 }}
+              animate={{ y: [5, -5, 5], rotate: [1.5, -1.5, 1.5] }}
+              transition={{ repeat: Infinity, duration: 5.4, ease: "easeInOut", delay: 0.4 }}
               className="w-56 p-3.5 rounded-2xl bg-amber-100 border-2 border-stone-900 shadow-brutal-xs"
             >
               <div className="flex items-center gap-2 mb-1">
@@ -149,11 +149,11 @@ export const LandingInteractiveDemo: React.FC = () => {
             </motion.div>
           </div>
 
-          {/* Right Flanking Cards (Visible on large screens) */}
-          <div className="hidden xl:flex flex-col gap-5 absolute -right-2 top-8 z-10 pointer-events-none">
+          {/* Right Flanking Cards (Visible on large screens - Two Up & Two Down) */}
+          <div className="hidden xl:flex flex-col justify-between absolute -right-2 top-8 bottom-12 z-10 pointer-events-none">
             <motion.div
-              animate={{ y: [-6, 6, -6], rotate: [2, -1, 2] }}
-              transition={{ repeat: Infinity, duration: 4.4, ease: "easeInOut", delay: 0.2 }}
+              animate={{ y: [-5, 5, -5], rotate: [2, -1, 2] }}
+              transition={{ repeat: Infinity, duration: 4.6, ease: "easeInOut", delay: 0.2 }}
               className="w-56 p-3.5 rounded-2xl bg-emerald-100 border-2 border-stone-900 shadow-brutal-xs"
             >
               <div className="flex items-center gap-2 mb-1">
@@ -166,8 +166,8 @@ export const LandingInteractiveDemo: React.FC = () => {
             </motion.div>
 
             <motion.div
-              animate={{ y: [5, -5, 5], rotate: [-2, 1, -2] }}
-              transition={{ repeat: Infinity, duration: 5.6, ease: "easeInOut", delay: 0.6 }}
+              animate={{ y: [4, -4, 4], rotate: [-1.5, 2, -1.5] }}
+              transition={{ repeat: Infinity, duration: 5.8, ease: "easeInOut", delay: 0.6 }}
               className="w-56 p-3.5 rounded-2xl bg-purple-100 border-2 border-stone-900 shadow-brutal-xs"
             >
               <div className="flex items-center gap-2 mb-1">
