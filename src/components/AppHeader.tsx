@@ -96,35 +96,35 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </button>
 
           {/* Action Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
             {/* Restock Button */}
             <button
               onClick={onOpenAddSupply}
               aria-label="Restock supplies to kitchen"
-              className="inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 sm:min-h-[42px] text-xs font-black px-2.5 sm:px-3.5 rounded-xl bg-emerald-300 hover:bg-emerald-400 text-stone-900 border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 h-9 w-9 sm:h-9 sm:w-9 lg:h-10 lg:w-auto text-xs font-black p-0 lg:px-3.5 rounded-xl bg-emerald-300 hover:bg-emerald-400 text-stone-900 border-2 border-stone-900 shadow-brutal-xs lg:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0"
               title="Add new ingredient or ready meal"
             >
               <Plus size={16} weight="bold" />
-              <span className="hidden sm:inline">Restock</span>
+              <span className="hidden lg:inline">Restock</span>
             </button>
 
             {/* Saved Recipes Button */}
             {onOpenSavedRecipes && (
               <button
                 onClick={onOpenSavedRecipes}
-                className="inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 sm:min-h-[42px] text-xs font-black px-2.5 sm:px-3.5 rounded-xl bg-orange-200 hover:bg-orange-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0"
+                className="inline-flex items-center justify-center gap-1.5 h-9 w-9 sm:h-9 sm:w-9 lg:h-10 lg:w-auto text-xs font-black p-0 lg:px-3.5 rounded-xl bg-orange-200 hover:bg-orange-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs lg:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0"
                 title="My Saved Recipes"
                 aria-label="My Saved Recipes"
               >
                 <BookmarkSimple size={16} weight="bold" />
-                <span className="hidden sm:inline">Recipes</span>
+                <span className="hidden lg:inline">Recipes</span>
               </button>
             )}
 
             {/* Meal Reminders Button */}
             <button
               onClick={onOpenNotifications}
-              className="inline-flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 sm:min-h-[42px] sm:min-w-[42px] p-2 sm:p-2.5 rounded-xl bg-amber-200 hover:bg-amber-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0"
+              className="inline-flex items-center justify-center h-9 w-9 lg:h-10 lg:w-10 p-2 sm:p-2.5 rounded-xl bg-amber-200 hover:bg-amber-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs lg:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0"
               title="Manage meal notification reminders"
               aria-label="Meal Reminders"
             >
@@ -135,7 +135,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             {onOpenWalkthrough && (
               <button
                 onClick={onOpenWalkthrough}
-                className="inline-flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 sm:min-h-[42px] sm:min-w-[42px] p-2 sm:p-2.5 rounded-xl bg-purple-200 hover:bg-purple-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0 font-display font-black text-xs"
+                className="inline-flex items-center justify-center h-9 w-9 lg:h-10 lg:w-10 p-2 sm:p-2.5 rounded-xl bg-purple-200 hover:bg-purple-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs lg:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0 font-display font-black text-xs"
                 title="How Provisions Works (Tour)"
                 aria-label="How Provisions Works"
               >
@@ -155,12 +155,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                     onOpenProgressLog();
                   }
                 }}
-                className="inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 sm:min-h-[42px] text-xs font-black px-2.5 sm:px-3.5 rounded-xl bg-rose-200 hover:bg-rose-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0"
+                className="inline-flex items-center justify-center gap-1.5 h-9 w-9 sm:h-9 sm:w-9 lg:h-10 lg:w-auto text-xs font-black p-0 lg:px-3.5 rounded-xl bg-rose-200 hover:bg-rose-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs lg:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0"
                 title={`${owner}'s Personal Space (Eating Goal & Weight Log)`}
                 aria-label={`${owner}'s Personal Space`}
               >
                 <User size={16} weight="bold" />
-                <span className="hidden sm:inline">{owner}</span>
+                <span className="hidden lg:inline">{owner}</span>
               </button>
             )}
           </div>
