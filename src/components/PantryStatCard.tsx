@@ -128,7 +128,7 @@ export const PantryStatCard: React.FC<PantryStatCardProps> = ({
             onClick={onOpenSettings}
             className="inline-flex items-center gap-1 text-[11px] font-bold text-stone-600 hover:text-stone-900 hover:underline"
           >
-            <span>Notion Connection →</span>
+            <span>Cloud Sync →</span>
           </button>
         )}
       </div>

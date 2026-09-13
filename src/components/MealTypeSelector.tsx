@@ -11,7 +11,9 @@ import {
 import { getDefaultMealTypeByHour } from "@/lib/flow-logic";
 import { MealType } from "@/lib/types";
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
+export type TwoMealSchedule = "lunch_dinner" | "breakfast_dinner" | "breakfast_lunch";
 
 interface MealTypeSelectorProps {
   selectedType: MealType;
@@ -22,17 +24,23 @@ interface MealTypeSelectorProps {
 export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
   selectedType,
   onSelect,
-  mealsPerDay,
+  mealsPerDay = 4,
 }) => {
-  const [showAll, setShowAll] = React.useState(false);
-  const isTwoMealsPlan = mealsPerDay === 2;
+  const effectiveMeals = mealsPerDay || 4;
+  const isTwoMealsPlan = effectiveMeals === 2;
+  const isThreeMealsPlan = effectiveMeals === 3;
 
-  // If in 2-meals plan and breakfast was selected, auto-shift to Lunch
-  React.useEffect(() => {
-    if (isTwoMealsPlan && !showAll && selectedType === "Breakfast") {
-      onSelect("Lunch");
+  const [twoMealSchedule, setTwoMealSchedule] = useState<TwoMealSchedule>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("meal_builder_two_meal_schedule");
+      if (saved === "lunch_dinner" || saved === "breakfast_dinner" || saved === "breakfast_lunch") {
+        return saved;
+      }
     }
-  }, [isTwoMealsPlan, showAll, selectedType, onSelect]);
+    return "lunch_dinner";
+  });
+
+  const [showSnack, setShowSnack] = useState(false);
 
   const currentSuggested = getDefaultMealTypeByHour(new Date().getHours());
 
@@ -51,7 +59,7 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
       label: "Breakfast",
       emphasis: "morning warmth",
       subtitle: "Gentle start with quick warm comforts & tea.",
-      icon: <SunHorizon size={28} weight="duotone" className="text-amber-800" />,
+      icon: <SunHorizon size={26} weight="duotone" className="text-amber-800" />,
       cardBg: "bg-[#FEF08A]", // Rich Buttercup Yellow
       badgeBg: "bg-amber-100 text-amber-950 border-amber-800",
       tagText: "Morning Fuel",
@@ -61,43 +69,74 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
       label: "Lunch",
       emphasis: "midday refuel",
       subtitle: "Hearty, nourishing plate to power your focus.",
-      icon: <BowlFood size={28} weight="duotone" className="text-emerald-800" />,
+      icon: <BowlFood size={26} weight="duotone" className="text-emerald-800" />,
       cardBg: "bg-[#A7F3D0]", // Vibrant Fresh Mint
       badgeBg: "bg-emerald-100 text-emerald-950 border-emerald-800",
       tagText: "Peak Energy",
-    },
-    {
-      type: "Snack",
-      label: "Snack & Craving",
-      emphasis: "zero hassle",
-      subtitle: "Quick 2-minute nibbles, fruit bowls & sweet bites.",
-      icon: <Cookie size={28} weight="duotone" className="text-purple-900" />,
-      cardBg: "bg-[#DDD6FE]", // Electric Lavender Lilac
-      badgeBg: "bg-purple-100 text-purple-950 border-purple-900",
-      tagText: "Quick Bites",
     },
     {
       type: "Dinner",
       label: "Dinner",
       emphasis: "cozy comfort",
       subtitle: "Unwind from the day with a satisfying warm meal.",
-      icon: <MoonStars size={28} weight="duotone" className="text-rose-900" />,
+      icon: <MoonStars size={26} weight="duotone" className="text-rose-900" />,
       cardBg: "bg-[#FECDD3]", // Sunset Terracotta Peach Coral
       badgeBg: "bg-rose-100 text-rose-950 border-rose-900",
       tagText: "Evening Unwind",
     },
+    {
+      type: "Snack",
+      label: "Snack & Craving",
+      emphasis: "zero hassle",
+      subtitle: "Quick 2-minute nibbles, fruit bowls & sweet bites.",
+      icon: <Cookie size={26} weight="duotone" className="text-purple-900" />,
+      cardBg: "bg-[#DDD6FE]", // Electric Lavender Lilac
+      badgeBg: "bg-purple-100 text-purple-950 border-purple-900",
+      tagText: "Quick Bites",
+    },
   ];
 
-  const visibleOptions = React.useMemo(() => {
-    if (isTwoMealsPlan && !showAll) {
-      return options.filter((opt) => opt.type !== "Breakfast");
+  const visibleOptions = useMemo(() => {
+    if (isTwoMealsPlan) {
+      let allowed: MealType[] = [];
+      if (twoMealSchedule === "lunch_dinner") allowed = ["Lunch", "Dinner"];
+      else if (twoMealSchedule === "breakfast_dinner") allowed = ["Breakfast", "Dinner"];
+      else if (twoMealSchedule === "breakfast_lunch") allowed = ["Breakfast", "Lunch"];
+
+      if (showSnack) allowed.push("Snack");
+      return options.filter((opt) => allowed.includes(opt.type));
     }
+
+    if (isThreeMealsPlan) {
+      // 3 meals: removes the snack option entirely
+      return options.filter((opt) => opt.type !== "Snack");
+    }
+
+    // 4 meals (default): includes snack
     return options;
-  }, [isTwoMealsPlan, showAll, options]);
+  }, [isTwoMealsPlan, isThreeMealsPlan, twoMealSchedule, showSnack]);
+
+  // Ensure current selection is valid for active schedule
+  useEffect(() => {
+    const isCurrentVisible = visibleOptions.some((o) => o.type === selectedType);
+    if (!isCurrentVisible && visibleOptions.length > 0) {
+      onSelect(visibleOptions[0].type);
+    }
+  }, [visibleOptions, selectedType, onSelect]);
+
+  const isThreeColumns = visibleOptions.length === 3;
+
+  const handleScheduleChange = (schedule: TwoMealSchedule) => {
+    setTwoMealSchedule(schedule);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("meal_builder_two_meal_schedule", schedule);
+      if (window.navigator?.vibrate) window.navigator.vibrate(10);
+    }
+  };
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
         <div>
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-stone-900">
@@ -109,17 +148,68 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
                 <span>2 Meals / Day Schedule</span>
               </span>
             )}
+            {isThreeMealsPlan && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full bg-emerald-200 border-2 border-stone-900 shadow-brutal-xs text-stone-900">
+                <Sparkle size={12} weight="fill" className="text-emerald-700" />
+                <span>3 Meals / Day (No Snack)</span>
+              </span>
+            )}
           </div>
           <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
-            {isTwoMealsPlan && !showAll
-              ? "Calibrated to your 2-meals-a-day schedule: Lunch, Dinner & Snack craving."
+            {isTwoMealsPlan
+              ? "Calibrated to your 2-meals-a-day schedule. Choose your meal slot below."
+              : isThreeMealsPlan
+              ? "Breakfast, Lunch & Dinner calibrated to your 3-meals daily goal."
               : "Select a meal to explore ready-cooked meals or delicious pantry pairings."}
           </p>
         </div>
+
+        {/* Schedule Selector for 2-Meals Plan */}
+        {isTwoMealsPlan && (
+          <div className="flex items-center gap-1 bg-stone-100 p-1.5 rounded-2xl border-2 border-stone-900 shadow-brutal-xs shrink-0 self-start sm:self-auto flex-wrap">
+            <button
+              type="button"
+              onClick={() => handleScheduleChange("lunch_dinner")}
+              className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all ${
+                twoMealSchedule === "lunch_dinner"
+                  ? "bg-amber-300 text-stone-900 border border-stone-900 shadow-xs"
+                  : "text-stone-600 hover:text-stone-900"
+              }`}
+            >
+              Lunch &amp; Dinner
+            </button>
+            <button
+              type="button"
+              onClick={() => handleScheduleChange("breakfast_dinner")}
+              className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all ${
+                twoMealSchedule === "breakfast_dinner"
+                  ? "bg-amber-300 text-stone-900 border border-stone-900 shadow-xs"
+                  : "text-stone-600 hover:text-stone-900"
+              }`}
+            >
+              Breakfast &amp; Dinner
+            </button>
+            <button
+              type="button"
+              onClick={() => handleScheduleChange("breakfast_lunch")}
+              className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all ${
+                twoMealSchedule === "breakfast_lunch"
+                  ? "bg-amber-300 text-stone-900 border border-stone-900 shadow-xs"
+                  : "text-stone-600 hover:text-stone-900"
+              }`}
+            >
+              Breakfast &amp; Lunch
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Responsive Grid: 3 Columns for 2-Meal plan, 2x2 for Standard */}
-      <div className={`grid grid-cols-1 ${visibleOptions.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"} gap-4 md:gap-5`}>
+      {/* Responsive Grid: 3 Columns for 3-Meal plan, 2 Columns for 2 or 4 Meals */}
+      <div
+        className={`grid grid-cols-1 ${
+          isThreeColumns ? "sm:grid-cols-3 gap-3 md:gap-4" : "sm:grid-cols-2 gap-4 md:gap-5"
+        }`}
+      >
         {visibleOptions.map((opt) => {
           const isSelected = selectedType === opt.type;
           const isNow = currentSuggested === opt.type;
@@ -137,7 +227,9 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
               }}
               aria-pressed={isSelected}
               aria-label={`Select ${opt.label} (${opt.emphasis})`}
-              className={`relative flex flex-col justify-between p-5 sm:p-6 rounded-3xl border-[2.5px] border-stone-900 text-left transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 ${
+              className={`relative flex flex-col justify-between ${
+                isThreeColumns ? "p-4 sm:p-3.5 md:p-4.5" : "p-5 sm:p-6"
+              } rounded-3xl border-[2.5px] border-stone-900 text-left overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 ${
                 opt.cardBg
               } ${
                 isSelected
@@ -146,49 +238,61 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
               }`}
             >
               {/* Card Top Row: Icon & Status Badge */}
-              <div className="w-full flex items-center justify-between gap-2 mb-4">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white border-2 border-stone-900 shadow-brutal-sm flex items-center justify-center p-2 shrink-0">
+              <div className="w-full flex items-center justify-between gap-1.5 mb-3">
+                <div
+                  className={`${
+                    isThreeColumns ? "w-9 h-9 sm:w-10 sm:h-10" : "w-10 h-10 sm:w-11 sm:h-11"
+                  } rounded-2xl bg-white border-2 border-stone-900 shadow-brutal-sm flex items-center justify-center p-1.5 shrink-0`}
+                >
                   {opt.icon}
                 </div>
 
-                <div className="flex items-center justify-end shrink-0 whitespace-nowrap">
+                <div className="flex items-center justify-end shrink-0">
                   {isNow && isSelected ? (
-                    <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
-                      <Sparkle size={11} weight="fill" className="text-amber-400 shrink-0" />
-                      <span className="whitespace-nowrap">Right Now</span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-full bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
+                      <Sparkle size={10} weight="fill" className="text-amber-400 shrink-0" />
+                      <span>Now</span>
                       <span className="w-1 h-1 rounded-full bg-stone-500 shrink-0" />
-                      <CheckFat size={11} weight="fill" className="text-emerald-400 shrink-0" />
+                      <CheckFat size={10} weight="fill" className="text-emerald-400 shrink-0" />
                     </span>
                   ) : isNow ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-white text-stone-900 border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
-                      <Sparkle size={11} weight="fill" className="text-amber-500 shrink-0" />
-                      <span className="whitespace-nowrap">Right Now</span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-full bg-white text-stone-900 border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
+                      <Sparkle size={10} weight="fill" className="text-amber-500 shrink-0" />
+                      <span>Now</span>
                     </span>
                   ) : isSelected ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
-                      <CheckFat size={11} weight="fill" className="text-emerald-400 shrink-0" />
-                      <span className="whitespace-nowrap">Selected</span>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-full bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
+                      <CheckFat size={10} weight="fill" className="text-emerald-400 shrink-0" />
+                      <span>Selected</span>
                     </span>
                   ) : null}
                 </div>
               </div>
 
               {/* Card Core Content */}
-              <div className="space-y-1.5 my-2">
-                <div className="text-xl sm:text-2xl font-display font-black text-stone-900 tracking-tight flex items-baseline gap-2">
+              <div className="space-y-1 my-1.5 min-w-0">
+                <div
+                  className={`${
+                    isThreeColumns ? "text-lg sm:text-xl" : "text-xl sm:text-2xl"
+                  } font-display font-black text-stone-900 tracking-tight flex items-baseline gap-2 truncate`}
+                >
                   <span>{opt.label}</span>
                 </div>
-                <p className="text-xs sm:text-sm text-stone-800 font-medium leading-relaxed">
+                <p
+                  className={`text-xs sm:text-sm text-stone-800 font-medium leading-relaxed ${
+                    isThreeColumns ? "line-clamp-2" : ""
+                  }`}
+                >
                   {opt.subtitle}
                 </p>
               </div>
 
               {/* Card Footer Pill Strip */}
-              <div className="mt-4 pt-3.5 border-t-2 border-stone-900/20 w-full flex items-center justify-between gap-2">
-                <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-stone-900 bg-white/80 px-2.5 py-1 rounded-xl border border-stone-900/40 whitespace-nowrap shrink-0">
+              <div className="mt-3 pt-2.5 border-t-2 border-stone-900/15 w-full flex items-center justify-between gap-1.5 min-w-0">
+                <span className="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-stone-900 bg-white/85 px-2 py-0.5 rounded-xl border border-stone-900/30 truncate shrink-0 max-w-[110px]">
                   {opt.tagText}
                 </span>
-                <span className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-1 group-hover:translate-x-1 transition-transform whitespace-nowrap shrink-0">
+                <span className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-1 whitespace-nowrap shrink-0">
                   <span>Explore</span>
                   <span>→</span>
                 </span>
@@ -198,15 +302,15 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
         })}
       </div>
 
-      {/* Optional early breakfast toggle when on 2-meal schedule */}
+      {/* Optional snack craving toggle when on 2-meal schedule */}
       {isTwoMealsPlan && (
         <div className="pt-1 text-center">
           <button
             type="button"
-            onClick={() => setShowAll((prev) => !prev)}
-            className="text-xs font-bold text-stone-500 hover:text-stone-900 underline underline-offset-2 transition-colors"
+            onClick={() => setShowSnack((prev) => !prev)}
+            className="text-xs font-bold text-stone-600 hover:text-stone-900 underline underline-offset-2 transition-colors"
           >
-            {showAll ? "← Back to 2-meal schedule (hide breakfast)" : "Having an early breakfast today? Show all 4 meal slots"}
+            {showSnack ? "← Hide snack slot" : "+ Need a snack craving today? Show snack option"}
           </button>
         </div>
       )}

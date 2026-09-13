@@ -339,7 +339,7 @@ function LoginForm() {
               <Link href="/" className="hover:text-stone-950 transition-colors">
                 ← Back to Home
               </Link>
-              <span>Notion Synced</span>
+              <span>Cloud Synced</span>
             </div>
           </div>
         </div>

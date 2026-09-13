@@ -214,7 +214,7 @@ export const MealConfirmation: React.FC<MealConfirmationProps> = ({
           {isLogging ? (
             <span className="inline-flex items-center gap-2.5">
               <ProvisionsLogo size={20} className="w-5 h-5 animate-pulse shrink-0 shadow-none border-stone-900" />
-              <span>Logging to Notion...</span>
+              <span>Logging Meal...</span>
             </span>
           ) : (
             <>
@@ -224,7 +224,7 @@ export const MealConfirmation: React.FC<MealConfirmationProps> = ({
           )}
         </motion.button>
         <p className="text-center text-[11px] font-bold text-stone-600">
-          Silently logs to your Notion Meal Log &amp; initiates the leftover check.
+          Silently logs to your Kitchen Meal Log &amp; initiates the leftover check.
         </p>
       </div>
     </motion.div>

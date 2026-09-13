@@ -27,7 +27,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
   const owner = propOwner || getCurrentOwner();
   const cachedInitial = getClientProfileCached(owner);
   const [selectedGoal, setSelectedGoal] = useState<UserGoal>(() => cachedInitial?.goal || getDefaultGoalForOwner(owner));
-  const [mealsPerDay, setMealsPerDay] = useState<number>(() => cachedInitial?.mealsPerDay || 3);
+  const [mealsPerDay, setMealsPerDay] = useState<number>(() => cachedInitial?.mealsPerDay || 4);
   const [selectedPriorities, setSelectedPriorities] = useState<NutrientTag[]>(() => cachedInitial?.nutrientPriorities || []);
   const [heightUnit, setHeightUnit] = useState<"cm" | "ft">("cm");
   const [heightCm, setHeightCm] = useState<string>(() => cachedInitial?.height ? String(cachedInitial.height) : "");
@@ -257,12 +257,11 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
           How many meals you aim to eat daily (calibrates target intake and reminders).
         </p>
 
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {[
-            { count: 2, label: "2", sub: "Light" },
-            { count: 3, label: "3", sub: "Standard" },
-            { count: 4, label: "4", sub: "+ Snack" },
-            { count: 5, label: "5+", sub: "Athlete" },
+            { count: 2, label: "2", sub: "Two Meals" },
+            { count: 3, label: "3", sub: "No Snack" },
+            { count: 4, label: "4", sub: "Default (+ Snack)" },
           ].map((item) => {
             const isSelected = mealsPerDay === item.count;
             return (

@@ -6,6 +6,7 @@ import { WALKTHROUGH_STORAGE_KEY } from "@/components/AppWalkthroughModal";
 import { BottomNavBar, NavTabId } from "@/components/BottomNavBar";
 import { CompanionNoteCard } from "@/components/CompanionNoteCard";
 import { CulinaryCompanion } from "@/components/CulinaryCompanion";
+import { EmptyKitchenStarterCard } from "@/components/EmptyKitchenStarterCard";
 import { GentleSafetyNet } from "@/components/GentleSafetyNet";
 import { ArrowLeft } from "@/components/icons";
 import { KitchenSidebar } from "@/components/KitchenSidebar";
@@ -193,6 +194,12 @@ export default function MealBuilderAppPage() {
                 </motion.div>
               ) : currentStep === "meal_type" ? (
                 <motion.div key="step-meal-type" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                  {catalogue.ingredients.length === 0 && (
+                    <EmptyKitchenStarterCard
+                      onSeedStarterIngredients={handleSeedStarterIngredients}
+                      onOpenAddSupply={() => setIsAddSupplyOpen(true)}
+                    />
+                  )}
                   <MealTypeSelector selectedType={mealType} onSelect={handleSelectMealType} mealsPerDay={clientProfile?.mealsPerDay} />
                 </motion.div>
               ) : currentStep === "ready_meal" ? (

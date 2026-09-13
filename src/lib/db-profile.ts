@@ -38,7 +38,7 @@ export async function fetchDbMealProfile(owner: string): Promise<MealProfile | n
       height: row.height ? Number(row.height) : undefined,
       weight: row.weight ? Number(row.weight) : undefined,
       nutrientPriorities: (row.nutrient_priorities || []) as NutrientTag[],
-      mealsPerDay: row.meals_per_day ? Number(row.meals_per_day) : 3,
+      mealsPerDay: row.meals_per_day ? Number(row.meals_per_day) : 4,
       updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
     };
   } catch (error) {
@@ -68,7 +68,7 @@ export async function saveDbMealProfile(profile: {
     height: profile.height,
     weight: profile.weight,
     nutrientPriorities: profile.nutrientPriorities || [],
-    mealsPerDay: profile.mealsPerDay || 3,
+    mealsPerDay: profile.mealsPerDay || 4,
     updatedAt: now,
   };
 
@@ -95,7 +95,7 @@ export async function saveDbMealProfile(profile: {
         ${profile.height ?? null},
         ${profile.weight ?? null},
         ${profile.nutrientPriorities || []},
-        ${profile.mealsPerDay ?? 3},
+        ${profile.mealsPerDay ?? 4},
         NOW()
       )
       ON CONFLICT (owner) DO UPDATE
