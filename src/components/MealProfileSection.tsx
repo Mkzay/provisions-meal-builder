@@ -18,11 +18,15 @@ import React, { useEffect, useState } from "react";
 interface MealProfileSectionProps {
   owner?: string;
   onSaved?: (profile: MealProfile) => void;
+  onRegisterSave?: (saveFn: () => Promise<void>) => void;
+  onSaveStateChange?: (isSaving: boolean, justSaved: boolean) => void;
 }
 
 export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
   owner: propOwner,
   onSaved,
+  onRegisterSave,
+  onSaveStateChange,
 }) => {
   const owner = propOwner || getCurrentOwner();
   const cachedInitial = getClientProfileCached(owner);
@@ -175,6 +179,14 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
       setTimeout(() => setJustSaved(false), 2000);
     }
   };
+
+  useEffect(() => {
+    onRegisterSave?.(() => handleSave());
+  }, [onRegisterSave]);
+
+  useEffect(() => {
+    onSaveStateChange?.(isSaving, justSaved);
+  }, [isSaving, justSaved, onSaveStateChange]);
 
   return (
     <div className="space-y-4">
@@ -359,32 +371,6 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
         weightInput={weightInput}
         onWeightChange={setWeightInput}
       />
-
-      {/* Sticky Action CTA */}
-      <div className="sticky bottom-0 z-20 -mx-5 sm:-mx-6 -mb-5 sm:-mb-6 p-3 bg-[#FAF8F5]/95 backdrop-blur-md border-t-2 border-stone-900 shadow-brutal-sm flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${justSaved ? "bg-emerald-500 animate-pulse" : "bg-emerald-400"}`} />
-          <span className="text-[11px] sm:text-xs font-bold text-stone-700 truncate">
-            {justSaved ? "✓ Saved to cloud!" : "Auto-saves on tap"}
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={() => handleSave()}
-          disabled={isSaving || isLoading}
-          className={`py-2 px-3 sm:px-4 rounded-xl font-black text-xs border-2 border-stone-900 shadow-brutal-xs transition-all active:translate-x-[1px] active:translate-y-[1px] shrink-0 ${
-            justSaved
-              ? "bg-emerald-400 text-stone-900"
-              : isSaving
-              ? "bg-amber-200 text-stone-700 cursor-wait"
-              : "bg-amber-300 hover:bg-amber-400 text-stone-900"
-          }`}
-        >
-          <span>
-            {isSaving ? "Saving..." : justSaved ? "✓ Saved!" : "Save Profile & Weight"}
-          </span>
-        </button>
-      </div>
     </div>
   );
 };

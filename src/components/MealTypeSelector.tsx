@@ -206,15 +206,12 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
         </div>
       )}
 
-      {/* Responsive Grid: 3 Columns for 3-Meal plan, 2 Columns for 2 or 4 Meals */}
-      <div
-        className={`grid grid-cols-1 ${
-          isThreeColumns ? "sm:grid-cols-3 gap-3 md:gap-4" : "sm:grid-cols-2 gap-4 md:gap-5"
-        }`}
-      >
-        {visibleOptions.map((opt) => {
+      {/* Responsive Grid: 2 Columns for all plans (3-meal plan places 2 on top, 3rd centered below) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+        {visibleOptions.map((opt, index) => {
           const isSelected = selectedType === opt.type;
           const isNow = currentSuggested === opt.type;
+          const isThirdInThree = visibleOptions.length === 3 && index === 2;
 
           return (
             <motion.button
@@ -229,10 +226,10 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
               }}
               aria-pressed={isSelected}
               aria-label={`Select ${opt.label} (${opt.emphasis})`}
-              className={`relative flex flex-col justify-between ${
-                isThreeColumns ? "p-4 sm:p-3.5 md:p-4.5" : "p-5 sm:p-6"
-              } rounded-3xl border-[2.5px] border-stone-900 text-left overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 ${
+              className={`relative flex flex-col justify-between p-5 sm:p-6 rounded-3xl border-[2.5px] border-stone-900 text-left overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 ${
                 opt.cardBg
+              } ${
+                isThirdInThree ? "sm:col-span-2 sm:w-[calc(50%-0.625rem)] sm:mx-auto" : ""
               } ${
                 isSelected
                   ? "shadow-[6px_6px_0px_#1C1917] ring-2 ring-stone-900 -translate-y-1"
@@ -240,31 +237,27 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
               }`}
             >
               {/* Card Top Row: Icon & Status Badge */}
-              <div className="w-full flex items-center justify-between gap-1.5 mb-3">
-                <div
-                  className={`${
-                    isThreeColumns ? "w-9 h-9 sm:w-10 sm:h-10" : "w-10 h-10 sm:w-11 sm:h-11"
-                  } rounded-2xl bg-white border-2 border-stone-900 shadow-brutal-sm flex items-center justify-center p-1.5 shrink-0`}
-                >
+              <div className="w-full flex items-center justify-between gap-2 mb-3.5">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white border-2 border-stone-900 shadow-brutal-sm flex items-center justify-center p-2 shrink-0">
                   {opt.icon}
                 </div>
 
                 <div className="flex items-center justify-end shrink-0">
                   {isNow && isSelected ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-full bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
-                      <Sparkle size={10} weight="fill" className="text-amber-400 shrink-0" />
+                    <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
+                      <Sparkle size={11} weight="fill" className="text-amber-400 shrink-0" />
                       <span>Now</span>
                       <span className="w-1 h-1 rounded-full bg-stone-500 shrink-0" />
-                      <CheckFat size={10} weight="fill" className="text-emerald-400 shrink-0" />
+                      <CheckFat size={11} weight="fill" className="text-emerald-400 shrink-0" />
                     </span>
                   ) : isNow ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-full bg-white text-stone-900 border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
-                      <Sparkle size={10} weight="fill" className="text-amber-500 shrink-0" />
+                    <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-white text-stone-900 border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
+                      <Sparkle size={11} weight="fill" className="text-amber-500 shrink-0" />
                       <span>Now</span>
                     </span>
                   ) : isSelected ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-black tracking-wider uppercase px-2 py-0.5 rounded-full bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
-                      <CheckFat size={10} weight="fill" className="text-emerald-400 shrink-0" />
+                    <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black tracking-wider uppercase px-2.5 py-1 rounded-full bg-stone-900 text-white border-2 border-stone-900 shadow-brutal-xs whitespace-nowrap shrink-0">
+                      <CheckFat size={11} weight="fill" className="text-emerald-400 shrink-0" />
                       <span>Selected</span>
                     </span>
                   ) : null}
@@ -272,34 +265,24 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
               </div>
 
               {/* Card Core Content */}
-              <div className="space-y-1 my-1.5 min-w-0">
-                <div
-                  className={`${
-                    isThreeColumns ? "text-lg sm:text-xl" : "text-xl sm:text-2xl"
-                  } font-display font-black text-stone-900 tracking-tight flex items-baseline gap-2 truncate`}
-                >
+              <div className="space-y-1.5 my-2 min-w-0">
+                <div className="text-xl sm:text-2xl font-display font-black text-stone-900 tracking-tight flex items-baseline gap-2">
                   <span>{opt.label}</span>
                 </div>
-                <p className="text-xs sm:text-sm text-stone-800 font-medium leading-relaxed min-h-[44px]">
+                <p className="text-xs sm:text-sm text-stone-800 font-medium leading-relaxed">
                   {opt.subtitle}
                 </p>
               </div>
 
-              {/* Card Footer: clean brutalist action button in 3-col mode, Explore text in 2-col mode */}
-              <div className="mt-4 pt-2.5 border-t-2 border-stone-900/15 w-full flex items-center justify-between gap-1.5 min-w-0">
-                <span className="text-[10px] font-black uppercase tracking-wider text-stone-900 bg-white/90 px-2 py-0.5 rounded-xl border border-stone-900/30 whitespace-nowrap shrink-0">
+              {/* Card Footer */}
+              <div className="mt-4 pt-3 border-t-2 border-stone-900/15 w-full flex items-center justify-between gap-2 min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-stone-900 bg-white/90 px-2.5 py-1 rounded-xl border border-stone-900/30 whitespace-nowrap shrink-0">
                   {opt.tagText}
                 </span>
-                {isThreeColumns ? (
-                  <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-stone-900 text-white font-black text-xs shadow-brutal-xs shrink-0" aria-hidden="true">
-                    →
-                  </span>
-                ) : (
-                  <span className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-1 whitespace-nowrap shrink-0">
-                    <span>Explore</span>
-                    <span>→</span>
-                  </span>
-                )}
+                <span className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-1.5 whitespace-nowrap shrink-0">
+                  <span>Explore</span>
+                  <span>→</span>
+                </span>
               </div>
             </motion.button>
           );

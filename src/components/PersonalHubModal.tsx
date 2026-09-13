@@ -27,6 +27,9 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
 }) => {
   const owner = propOwner || "User";
   const [activeTab, setActiveTab] = useState<PersonalHubTab>(initialTab);
+  const [isProfileSaving, setIsProfileSaving] = useState(false);
+  const [isProfileJustSaved, setIsProfileJustSaved] = useState(false);
+  const saveProfileRef = React.useRef<(() => Promise<void>) | undefined>(undefined);
 
   useEffect(() => {
     if (isOpen) {
@@ -140,11 +143,57 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
           {/* Scrollable Body */}
           <div className="flex-1 overflow-y-auto no-scrollbar modal-scroll-contain p-5 sm:p-6 min-h-0">
             {activeTab === "profile" ? (
-              <MealProfileSection owner={owner} onSaved={onProfileSaved} />
+              <MealProfileSection
+                owner={owner}
+                onSaved={onProfileSaved}
+                onRegisterSave={(fn) => {
+                  saveProfileRef.current = fn;
+                }}
+                onSaveStateChange={(saving, saved) => {
+                  setIsProfileSaving(saving);
+                  setIsProfileJustSaved(saved);
+                }}
+              />
             ) : (
               <ProgressLogSection owner={owner} />
             )}
           </div>
+
+          {/* Auto-save bar directly above the bottom footer of the modal */}
+          {activeTab === "profile" && (
+            <div className="px-5 sm:px-6 py-2.5 bg-[#FEF9C3] border-t-2 border-stone-900 flex items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <span
+                  className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                    isProfileJustSaved ? "bg-emerald-500 animate-pulse" : "bg-emerald-500"
+                  }`}
+                />
+                <span className="text-[11px] sm:text-xs font-bold text-stone-800 truncate">
+                  {isProfileJustSaved ? "✓ Profile & weight saved to cloud!" : "Auto-saves on selection"}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => saveProfileRef.current?.()}
+                disabled={isProfileSaving}
+                className={`py-1.5 px-3.5 sm:px-4 rounded-xl font-black text-xs border-2 border-stone-900 shadow-brutal-xs transition-all active:translate-x-[1px] active:translate-y-[1px] shrink-0 ${
+                  isProfileJustSaved
+                    ? "bg-emerald-400 text-stone-900"
+                    : isProfileSaving
+                    ? "bg-amber-200 text-stone-700 cursor-wait"
+                    : "bg-amber-300 hover:bg-amber-400 text-stone-900"
+                }`}
+              >
+                <span>
+                  {isProfileSaving
+                    ? "Saving..."
+                    : isProfileJustSaved
+                    ? "✓ Saved!"
+                    : "Save Profile & Weight"}
+                </span>
+              </button>
+            </div>
+          )}
 
           {/* Pinned Footer */}
           <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 bg-stone-100/90 shrink-0 flex items-center justify-between gap-2 sm:gap-3 safe-area-bottom">
