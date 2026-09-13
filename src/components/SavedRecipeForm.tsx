@@ -1,6 +1,6 @@
 "use client";
 
-import { AddSupplyInput, CreateSavedRecipeInput, Ingredient, MealType } from "@/lib/types";
+import { AddSupplyInput, CreateSavedRecipeInput, Ingredient, MealType, SavedRecipe } from "@/lib/types";
 import React, { useMemo, useState } from "react";
 
 const ALL_MEAL_TYPES: MealType[] = ["Breakfast", "Lunch", "Dinner", "Snack"];
@@ -12,6 +12,8 @@ interface SavedRecipeFormProps {
   onSubmit: (input: CreateSavedRecipeInput) => Promise<void>;
   onCancel: () => void;
   isSubmitting?: boolean;
+  initialRecipe?: SavedRecipe;
+  isEdit?: boolean;
 }
 
 export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
@@ -21,13 +23,23 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
   onSubmit,
   onCancel,
   isSubmitting = false,
+  initialRecipe,
+  isEdit = false,
 }) => {
-  const [name, setName] = useState("");
-  const [mealTypes, setMealTypes] = useState<MealType[]>(["Lunch", "Dinner"]);
-  const [mainId, setMainId] = useState("");
-  const [proteinIds, setProteinIds] = useState<string[]>([]);
-  const [supplementaryIds, setSupplementaryIds] = useState<string[]>([]);
-  const [sourceUrl, setSourceUrl] = useState("");
+  const [name, setName] = useState(initialRecipe?.name || "");
+  const [mealTypes, setMealTypes] = useState<MealType[]>(initialRecipe?.mealTypes || ["Lunch", "Dinner"]);
+  const [mainId, setMainId] = useState(initialRecipe?.mainIngredientId || "");
+  const [proteinIds, setProteinIds] = useState<string[]>(
+    initialRecipe?.proteinIds?.length
+      ? initialRecipe.proteinIds
+      : (initialRecipe?.proteinId ? [initialRecipe.proteinId] : [])
+  );
+  const [supplementaryIds, setSupplementaryIds] = useState<string[]>(
+    initialRecipe?.supplementaryIds?.length
+      ? initialRecipe.supplementaryIds
+      : (initialRecipe?.supplementaryId ? [initialRecipe.supplementaryId] : [])
+  );
+  const [sourceUrl, setSourceUrl] = useState(initialRecipe?.sourceUrl || "");
 
   const [creatingRole, setCreatingRole] = useState<"Main" | "Protein" | "Supplementary" | null>(null);
   const [newIngredientName, setNewIngredientName] = useState("");
@@ -83,14 +95,24 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !mainId || isSubmitting) return;
+    const chosenMain = mains.find((m) => m.id === mainId);
     await onSubmit({
       name: name.trim(),
       mealTypes,
       mainIngredientId: mainId,
+      mainIngredientName: chosenMain?.name || initialRecipe?.mainIngredientName,
       proteinId: proteinIds[0] || undefined,
       proteinIds,
+      proteinNames: proteinIds.map((id, idx) => {
+        const p = proteins.find((item) => item.id === id);
+        return p ? p.name : (initialRecipe?.proteinNames?.[idx] || "Protein");
+      }),
       supplementaryId: supplementaryIds[0] || undefined,
       supplementaryIds,
+      supplementaryNames: supplementaryIds.map((id, idx) => {
+        const s = sides.find((item) => item.id === id);
+        return s ? s.name : (initialRecipe?.supplementaryNames?.[idx] || "Side");
+      }),
       sourceUrl: sourceUrl.trim() || undefined,
       owner,
     });
@@ -191,6 +213,11 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
           className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:bg-white dark:focus:bg-stone-700 text-stone-900 dark:text-stone-100 focus:outline-none shadow-brutal-xs dark:shadow-brutal-dark-sm"
         >
           <option value="">Select Main Ingredient...</option>
+          {mainId && !mains.some((m) => m.id === mainId) && (
+            <option value={mainId}>
+              {initialRecipe?.mainIngredientName || "Current Base"}
+            </option>
+          )}
           {mains.map((m) => (
             <option key={m.id} value={m.id}>
               {m.name} {m.available ? "• in stock" : "(out of stock)"}
@@ -216,14 +243,15 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
         {renderInlineAdd("Protein", "New protein name...")}
         {proteinIds.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {proteinIds.map((id) => {
+            {proteinIds.map((id, idx) => {
               const p = proteins.find((item) => item.id === id);
+              const pName = p ? p.name : (initialRecipe?.proteinNames?.[idx] || "Protein");
               return (
                 <span
                   key={id}
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border-2 border-stone-900 dark:border-amber-700 bg-amber-200 dark:bg-amber-950/60 text-stone-900 dark:text-amber-300 text-xs font-black shadow-brutal-xs"
                 >
-                  {p ? p.name : "Protein"}
+                  {pName}
                   <button
                     type="button"
                     onClick={() => removeProtein(id)}
@@ -273,14 +301,15 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
         {renderInlineAdd("Supplementary", "New side dish name...")}
         {supplementaryIds.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {supplementaryIds.map((id) => {
+            {supplementaryIds.map((id, idx) => {
               const s = sides.find((item) => item.id === id);
+              const sName = s ? s.name : (initialRecipe?.supplementaryNames?.[idx] || "Side");
               return (
                 <span
                   key={id}
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border-2 border-stone-900 dark:border-orange-700 bg-orange-200 dark:bg-orange-950/60 text-stone-900 dark:text-orange-300 text-xs font-black shadow-brutal-xs"
                 >
-                  {s ? s.name : "Side"}
+                  {sName}
                   <button
                     type="button"
                     onClick={() => removeSide(id)}
@@ -339,7 +368,7 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
           disabled={isSubmitting || !name.trim() || !mainId}
           className="px-5 py-2 rounded-xl border-2 border-stone-900 dark:border-stone-950 bg-emerald-300 dark:bg-emerald-400 hover:bg-emerald-400 dark:hover:bg-emerald-300 text-stone-900 dark:text-stone-950 text-xs font-black shadow-brutal-xs dark:shadow-brutal-dark-sm active:translate-x-0.5 active:translate-y-0.5 transition-all disabled:opacity-50"
         >
-          {isSubmitting ? "Saving..." : "Save to My Recipes"}
+          {isSubmitting ? (isEdit ? "Updating..." : "Saving...") : (isEdit ? "Update Recipe" : "Save to My Recipes")}
         </button>
       </div>
     </form>

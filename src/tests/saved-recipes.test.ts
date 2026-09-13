@@ -5,6 +5,7 @@ import {
 } from "../lib/notion-recipes";
 import {
   findMatchingSavedRecipe,
+  normalizeFoodName,
   suggestNutrientAwareCombo,
 } from "../lib/nutrient-curation";
 import { CreateSavedRecipeInput, Ingredient, SavedRecipe } from "../lib/types";
@@ -202,6 +203,90 @@ describe("Saved Recipes (Database 6 & Personal Suggestion Scoring)", () => {
 
       expect(result).not.toBeNull();
       expect(result?.pairings.dishName).not.toBe("Mama's Special Sunday Rice");
+    });
+  });
+
+  describe("Dual In-Stock Matching & Ingredient Disambiguation", () => {
+    const estherRecipe: SavedRecipe = {
+      id: "recipe-1",
+      name: "Mama's Special Sunday Rice",
+      mealTypes: ["Lunch", "Dinner"],
+      mainIngredientId: "ing-rice",
+      mainIngredientName: "Basmati Rice",
+      proteinId: "ing-chicken",
+      proteinName: "Grilled Chicken Breast",
+      supplementaryId: "ing-dodo",
+      supplementaryName: "Fried Sweet Plantains (Dodo)",
+      owner: "Esther",
+    };
+
+    it("recognizes in-stock ingredient even if re-added with a new ID (normalized name matching)", () => {
+      const readdedStock: Ingredient[] = [
+        { id: "ing-rice-brand-new", name: "Basmati Rice", role: "Main", mealTypes: ["Lunch", "Dinner"], owner: "Esther", available: true },
+        { id: "ing-chicken-brand-new", name: "Grilled Chicken Breast", role: "Protein", mealTypes: ["Lunch", "Dinner"], owner: "Esther", available: true },
+        { id: "ing-dodo-brand-new", name: "Fried Sweet Plantains (Dodo)", role: "Supplementary", mealTypes: ["Lunch", "Dinner"], owner: "Esther", available: true },
+      ];
+
+      const newRice = readdedStock[0];
+      const newChicken = readdedStock[1];
+      const newDodo = readdedStock[2];
+
+      // estherRecipe points to old IDs "ing-rice", "ing-chicken", "ing-dodo", but new items match by normalized name!
+      const match = findMatchingSavedRecipe(newRice, newChicken, newDodo, [estherRecipe], readdedStock);
+      expect(match).toBeDefined();
+      expect(match?.name).toBe("Mama's Special Sunday Rice");
+    });
+
+    it("accurately identifies missing ingredients by name and does not scramble items (Banana vs Baking Powder test)", () => {
+      const bananaPancakeRecipe: SavedRecipe = {
+        id: "recipe-pancake",
+        name: "Banana Pancakes",
+        mealTypes: ["Breakfast"],
+        mainIngredientId: "ing-flour",
+        mainIngredientName: "All-Purpose Flour",
+        supplementaryIds: ["ing-banana", "ing-baking-powder"],
+        supplementaryNames: ["Banana", "Baking Powder"],
+        owner: "Esther",
+      };
+
+      const pantryItems: Ingredient[] = [
+        { id: "ing-flour", name: "All-Purpose Flour", role: "Main", mealTypes: ["Breakfast"], owner: "Esther", available: true },
+        { id: "ing-banana", name: "Banana", role: "Supplementary", mealTypes: ["Breakfast"], owner: "Esther", available: false }, // Banana out of stock!
+        { id: "ing-baking-powder", name: "Baking Powder", role: "Supplementary", mealTypes: ["Breakfast"], owner: "Esther", available: true }, // in stock!
+      ];
+
+      // Simulate SavedRecipesModal stock matching logic
+      const idMap = new Map<string, boolean>();
+      const nameMap = new Map<string, boolean>();
+      pantryItems.forEach((i) => {
+        idMap.set(i.id, i.available);
+        nameMap.set(normalizeFoodName(i.name), i.available);
+      });
+
+      const isItemInStock = (id?: string, name?: string) => {
+        if (id && idMap.has(id)) return idMap.get(id)!;
+        if (name && nameMap.has(normalizeFoodName(name))) return nameMap.get(normalizeFoodName(name))!;
+        return false;
+      };
+
+      const getDisplayName = (id?: string, fallbackName?: string) => {
+        if (id) {
+          const found = pantryItems.find((i) => i.id === id);
+          if (found?.name) return found.name;
+        }
+        return fallbackName || "Ingredient";
+      };
+
+      const missing: string[] = [];
+      bananaPancakeRecipe.supplementaryIds?.forEach((sid, idx) => {
+        const sName = bananaPancakeRecipe.supplementaryNames?.[idx];
+        if (!isItemInStock(sid, sName)) {
+          missing.push(getDisplayName(sid, sName));
+        }
+      });
+
+      expect(missing).toEqual(["Banana"]);
+      expect(missing).not.toContain("Baking Powder");
     });
   });
 });

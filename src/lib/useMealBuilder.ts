@@ -11,24 +11,17 @@ export type FlowStep = "meal_type" | "ready_meal" | "mode_select" | "manual_pick
 
 export function useMealBuilder(owner: string = "User", nutrientPriorities?: NutrientTag[], savedRecipes?: SavedRecipe[]) {
   const [catalogue, setCatalogue] = useState<KitchenCatalogue>(EMPTY_CATALOGUE);
-  const [isClientReady, setIsClientReady] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [isAddSupplyOpen, setIsAddSupplyOpen] = useState(false);
+  const [isClientReady, setIsClientReady] = useState(false), [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false), [isAddSupplyOpen, setIsAddSupplyOpen] = useState(false);
   const [mealType, setMealType] = useState<MealType>(() => getDefaultMealTypeByHour(new Date().getHours(), getClientProfileCached(owner)?.mealsPerDay));
-  const [currentStep, setCurrentStep] = useState<FlowStep>("meal_type");
-  const [selectedSource, setSelectedSource] = useState<MealSource>("Built");
+  const [currentStep, setCurrentStep] = useState<FlowStep>("meal_type"), [selectedSource, setSelectedSource] = useState<MealSource>("Built");
   const [selectedReadyMeal, setSelectedReadyMeal] = useState<ReadyMeal | undefined>();
-  const [selectedMain, setSelectedMain] = useState<Ingredient | undefined>();
-  const [selectedProtein, setSelectedProtein] = useState<Ingredient | undefined>();
-  const [selectedSupplementary, setSelectedSupplementary] = useState<Ingredient | undefined>();
-  const [selectedSupplementaries, setSelectedSupplementaries] = useState<Ingredient[]>([]);
+  const [selectedMain, setSelectedMain] = useState<Ingredient | undefined>(), [selectedProtein, setSelectedProtein] = useState<Ingredient | undefined>();
+  const [selectedSupplementary, setSelectedSupplementary] = useState<Ingredient | undefined>(), [selectedSupplementaries, setSelectedSupplementaries] = useState<Ingredient[]>([]);
   const [pairingResult, setPairingResult] = useState<PairingResult | null>(null);
-  const [isLeftoverModalOpen, setIsLeftoverModalOpen] = useState(false);
-  const [isLogging, setIsLogging] = useState(false);
+  const [isLeftoverModalOpen, setIsLeftoverModalOpen] = useState(false), [isLogging, setIsLogging] = useState(false);
   const [ratedHistory, setRatedHistory] = useState<RatedMealRecord[]>([]);
-  const [activeLogId, setActiveLogId] = useState<string | undefined>();
-  const [isRatingCardOpen, setIsRatingCardOpen] = useState(false);
+  const [activeLogId, setActiveLogId] = useState<string | undefined>(), [isRatingCardOpen, setIsRatingCardOpen] = useState(false);
 
   useEffect(() => {
     const cached = loadCachedCatalogue(owner);
@@ -357,16 +350,25 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     handleResetToHome();
   };
 
-  const handleToggleAvailability = async (id: string, kind: "ingredient" | "ready_meal", available: boolean) => {
+  const handleUpdateSupply = async (
+    id: string,
+    kind: "ingredient" | "ready_meal",
+    updates: { name?: string; role?: any; mealTypes?: MealType[]; available?: boolean }
+  ) => {
     const nextCatalogue = {
       ...catalogue,
-      ingredients: kind === "ingredient" ? catalogue.ingredients.map((i) => (i.id === id ? { ...i, available } : i)) : catalogue.ingredients,
-      readyMeals: kind === "ready_meal" ? catalogue.readyMeals.map((m) => (m.id === id ? { ...m, available } : m)) : catalogue.readyMeals,
+      ingredients: kind === "ingredient" ? catalogue.ingredients.map((i) => (i.id === id ? { ...i, ...updates } : i)) : catalogue.ingredients,
+      readyMeals: kind === "ready_meal" ? catalogue.readyMeals.map((m) => (m.id === id ? { ...m, ...updates } : m)) : catalogue.readyMeals,
     };
     setCatalogue(nextCatalogue);
     saveCachedCatalogue(nextCatalogue, owner);
-    try { await fetch("/api/notion/supplies", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, available }) }); } catch {}
+    try {
+      await fetch("/api/notion/supplies", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, ...updates }) });
+    } catch {}
   };
+
+  const handleToggleAvailability = (id: string, kind: "ingredient" | "ready_meal", available: boolean) =>
+    handleUpdateSupply(id, kind, { available });
 
   const handleDeleteSupply = async (id: string, kind: "ingredient" | "ready_meal", name?: string) => {
     const nextCatalogue = {
@@ -389,6 +391,6 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     handleResetSeedData: handleSeedStarterIngredients, handleResetToHome,
     handleSelectMealType, handleSelectReadyMeal, handleBypassReadyMeal, handleSuggestForMe, handleManualPickMode, handleSelectMain,
     handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision, handleQuickAddStaples, handleAddSupply, handleAddBulkSupplies,
-    handleToggleAvailability, handleDeleteSupply, handleCookSavedRecipe, isRatingCardOpen, setIsRatingCardOpen, activeLogId, handleRateMeal, handleSkipRating, ratedHistory,
+    handleToggleAvailability, handleUpdateSupply, handleDeleteSupply, handleCookSavedRecipe, isRatingCardOpen, setIsRatingCardOpen, activeLogId, handleRateMeal, handleSkipRating, ratedHistory,
   };
 }

@@ -6,7 +6,14 @@ import { FoodIdeasModal } from "@/components/FoodIdeasModal";
 import { KitchenInventoryModal } from "@/components/KitchenInventoryModal";
 import { PersonalHubModal, PersonalHubTab } from "@/components/PersonalHubModal";
 import { SavedRecipesModal } from "@/components/SavedRecipesModal";
-import { AddSupplyInput, CreateSavedRecipeInput, KitchenCatalogue, SavedRecipe } from "@/lib/types";
+import {
+  AddSupplyInput,
+  CreateSavedRecipeInput,
+  KitchenCatalogue,
+  MealType,
+  SavedRecipe,
+  UpdateSavedRecipeInput,
+} from "@/lib/types";
 import React from "react";
 
 interface AppModalsProps {
@@ -24,6 +31,11 @@ interface AppModalsProps {
   onOpenAddSupply: () => void;
   onSeedStarterIngredients?: () => Promise<void> | void;
   onToggleAvailability: (id: string, kind: "ingredient" | "ready_meal", available: boolean) => void;
+  onUpdateSupply?: (
+    id: string,
+    kind: "ingredient" | "ready_meal",
+    updates: { name: string; role?: "Main" | "Protein" | "Supplementary"; mealTypes: MealType[] }
+  ) => Promise<void>;
   onDeleteSupply: (id: string, kind: "ingredient" | "ready_meal", name?: string) => void;
   isPersonalHubOpen: boolean;
   personalHubTab: PersonalHubTab;
@@ -35,6 +47,7 @@ interface AppModalsProps {
   onCloseSavedRecipes: () => void;
   savedRecipes: SavedRecipe[];
   onCreateRecipe: (input: CreateSavedRecipeInput) => Promise<{ success: boolean; id?: string }>;
+  onUpdateRecipe?: (id: string, input: UpdateSavedRecipeInput) => Promise<{ success: boolean }>;
   onDeleteRecipe: (id: string) => Promise<{ success: boolean }>;
   onCookRecipe: (recipe: SavedRecipe) => void;
 }
@@ -54,6 +67,7 @@ export const AppModals: React.FC<AppModalsProps> = ({
   onOpenAddSupply,
   onSeedStarterIngredients,
   onToggleAvailability,
+  onUpdateSupply,
   onDeleteSupply,
   isPersonalHubOpen,
   personalHubTab,
@@ -65,6 +79,7 @@ export const AppModals: React.FC<AppModalsProps> = ({
   onCloseSavedRecipes,
   savedRecipes,
   onCreateRecipe,
+  onUpdateRecipe,
   onDeleteRecipe,
   onCookRecipe,
 }) => {
@@ -94,6 +109,7 @@ export const AppModals: React.FC<AppModalsProps> = ({
         ingredients={catalogue.ingredients}
         readyMeals={catalogue.readyMeals}
         onToggleAvailability={onToggleAvailability}
+        onUpdateSupply={onUpdateSupply}
         onDeleteSupply={onDeleteSupply}
         onOpenAddSupply={onOpenAddSupply}
         onOpenFoodIdeas={onOpenFoodIdeas}
@@ -122,6 +138,7 @@ export const AppModals: React.FC<AppModalsProps> = ({
         ingredients={catalogue.ingredients}
         onAddSupply={onAddSupply}
         onCreateRecipe={onCreateRecipe}
+        onUpdateRecipe={onUpdateRecipe}
         onDeleteRecipe={onDeleteRecipe}
         onCookRecipe={onCookRecipe}
         owner={owner}

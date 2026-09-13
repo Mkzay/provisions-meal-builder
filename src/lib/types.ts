@@ -203,10 +203,31 @@ export interface CreateSavedRecipeInput {
   name: string;
   mealTypes: MealType[];
   mainIngredientId?: string;
+  mainIngredientName?: string;
   proteinId?: string;
   proteinIds?: string[];
+  proteinName?: string;
+  proteinNames?: string[];
   supplementaryId?: string;
   supplementaryIds?: string[];
+  supplementaryName?: string;
+  supplementaryNames?: string[];
   owner: string;
+  sourceUrl?: string;
+}
+
+export interface UpdateSavedRecipeInput {
+  name?: string;
+  mealTypes?: MealType[];
+  mainIngredientId?: string;
+  mainIngredientName?: string;
+  proteinId?: string;
+  proteinIds?: string[];
+  proteinName?: string;
+  proteinNames?: string[];
+  supplementaryId?: string;
+  supplementaryIds?: string[];
+  supplementaryName?: string;
+  supplementaryNames?: string[];
   sourceUrl?: string;
 }

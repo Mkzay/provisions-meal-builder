@@ -21,7 +21,8 @@ interface KitchenSidebarProps {
   isCachedFallback?: boolean;
   onSelectReadyMeal: (meal: ReadyMeal) => void;
   onOpenSettings?: () => void;
-  onOpenStaples: () => void;
+  onOpenStaples?: () => void;
+  onOpenAddSupply?: () => void;
   onOpenFoodIdeas?: () => void;
   onOpenInventory?: () => void;
   onOpenSavedRecipes?: () => void;
@@ -37,6 +38,7 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
   onSelectReadyMeal,
   onOpenSettings,
   onOpenStaples,
+  onOpenAddSupply,
   onOpenFoodIdeas,
   onOpenInventory,
   onOpenSavedRecipes,
@@ -81,7 +83,7 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
 
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={onOpenStaples}
+            onClick={onOpenAddSupply || onOpenStaples}
             className="w-full py-2 px-2.5 rounded-xl border-2 border-stone-900 dark:border-amber-700/70 bg-amber-100 dark:bg-amber-950/80 hover:bg-amber-200 dark:hover:bg-amber-900 text-xs font-black text-stone-900 dark:text-amber-200 transition-all shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px]"
           >
             + Restock
@@ -198,7 +200,7 @@ export const KitchenSidebar: React.FC<KitchenSidebarProps> = ({
         </div>
 
         <button
-          onClick={onOpenStaples}
+          onClick={onOpenAddSupply || onOpenStaples}
           className="w-full pt-2 border-t-2 border-stone-900 dark:border-stone-800 flex items-center justify-center gap-1.5 text-xs font-black text-stone-900 dark:text-stone-200 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
         >
           <PlusCircle size={15} weight="bold" />

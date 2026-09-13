@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { CreateSavedRecipeInput, SavedRecipe } from "./types";
+import { CreateSavedRecipeInput, SavedRecipe, UpdateSavedRecipeInput } from "./types";
 
 export function useSavedRecipes() {
   const { data: session, status } = useSession();
@@ -78,6 +78,51 @@ export function useSavedRecipes() {
     [fetchRecipes, session]
   );
 
+  const updateRecipe = useCallback(
+    async (id: string, input: UpdateSavedRecipeInput): Promise<{ success: boolean }> => {
+      setIsSaving(true);
+      setSavedRecipes((prev) =>
+        prev.map((r) =>
+          r.id === id
+            ? {
+                ...r,
+                name: input.name ?? r.name,
+                mealTypes: input.mealTypes ?? r.mealTypes,
+                mainIngredientId: input.mainIngredientId !== undefined ? input.mainIngredientId : r.mainIngredientId,
+                mainIngredientName: input.mainIngredientName ?? r.mainIngredientName,
+                proteinIds: input.proteinIds ?? r.proteinIds,
+                proteinNames: input.proteinNames ?? r.proteinNames,
+                supplementaryIds: input.supplementaryIds ?? r.supplementaryIds,
+                supplementaryNames: input.supplementaryNames ?? r.supplementaryNames,
+                sourceUrl: input.sourceUrl !== undefined ? input.sourceUrl : r.sourceUrl,
+              }
+            : r
+        )
+      );
+
+      try {
+        const res = await fetch("/api/notion/recipes", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, ...input }),
+        });
+        if (res.ok) {
+          await fetchRecipes();
+          return { success: true };
+        }
+        await fetchRecipes();
+        return { success: false };
+      } catch (err) {
+        console.error("Failed to update saved recipe:", err);
+        await fetchRecipes();
+        return { success: false };
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [fetchRecipes]
+  );
+
   const deleteRecipe = useCallback(
     async (id: string): Promise<{ success: boolean }> => {
       // Optimistic delete
@@ -110,6 +155,7 @@ export function useSavedRecipes() {
     closeSavedRecipes: () => setIsOpen(false),
     fetchRecipes,
     createRecipe,
+    updateRecipe,
     deleteRecipe,
   };
 }

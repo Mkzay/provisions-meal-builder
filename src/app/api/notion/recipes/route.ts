@@ -3,9 +3,10 @@ import {
   createDbSavedRecipe,
   deleteDbSavedRecipe,
   fetchDbSavedRecipes,
+  updateDbSavedRecipe,
 } from "@/lib/db-recipes";
 import { getSessionOwner } from "@/lib/owner-authorization";
-import { CreateSavedRecipeInput } from "@/lib/types";
+import { CreateSavedRecipeInput, UpdateSavedRecipeInput } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -66,6 +67,42 @@ export async function POST(req: NextRequest) {
     console.error("API error creating saved recipe:", error);
     return NextResponse.json(
       { error: "Failed to create saved recipe" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const session = await auth();
+    const owner = getSessionOwner(session);
+    if (!owner) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { id, ...updates } = (body || {}) as { id?: string } & UpdateSavedRecipeInput;
+
+    if (!id) {
+      return NextResponse.json(
+        { error: "Recipe ID is required for update" },
+        { status: 400 }
+      );
+    }
+
+    const result = await updateDbSavedRecipe(id, updates, owner);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Failed to update saved recipe or not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("API error updating saved recipe:", error);
+    return NextResponse.json(
+      { error: "Internal server error updating recipe" },
       { status: 500 }
     );
   }

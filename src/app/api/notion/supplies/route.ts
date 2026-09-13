@@ -3,9 +3,10 @@ import { getSessionOwner } from "@/lib/owner-authorization";
 import {
   addDbSupply,
   deleteDbSupply,
+  updateDbSupply,
   updateDbSupplyAvailability,
 } from "@/lib/db-supplies";
-import { AddSupplyInput } from "@/lib/types";
+import { AddSupplyInput, MealType } from "@/lib/types";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -38,15 +39,35 @@ export async function PATCH(request: Request) {
   try {
     const owner = getSessionOwner(await auth());
     if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const body = (await request.json()) as { id: string; available: boolean };
-    if (!body || !body.id || typeof body.available !== "boolean") {
+    const body = (await request.json()) as {
+      id: string;
+      available?: boolean;
+      name?: string;
+      role?: string;
+      mealTypes?: MealType[];
+    };
+    if (!body || !body.id) {
       return NextResponse.json(
-        { error: "Invalid payload: id and boolean available are required" },
+        { error: "Invalid payload: id is required" },
         { status: 400 }
       );
     }
 
-    const result = await updateDbSupplyAvailability(body.id, body.available, owner);
+    if (typeof body.available === "boolean" && !body.name && !body.role && !body.mealTypes) {
+      const result = await updateDbSupplyAvailability(body.id, body.available, owner);
+      return NextResponse.json(result);
+    }
+
+    const result = await updateDbSupply(
+      body.id,
+      {
+        name: body.name,
+        role: body.role,
+        mealTypes: body.mealTypes,
+        available: body.available,
+      },
+      owner
+    );
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error in PATCH /api/notion/supplies:", error);

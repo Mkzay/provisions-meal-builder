@@ -4,11 +4,19 @@ import {
   BookmarkSimple,
   Check,
   CookingPot,
+  PencilSimple,
   Plus,
   TrashSimple,
   X,
 } from "@/components/icons";
-import { AddSupplyInput, CreateSavedRecipeInput, Ingredient, SavedRecipe } from "@/lib/types";
+import { normalizeFoodName } from "@/lib/nutrient-curation";
+import {
+  AddSupplyInput,
+  CreateSavedRecipeInput,
+  Ingredient,
+  SavedRecipe,
+  UpdateSavedRecipeInput,
+} from "@/lib/types";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useMemo, useState } from "react";
 import { SavedRecipeForm } from "./SavedRecipeForm";
@@ -20,6 +28,7 @@ interface SavedRecipesModalProps {
   ingredients: Ingredient[];
   onAddSupply: (input: AddSupplyInput) => Promise<{ success: boolean; id?: string } | void>;
   onCreateRecipe: (input: CreateSavedRecipeInput) => Promise<{ success: boolean; id?: string }>;
+  onUpdateRecipe?: (id: string, input: UpdateSavedRecipeInput) => Promise<{ success: boolean }>;
   onDeleteRecipe: (id: string) => Promise<{ success: boolean }>;
   onCookRecipe?: (recipe: SavedRecipe) => void;
   owner: string;
@@ -32,18 +41,46 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
   ingredients,
   onAddSupply,
   onCreateRecipe,
+  onUpdateRecipe,
   onDeleteRecipe,
   onCookRecipe,
   owner,
 }) => {
-  const [activeTab, setActiveTab] = useState<"list" | "create">("list");
+  const [activeTab, setActiveTab] = useState<"list" | "create" | "edit">("list");
+  const [editingRecipe, setEditingRecipe] = useState<SavedRecipe | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const stockMap = useMemo(() => {
-    const map = new Map<string, boolean>();
-    ingredients.forEach((i) => map.set(i.id, i.available));
-    return map;
+    const idMap = new Map<string, boolean>();
+    const nameMap = new Map<string, boolean>();
+    ingredients.forEach((i) => {
+      idMap.set(i.id, i.available);
+      if (i.name) nameMap.set(normalizeFoodName(i.name), i.available);
+    });
+    return { idMap, nameMap };
   }, [ingredients]);
+
+  const isIngredientInStock = (id?: string, name?: string): boolean => {
+    if (id && stockMap.idMap.has(id)) return stockMap.idMap.get(id)!;
+    if (name && stockMap.nameMap.has(normalizeFoodName(name))) {
+      return stockMap.nameMap.get(normalizeFoodName(name))!;
+    }
+    return false;
+  };
+
+  const getIngredientDisplayName = (id?: string, fallbackName?: string): string => {
+    if (id) {
+      const found = ingredients.find((i) => i.id === id);
+      if (found?.name) return found.name;
+    }
+    if (fallbackName) {
+      const norm = normalizeFoodName(fallbackName);
+      const found = ingredients.find((i) => normalizeFoodName(i.name) === norm);
+      if (found?.name) return found.name;
+      return fallbackName;
+    }
+    return "Ingredient";
+  };
 
   const handleCreateRecipe = async (input: CreateSavedRecipeInput) => {
     setIsSubmitting(true);
@@ -54,6 +91,32 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
       }
     } catch (err) {
       console.error("Error creating recipe:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateRecipe = async (input: CreateSavedRecipeInput) => {
+    if (!editingRecipe || !onUpdateRecipe) return;
+    setIsSubmitting(true);
+    try {
+      const res = await onUpdateRecipe(editingRecipe.id, {
+        name: input.name,
+        mealTypes: input.mealTypes,
+        mainIngredientId: input.mainIngredientId,
+        mainIngredientName: input.mainIngredientName,
+        proteinIds: input.proteinIds,
+        proteinNames: input.proteinNames,
+        supplementaryIds: input.supplementaryIds,
+        supplementaryNames: input.supplementaryNames,
+        sourceUrl: input.sourceUrl,
+      });
+      if (res.success) {
+        setEditingRecipe(null);
+        setActiveTab("list");
+      }
+    } catch (err) {
+      console.error("Error updating recipe:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -101,7 +164,10 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
           {/* Tab Navigation */}
           <div className="flex gap-2 pt-4 pb-3 shrink-0">
             <button
-              onClick={() => setActiveTab("list")}
+              onClick={() => {
+                setEditingRecipe(null);
+                setActiveTab("list");
+              }}
               className={`flex-1 py-2 px-3 text-xs sm:text-sm font-black rounded-xl border-2 border-stone-900 dark:border-stone-700 transition-all shadow-brutal-xs ${
                 activeTab === "list" ? "bg-amber-300 dark:bg-amber-400 text-stone-900 dark:text-stone-950" : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700"
               }`}
@@ -109,7 +175,10 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
               My Recipes ({savedRecipes.length})
             </button>
             <button
-              onClick={() => setActiveTab("create")}
+              onClick={() => {
+                setEditingRecipe(null);
+                setActiveTab("create");
+              }}
               className={`flex-1 py-2 px-3 text-xs sm:text-sm font-black rounded-xl border-2 border-stone-900 dark:border-stone-700 transition-all shadow-brutal-xs flex items-center justify-center gap-1.5 ${
                 activeTab === "create" ? "bg-emerald-300 dark:bg-emerald-900/70 text-stone-900 dark:text-emerald-200" : "bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700"
               }`}
@@ -117,6 +186,12 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
               <Plus size={14} weight="bold" />
               <span>Save New Recipe</span>
             </button>
+            {activeTab === "edit" && editingRecipe && (
+              <div className="py-2 px-3 text-xs sm:text-sm font-black rounded-xl border-2 border-stone-900 dark:border-amber-700 bg-amber-400 dark:bg-amber-500 text-stone-900 dark:text-stone-950 shadow-brutal-xs flex items-center gap-1.5 shrink-0">
+                <PencilSimple size={14} weight="bold" />
+                <span className="truncate max-w-[120px]">Edit Recipe</span>
+              </div>
+            )}
           </div>
 
           {/* Body Content */}
@@ -140,30 +215,28 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
               ) : (
                 <div className="space-y-3">
                   {savedRecipes.map((recipe) => {
-                    const mainInStock = recipe.mainIngredientId
-                      ? (stockMap.get(recipe.mainIngredientId) ?? false)
-                      : false;
+                    const mainInStock = isIngredientInStock(recipe.mainIngredientId, recipe.mainIngredientName);
 
                     const pIds = recipe.proteinIds?.length ? recipe.proteinIds : (recipe.proteinId ? [recipe.proteinId] : []);
                     const missingProteins: string[] = [];
                     pIds.forEach((pid, idx) => {
-                      if (!(stockMap.get(pid) ?? false)) {
-                        const pName = recipe.proteinNames?.[idx] || (pid === recipe.proteinId ? recipe.proteinName : undefined) || "Protein";
-                        missingProteins.push(pName);
+                      const pName = recipe.proteinNames?.[idx] || (pid === recipe.proteinId ? recipe.proteinName : undefined);
+                      if (!isIngredientInStock(pid, pName)) {
+                        missingProteins.push(getIngredientDisplayName(pid, pName));
                       }
                     });
 
                     const sIds = recipe.supplementaryIds?.length ? recipe.supplementaryIds : (recipe.supplementaryId ? [recipe.supplementaryId] : []);
                     const missingSupps: string[] = [];
                     sIds.forEach((sid, idx) => {
-                      if (!(stockMap.get(sid) ?? false)) {
-                        const sName = recipe.supplementaryNames?.[idx] || (sid === recipe.supplementaryId ? recipe.supplementaryName : undefined) || "Side";
-                        missingSupps.push(sName);
+                      const sName = recipe.supplementaryNames?.[idx] || (sid === recipe.supplementaryId ? recipe.supplementaryName : undefined);
+                      if (!isIngredientInStock(sid, sName)) {
+                        missingSupps.push(getIngredientDisplayName(sid, sName));
                       }
                     });
 
                     const missingNames: string[] = [];
-                    if (!mainInStock) missingNames.push(recipe.mainIngredientName || "Base");
+                    if (!mainInStock) missingNames.push(getIngredientDisplayName(recipe.mainIngredientId, recipe.mainIngredientName));
                     missingNames.push(...missingProteins);
                     missingNames.push(...missingSupps);
 
@@ -231,6 +304,19 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
                               <span>Cook This</span>
                             </button>
                           )}
+                          {onUpdateRecipe && (
+                            <button
+                              onClick={() => {
+                                setEditingRecipe(recipe);
+                                setActiveTab("edit");
+                              }}
+                              className="p-1.5 rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 shadow-brutal-xs active:translate-x-0.5 active:translate-y-0.5 transition-all"
+                              title="Edit recipe"
+                              aria-label="Edit recipe"
+                            >
+                              <PencilSimple size={15} weight="bold" />
+                            </button>
+                          )}
                           <button
                             onClick={() => onDeleteRecipe(recipe.id)}
                             className="p-1.5 rounded-xl border-2 border-stone-900 dark:border-rose-700 bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-200 dark:hover:bg-rose-900 text-rose-800 dark:text-rose-300 shadow-brutal-xs active:translate-x-0.5 active:translate-y-0.5 transition-all"
@@ -245,7 +331,7 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
                   })}
                 </div>
               )
-            ) : (
+            ) : activeTab === "create" ? (
               <SavedRecipeForm
                 ingredients={ingredients}
                 owner={owner}
@@ -253,6 +339,21 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
                 onSubmit={handleCreateRecipe}
                 onCancel={() => setActiveTab("list")}
                 isSubmitting={isSubmitting}
+              />
+            ) : (
+              <SavedRecipeForm
+                key={editingRecipe?.id}
+                ingredients={ingredients}
+                owner={owner}
+                onAddSupply={onAddSupply}
+                onSubmit={handleUpdateRecipe}
+                onCancel={() => {
+                  setEditingRecipe(null);
+                  setActiveTab("list");
+                }}
+                isSubmitting={isSubmitting}
+                initialRecipe={editingRecipe ?? undefined}
+                isEdit={true}
               />
             )}
           </div>

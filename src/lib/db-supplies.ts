@@ -60,20 +60,13 @@ export async function fetchDbCatalogue(owner?: string): Promise<KitchenCatalogue
     // Starter staples can be loaded opt-in by the user via the UI.
 
     const ingredients: Ingredient[] = ingRows.map((r: any) => ({
-      id: r.id,
-      name: r.name,
-      role: r.category as any,
-      owner: r.owner,
-      available: Boolean(r.available),
-      mealTypes: (r.meal_types || []) as MealType[],
+      id: r.id, name: r.name, role: r.category as any, owner: r.owner,
+      available: Boolean(r.available), mealTypes: (r.meal_types || []) as MealType[],
       nutrientTags: (r.nutrient_tags || []) as NutrientTag[],
     }));
 
     const readyMeals: ReadyMeal[] = mealRows.map((r: any) => ({
-      id: r.id,
-      name: r.name,
-      owner: r.owner,
-      available: Boolean(r.available),
+      id: r.id, name: r.name, owner: r.owner, available: Boolean(r.available),
       mealTypes: (r.meal_types || []) as MealType[],
       nutrientTags: (r.nutrient_tags || []) as NutrientTag[],
     }));
@@ -222,6 +215,85 @@ export async function updateDbSupplyAvailability(
 }
 
 /**
+ * Updates properties (name, role, mealTypes, available) of an ingredient or ready meal in Postgres.
+ */
+export async function updateDbSupply(
+  id: string,
+  updates: {
+    name?: string;
+    role?: string;
+    mealTypes?: MealType[];
+    available?: boolean;
+  },
+  owner: string
+): Promise<{ success: boolean }> {
+  const sql = getSql();
+  if (!sql) return { success: true };
+
+  try {
+    await ensureSchema();
+    const targetOwner = owner.trim().toLowerCase();
+
+    // Check pantry ingredients first
+    const ingCheck = await sql`
+      SELECT id, name, category, meal_types, available FROM pantry_ingredients
+      WHERE id = ${id} AND LOWER(owner) = ${targetOwner}
+      LIMIT 1;
+    `;
+
+    if (ingCheck.length > 0) {
+      const cur = ingCheck[0];
+      const newName = updates.name !== undefined ? updates.name.trim() : cur.name;
+      const newRole = updates.role !== undefined ? updates.role : cur.category;
+      const newMealTypes = updates.mealTypes !== undefined ? updates.mealTypes : cur.meal_types;
+      const newAvail = updates.available !== undefined ? updates.available : cur.available;
+
+      await sql`
+        UPDATE pantry_ingredients
+        SET
+          name = ${newName},
+          category = ${newRole},
+          meal_types = ${newMealTypes},
+          available = ${newAvail},
+          updated_at = NOW()
+        WHERE id = ${id} AND LOWER(owner) = ${targetOwner};
+      `;
+      return { success: true };
+    }
+
+    // Check ready meals
+    const mealCheck = await sql`
+      SELECT id, name, meal_types, available FROM ready_meals
+      WHERE id = ${id} AND LOWER(owner) = ${targetOwner}
+      LIMIT 1;
+    `;
+
+    if (mealCheck.length > 0) {
+      const cur = mealCheck[0];
+      const newName = updates.name !== undefined ? updates.name.trim() : cur.name;
+      const newMealTypes = updates.mealTypes !== undefined ? updates.mealTypes : cur.meal_types;
+      const newAvail = updates.available !== undefined ? updates.available : cur.available;
+
+      await sql`
+        UPDATE ready_meals
+        SET
+          name = ${newName},
+          meal_types = ${newMealTypes},
+          available = ${newAvail},
+          updated_at = NOW()
+        WHERE id = ${id} AND LOWER(owner) = ${targetOwner};
+      `;
+      return { success: true };
+    }
+
+    return { success: false };
+  } catch (error) {
+    console.error("Failed to update supply in Postgres:", error);
+    return { success: false };
+  }
+}
+
+/**
  * Deletes a supply from Postgres.
  */
 export async function deleteDbSupply(
@@ -238,29 +310,11 @@ export async function deleteDbSupply(
     const cleanName = name?.trim().toLowerCase();
 
     if (cleanName) {
-      await sql`
-        DELETE FROM pantry_ingredients
-        WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()} OR LOWER(name) = ${cleanName})
-          AND LOWER(owner) = ${targetOwner};
-      `;
-
-      await sql`
-        DELETE FROM ready_meals
-        WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()} OR LOWER(name) = ${cleanName})
-          AND LOWER(owner) = ${targetOwner};
-      `;
+      await sql`DELETE FROM pantry_ingredients WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()} OR LOWER(name) = ${cleanName}) AND LOWER(owner) = ${targetOwner};`;
+      await sql`DELETE FROM ready_meals WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()} OR LOWER(name) = ${cleanName}) AND LOWER(owner) = ${targetOwner};`;
     } else {
-      await sql`
-        DELETE FROM pantry_ingredients
-        WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()})
-          AND LOWER(owner) = ${targetOwner};
-      `;
-
-      await sql`
-        DELETE FROM ready_meals
-        WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()})
-          AND LOWER(owner) = ${targetOwner};
-      `;
+      await sql`DELETE FROM pantry_ingredients WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()}) AND LOWER(owner) = ${targetOwner};`;
+      await sql`DELETE FROM ready_meals WHERE (id = ${id} OR LOWER(id) = ${id.toLowerCase()}) AND LOWER(owner) = ${targetOwner};`;
     }
 
     return { success: true };

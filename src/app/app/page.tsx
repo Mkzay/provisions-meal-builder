@@ -68,7 +68,7 @@ export default function MealBuilderAppPage() {
 
   const {
     savedRecipes, isOpen: isSavedRecipesOpen, openSavedRecipes, closeSavedRecipes,
-    createRecipe, deleteRecipe,
+    createRecipe, updateRecipe, deleteRecipe,
   } = useSavedRecipes();
 
   const {
@@ -83,14 +83,12 @@ export default function MealBuilderAppPage() {
     handleSuggestForMe, handleManualPickMode, handleSelectMain,
     handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision,
     handleQuickAddStaples, handleAddSupply, handleAddBulkSupplies,
-    handleToggleAvailability, handleDeleteSupply, handleCookSavedRecipe,
+    handleToggleAvailability, handleUpdateSupply, handleDeleteSupply, handleCookSavedRecipe,
     isRatingCardOpen, setIsRatingCardOpen, handleRateMeal, handleSkipRating,
   } = useMealBuilder(owner, undefined, savedRecipes);
 
   const missingIngredientNames = catalogue.ingredients.filter((i) => !i.available).map((i) => i.name);
   useNotificationRunner(owner, missingIngredientNames);
-
-  const [isStaplesDrawerOpen, setIsStaplesDrawerOpen] = useState(false);
 
   const handleSelectNavTab = (tab: NavTabId) => {
     setActiveNavTab(tab);
@@ -160,7 +158,8 @@ export default function MealBuilderAppPage() {
               currentMealType={mealType}
               isCachedFallback={catalogue.isCachedFallback}
               onSelectReadyMeal={handleSelectReadyMeal}
-              onOpenStaples={() => setIsStaplesDrawerOpen(true)}
+              onOpenAddSupply={() => setIsAddSupplyOpen(true)}
+              onOpenStaples={() => setIsAddSupplyOpen(true)}
               onOpenFoodIdeas={() => setIsFoodIdeasOpen(true)}
               onOpenInventory={() => setIsInventoryOpen(true)}
               onOpenSavedRecipes={openSavedRecipes}
@@ -352,6 +351,7 @@ export default function MealBuilderAppPage() {
         onOpenAddSupply={() => setIsAddSupplyOpen(true)}
         onSeedStarterIngredients={handleSeedStarterIngredients}
         onToggleAvailability={handleToggleAvailability}
+        onUpdateSupply={handleUpdateSupply}
         onDeleteSupply={handleDeleteSupply}
         isPersonalHubOpen={isPersonalHubOpen}
         personalHubTab={personalHubTab}
@@ -372,6 +372,7 @@ export default function MealBuilderAppPage() {
         }}
         savedRecipes={savedRecipes}
         onCreateRecipe={createRecipe}
+        onUpdateRecipe={updateRecipe}
         onDeleteRecipe={deleteRecipe}
         onCookRecipe={handleCookSavedRecipe}
       />

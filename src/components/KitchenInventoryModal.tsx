@@ -5,6 +5,7 @@ import {
   Check,
   CookingPot,
   Package,
+  PencilSimple,
   Plus,
   Sparkle,
   TrashSimple,
@@ -13,6 +14,7 @@ import {
 import { Ingredient, MealType, ReadyMeal } from "@/lib/types";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useMemo, useState } from "react";
+import { EditSupplyModal } from "./EditSupplyModal";
 
 interface KitchenInventoryModalProps {
   isOpen: boolean;
@@ -20,6 +22,11 @@ interface KitchenInventoryModalProps {
   ingredients: Ingredient[];
   readyMeals: ReadyMeal[];
   onToggleAvailability: (id: string, kind: "ingredient" | "ready_meal", available: boolean) => void;
+  onUpdateSupply?: (
+    id: string,
+    kind: "ingredient" | "ready_meal",
+    updates: { name: string; role?: "Main" | "Protein" | "Supplementary"; mealTypes: MealType[] }
+  ) => Promise<void>;
   onDeleteSupply: (id: string, kind: "ingredient" | "ready_meal", name?: string) => void;
   onOpenAddSupply: () => void;
   onOpenFoodIdeas?: () => void;
@@ -45,6 +52,7 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
   ingredients,
   readyMeals,
   onToggleAvailability,
+  onUpdateSupply,
   onDeleteSupply,
   onOpenAddSupply,
   onOpenFoodIdeas,
@@ -55,6 +63,7 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [isSeeding, setIsSeeding] = useState(false);
+  const [editingItem, setEditingItem] = useState<InventoryRowItem | null>(null);
 
   const allItems: InventoryRowItem[] = useMemo(() => {
     const list: InventoryRowItem[] = [];
@@ -271,7 +280,7 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                     <button
                       type="button"
                       onClick={() => handleToggle(item)}
@@ -282,6 +291,17 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
                     >
                       {item.available ? (<><Check size={13} weight="bold" /><span>In Stock</span></>) : (<><X size={13} weight="bold" /><span>Out of Stock</span></>)}
                     </button>
+                    {onUpdateSupply && (
+                      <button
+                        type="button"
+                        onClick={() => setEditingItem(item)}
+                        aria-label={`Edit ${item.name}`}
+                        className="p-1.5 rounded-xl border-2 border-stone-900 dark:border-stone-700 bg-white dark:bg-stone-800 hover:bg-amber-100 dark:hover:bg-amber-950/60 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 active:translate-x-[1px] active:translate-y-[1px] transition-all shadow-brutal-xs dark:shadow-brutal-dark-sm shrink-0"
+                        title="Edit staple / meal"
+                      >
+                        <PencilSimple size={15} weight="bold" />
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => handleDelete(item)}
@@ -328,6 +348,17 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
           </div>
         </motion.div>
       </div>
+
+      {editingItem && onUpdateSupply && (
+        <EditSupplyModal
+          isOpen={!!editingItem}
+          item={editingItem}
+          onClose={() => setEditingItem(null)}
+          onSave={async (id, kind, updates) => {
+            await onUpdateSupply(id, kind, updates);
+          }}
+        />
+      )}
     </AnimatePresence>
   );
 };

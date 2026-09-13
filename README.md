@@ -1,98 +1,71 @@
 # Provisions 🥣
 
-> A zero-friction meal decision tool that eliminates decision fatigue around food by working with what's actually in your kitchen.
+> A zero-friction, neo-brutalist meal decision tool that eliminates food fatigue by working directly with what's actually in your kitchen.
 
 ---
 
 ## The Problem
 
-Deciding what to cook when tired or hungry feels like a mountain. When that friction hits, it's easy to default to instant noodles or skip meals altogether.
+Deciding what to cook when tired or hungry creates overwhelming decision friction. When that friction hits, it's easy to default to low-nutrient fast foods or skip meals altogether.
 
-**Provisions** removes the cognitive wall. Instead of a rigid diet plan, it works with whatever ingredients and ready-cooked meals you actually have available. It prioritizes ready food, supports both auto-suggestions and manual selection, handles natural culinary pairings, and feeds leftovers back into the ready-meal pool automatically.
+**Provisions** removes the cognitive wall. Instead of imposing a rigid diet plan, it operates on whatever ingredients and ready-cooked meals you actually have in stock. It prioritizes ready food, supports both smart auto-suggestions and manual building, handles natural West African & continental culinary pairings, surfaces personal favorite recipes, and feeds leftovers back into the ready-meal pool automatically.
 
 ---
 
 ## Features
 
-- **Meal Type Selection** — Breakfast, Lunch, or Dinner with smart time-of-day awareness
-- **Ready Meal Priority** — Pre-cooked food is offered first for zero-effort meals
-- **Dual Decision Modes** — Auto-suggest a balanced combination, or manually pick from a thumb-friendly grid
-- **Smart Culinary Pairing** — Pre-selects natural pairings (e.g. Rice → Stew, Bread → Egg + Tea) with one-tap swaps
-- **Post-Meal Leftover Loop** — Leftovers auto-create ready meal entries; finished meals get cleared automatically
-- **Pantry Dashboard** — Real-time kitchen inventory stats synced from Notion
-- **Personal Hub** — Set an eating goal and track weight progress over time
-- **Configurable Reminders** — Meal notifications, pantry audit reminders, and grocery shopping nudges
-- **Gentle Safety Net** — Warm, zero-judgment empty state with quick comfort suggestions when the kitchen is bare
-- **PWA & Mobile-First** — Installable on home screens, standalone display, safe-area compliance, offline resilience
+- **Meal Type Selection** — Breakfast, Lunch, Dinner, or Snack with time-of-day awareness and customizable daily meal counts (2, 3, or 4 meals).
+- **Saved Recipes with Full CRUD** — Save family and online favorites with multiple proteins and sides. Easily edit recipe names, meal times, bases, and pairings at any time.
+- **Dual In-Stock Matching Engine** — Sophisticated dual matching by both database ID and normalized food name (`normalizeFoodName`), ensuring re-stocked or re-added pantry staples immediately satisfy saved recipes without broken links.
+- **Interactive Food Staples Catalogue** — Explore 60+ West African and continental pantry ideas categorized by Anchor Bases, Protein Sources, Greens/Sides/Fats, and Ready Meals. Customize recommended meal times (`Breakfast`, `Lunch`, `Dinner`, `Snack`) directly on the idea card before stocking.
+- **Live Kitchen Inventory Management** — Full inventory modal with instant 1-tap in-stock/out-of-stock toggling, inline staple/meal editing (edit name, category role, suitable meal times), and one-click starter staples loading.
+- **Smart Culinary Companion & Blueprint Pairings** — Automatic dish naming blueprints, nutrient tag curation, and natural pairing suggestions (e.g. Rice → Stew, Bread → Egg + Tea).
+- **Rating Feedback Loop** — 1-tap post-meal rating card (Liked, Disliked, Neutral) that adjusts future combo scoring while preserving recipe variety.
+- **Post-Meal Leftover Loop** — Cooked meals with leftovers automatically create ready-meal entries; consumed items update stock levels seamlessly.
+- **Comprehensive Theme Engine** — Complete neo-brutalist design in **Dark Mode**, **Light Mode**, and **System Mode** with high-contrast borders, custom Phosphor SVG icons, and tactile brutalist shadows.
+- **Personal Hub & Weight Tracking** — Set eating goals, height, and track weigh-in progress over time with trend indicators.
+- **PWA Auto-Update Lifecycle** — Installable Progressive Web App with service worker caching and instant update banners when a new version is deployed.
 
 ---
 
-## Tech Stack
+## Architecture & Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Framework | [Next.js 15](https://nextjs.org/) (App Router) |
 | Language | TypeScript |
-| Styling | Tailwind CSS 3 |
-| Authentication | [Auth.js (NextAuth v5)](https://authjs.dev/) with bcrypt |
-| Database (Auth) | [Neon Postgres](https://neon.tech/) (`users` table) |
-| Database (Meals) | [Notion API](https://developers.notion.com/) (5 databases as backend) |
-| Animation | Framer Motion |
-| Icons | Phosphor Icons |
-| Testing | Vitest |
+| Styling | Tailwind CSS 3 with custom neo-brutalist utilities |
+| Database | [Neon Serverless Postgres](https://neon.tech/) via `@neondatabase/serverless` |
+| Authentication | [Auth.js (NextAuth v5)](https://authjs.dev/) with bcrypt and session isolation |
+| Fallback Data Layer | [Notion API](https://developers.notion.com/) (optional legacy fallback) |
+| Motion | Framer Motion |
+| Icons | Phosphor Icons direct SSR imports |
+| Testing | Vitest (unit & integration tests) |
 | Deployment | Vercel |
 
 ---
 
-## Notion Database Schema
+## Database Architecture (Neon Postgres)
 
-The app uses three Notion databases as its backend:
+Provisions stores all application state in Neon Serverless Postgres with automatic table provisioning and strict multi-tenant owner isolation:
 
-### 1. Ingredients Catalogue
-| Property | Type | Notes |
-|----------|------|-------|
-| `Name` | Title | Ingredient name |
-| `Meal Type` | Multi-select | `Breakfast`, `Lunch`, `Dinner`, `Snack` |
-| `Role` | Select | `Main`, `Protein`, `Supplementary` |
-| `Available` | Checkbox | Whether currently in stock |
-| `Owner` | Select | Instance owner name |
+### 1. `users`
+- `id` (VARCHAR PRIMARY KEY), `username` (VARCHAR UNIQUE), `password_hash` (VARCHAR), `owner_name` (VARCHAR), `created_at` (TIMESTAMP)
 
-### 2. Ready Meals
-| Property | Type | Notes |
-|----------|------|-------|
-| `Name` | Title | Meal name |
-| `Meal Type` | Multi-select | `Breakfast`, `Lunch`, `Dinner`, `Snack` |
-| `Available` | Checkbox | Whether ready to eat |
-| `Owner` | Select | Instance owner name |
+### 2. `pantry_ingredients`
+- `id` (VARCHAR PRIMARY KEY), `name` (VARCHAR), `role` (`Main` | `Protein` | `Supplementary`), `meal_types` (TEXT[]), `available` (BOOLEAN), `owner` (VARCHAR), `created_at` (TIMESTAMP)
 
-### 3. Meal Log
-| Property | Type | Notes |
-|----------|------|-------|
-| `Date` | Date | When the meal was eaten |
-| `Meal Type` | Select | `Breakfast`, `Lunch`, `Dinner` |
-| `Source` | Select | `Ready Meal`, `Built` |
-| `Main Ingredient` | Relation | Linked to **Ingredients Catalogue** |
-| `Protein` | Relation | Linked to **Ingredients Catalogue** |
-| `Supplementary` | Relation | Linked to **Ingredients Catalogue** |
-| `Ready Meal` | Relation | Linked to **Ready Meals** |
-| `Had Leftovers` | Checkbox | Triggers leftover flow |
-| `Owner` | Select | Instance owner name |
+### 3. `pantry_ready_meals`
+- `id` (VARCHAR PRIMARY KEY), `name` (VARCHAR), `meal_types` (TEXT[]), `available` (BOOLEAN), `owner` (VARCHAR), `created_at` (TIMESTAMP)
 
-### 4. Meal Profile
-| Property | Type | Notes |
-|----------|------|-------|
-| `Name` | Title | e.g. "Esther's Meal Profile" |
-| `Owner` | Select | Instance owner name |
-| `Goal` | Select | `Lose weight`, `Gain weight`, `Eat healthier`, `Eat more food generally` |
-| `Height` | Number | Optional height record in cm (e.g. `168`) |
+### 4. `saved_recipes`
+- `id` (VARCHAR PRIMARY KEY), `name` (VARCHAR), `meal_types` (TEXT[]), `main_ingredient_id` (VARCHAR), `main_ingredient_name` (VARCHAR), `protein_ids` (TEXT[]), `protein_names` (TEXT[]), `supplementary_ids` (TEXT[]), `supplementary_names` (TEXT[]), `source_url` (VARCHAR), `owner` (VARCHAR), `created_at` (TIMESTAMP)
 
-### 5. Progress Log
-| Property | Type | Notes |
-|----------|------|-------|
-| `Name` | Title | e.g. "58.5 kg - 2026-09-12" |
-| `Owner` | Select | Instance owner name |
-| `Date` | Date | Date of weigh-in |
-| `Weight` | Number | Weight recorded (e.g. `58.5`) |
+### 5. `meal_logs`
+- `id` (VARCHAR PRIMARY KEY), `meal_date` (TIMESTAMP), `meal_type` (VARCHAR), `source` (VARCHAR), `dish_name` (VARCHAR), `had_leftovers` (BOOLEAN), `owner` (VARCHAR), `created_at` (TIMESTAMP)
+
+### 6. `meal_profiles` & `progress_logs`
+- User eating goals (`Lose weight`, `Gain weight`, `Eat healthier`, `Eat more food generally`), height, and chronological weigh-in records scoped by owner.
 
 ---
 
@@ -102,7 +75,7 @@ The app uses three Notion databases as its backend:
 
 - Node.js ≥ 18.x
 - npm ≥ 9.x
-- A [Notion integration](https://www.notion.so/profile/integrations) (optional — app runs on demo data without it)
+- Neon Postgres database instance
 
 ### Installation
 
@@ -112,43 +85,48 @@ npm install
 
 ### Environment Variables
 
-```bash
-cp .env.example .env.local
-```
-
-Fill in your credentials:
+Create `.env.local`:
 
 ```env
-# Notion Databases
-NOTION_API_KEY=secret_your_integration_token
-NOTION_INGREDIENTS_DB_ID=your_32_char_database_id
-NOTION_READY_MEALS_DB_ID=your_32_char_database_id
-NOTION_MEAL_LOG_DB_ID=your_32_char_database_id
-NOTION_PROFILE_DB_ID=your_32_char_database_id
-NOTION_PROGRESS_LOG_DB_ID=your_32_char_database_id
-
-# Neon Postgres (Auth)
+# Neon Postgres Database URL (Required)
 POSTGRES_URL=postgresql://user:pass@ep-example.neon.tech/neondb?sslmode=require
 
-# NextAuth / Auth.js
+# NextAuth / Auth.js Secret (Required)
 AUTH_SECRET=your_generated_32_char_secret_key
 
-# Optional AI meal curation (requests send selected ingredient names and meal type)
+# Optional OpenRouter AI Integration
 OPENROUTER_API_KEY=your_openrouter_key
 OPENROUTER_MODEL=google/gemini-2.0-flash-exp:free
+
+# Optional Legacy Notion Fallback
+NOTION_API_KEY=secret_token
+NOTION_INGREDIENTS_DB_ID=...
 ```
 
-> If omitted, the app runs in offline demo mode with realistic seed data.
+### Database Setup & User Management
 
-### Development
+Provisions includes automated, idempotent management scripts:
+
+```bash
+# Provision all Neon Postgres tables
+node scripts/init-db.mjs
+
+# Create an authorized user account:
+node scripts/create-user.mjs <username> <password> <owner_name>
+
+# Example:
+node scripts/create-user.mjs esther mysecurepassword Esther
+```
+
+### Development Server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Visit [http://localhost:3000](http://localhost:3000).
 
-### Testing
+### Running Tests
 
 ```bash
 npm test
@@ -163,54 +141,22 @@ npm start
 
 ---
 
-## Deployment
-
-### Vercel (Recommended)
-
-1. Push to GitHub
-2. Import the repo at [vercel.com/new](https://vercel.com/new)
-3. Add environment variables in Vercel project settings
-4. Deploy
-
-Every push to `main` triggers automatic production deployments.
-
-Set `AUTH_SECRET` in every deployed environment; the app intentionally has no fallback. OpenRouter is optional: without its key, meal curation and companion notes use local fallbacks. The built-in curator limiter is per running instance; use a shared rate-limit store before horizontally scaling a production deployment.
-
-### User Management & Multi-Owner Access
-
-Accounts are managed directly by the administrator via the CLI script against Neon Postgres:
-
-```bash
-# Initialize users table (idempotent)
-node scripts/init-db.mjs
-
-# Create or update an authorized user account:
-node scripts/create-user.mjs <username> <password> <owner_name>
-
-# Example:
-node scripts/create-user.mjs esther secret123 Esther
-node scripts/create-user.mjs mkzay secret456 Mkzay
-```
-
-When a user logs in, their authenticated session automatically scopes all meal queries, catalogue items, goals, weight logs, and leftovers to their designated owner identity.
-
----
-
 ## API Routes
 
-| Route | Method | Purpose |
-|-------|--------|---------|
-| `/api/health` | GET | Health check with Notion connection status |
-| `/api/notion/catalogue` | GET | Fetch ingredients and ready meals |
-| `/api/notion/log` | POST | Log a meal decision with linked Relations |
-| `/api/notion/leftovers` | POST | Handle post-meal leftover decisions |
-| `/api/notion/supplies` | POST | Add new ingredient or ready meal |
-| `/api/notion/profile` | GET, POST | Fetch or save eating goal and height in Notion |
-| `/api/notion/progress-log` | GET, POST, DELETE | Track, log, or archive weigh-in entries in Notion |
-| `/api/curate` | POST | Validate and optionally refine a selected meal with OpenRouter |
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/notion/catalogue` | GET | Fetch pantry ingredients and ready meals for the authenticated user |
+| `/api/notion/supplies` | POST, PATCH, DELETE | Add, update (name, role, meal times, availability), or delete pantry items |
+| `/api/notion/recipes` | GET, POST, PATCH, DELETE | Full CRUD on personal saved recipes with dual in-stock recognition |
+| `/api/notion/log` | POST | Record a completed meal decision |
+| `/api/notion/leftovers` | POST | Create ready meals from leftovers and adjust pantry availability |
+| `/api/notion/profile` | GET, POST | Retrieve or update user eating profile and goals |
+| `/api/notion/progress-log` | GET, POST, DELETE | Fetch, record, or delete weight tracking weigh-ins |
+| `/api/curate` | POST | Optional AI culinary notes and combo validation |
+| `/api/health` | GET | Service health check |
 
 ---
 
 ## License
 
-Private. Not licensed for redistribution.
+Private. All rights reserved.

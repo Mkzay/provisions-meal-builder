@@ -17,9 +17,11 @@ import {
   FoodCategory,
   FoodIdea,
 } from "@/lib/food-ideas-catalogue";
-import { AddSupplyInput, Ingredient, ReadyMeal } from "@/lib/types";
+import { AddSupplyInput, Ingredient, MealType, ReadyMeal } from "@/lib/types";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useMemo, useState } from "react";
+
+const MEAL_SLOTS: MealType[] = ["Breakfast", "Lunch", "Dinner", "Snack"];
 
 interface FoodIdeasModalProps {
   isOpen: boolean;
@@ -50,6 +52,7 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [stockingId, setStockingId] = useState<string | null>(null);
   const [justStockedIds, setJustStockedIds] = useState<Set<string>>(new Set());
+  const [customMeals, setCustomMeals] = useState<Record<string, MealType[]>>({});
 
   // Set of lowercase names currently in the user's kitchen
   const stockedNames = useMemo(() => {
@@ -66,6 +69,20 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
     });
   }, [selectedCategory, searchQuery]);
 
+  const toggleIdeaMeal = (ideaId: string, defaultMeals: MealType[], meal: MealType) => {
+    setCustomMeals((prev) => {
+      const current = prev[ideaId] || defaultMeals;
+      let next: MealType[];
+      if (current.includes(meal)) {
+        if (current.length === 1) return prev; // Keep at least one
+        next = current.filter((m) => m !== meal);
+      } else {
+        next = [...current, meal];
+      }
+      return { ...prev, [ideaId]: next };
+    });
+  };
+
   const handleStock = async (idea: FoodIdea) => {
     if (stockingId) return;
     setStockingId(idea.id);
@@ -75,11 +92,12 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
     }
 
     try {
+      const activeMeals = customMeals[idea.id] || idea.suitableMeals;
       await onAddSupply({
         kind: idea.kind,
         name: idea.name,
         role: idea.kind === "ingredient" ? idea.role : undefined,
-        mealTypes: idea.suitableMeals,
+        mealTypes: activeMeals,
         owner,
       });
 
@@ -252,16 +270,31 @@ export const FoodIdeasModal: React.FC<FoodIdeasModalProps> = ({
                         </p>
                       </div>
 
-                      <div className="pt-2 border-t border-stone-200 dark:border-stone-700 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1">
-                          {idea.suitableMeals.map((m) => (
-                            <span
-                              key={m}
-                              className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300"
-                            >
-                              {m.slice(0, 1)}
-                            </span>
-                          ))}
+                      <div className="pt-2 border-t border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500">For:</span>
+                          <div className="flex items-center gap-1">
+                            {MEAL_SLOTS.map((m) => {
+                              const activeMeals = customMeals[idea.id] || idea.suitableMeals;
+                              const isSelected = activeMeals.includes(m);
+                              return (
+                                <button
+                                  key={m}
+                                  type="button"
+                                  disabled={isStocked || isBusy}
+                                  onClick={() => toggleIdeaMeal(idea.id, idea.suitableMeals, m)}
+                                  title={`Toggle ${m}`}
+                                  className={`text-[10px] font-black w-5 h-5 rounded flex items-center justify-center border transition-all ${
+                                    isSelected
+                                      ? "bg-amber-300 dark:bg-amber-400 text-stone-900 dark:text-stone-950 border-stone-900 dark:border-stone-800"
+                                      : "bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-500 border-stone-200 dark:border-stone-700 hover:text-stone-700 dark:hover:text-stone-300"
+                                  }`}
+                                >
+                                  {m.slice(0, 1)}
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
 
                         {isStocked ? (

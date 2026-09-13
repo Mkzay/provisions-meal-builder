@@ -20,7 +20,7 @@ export interface SuggestedNutrientComboResult {
   comboNutrientTags: NutrientTag[];
 }
 
-function normalizeFoodName(name?: string): string {
+export function normalizeFoodName(name?: string): string {
   if (!name) return "";
   return name
     .toLowerCase()
@@ -133,18 +133,35 @@ export function findMatchingSavedRecipe(
   if (!savedRecipes || savedRecipes.length === 0) return undefined;
 
   const stockMap = new Map<string, boolean>();
+  const stockByName = new Map<string, boolean>();
   if (allIngredients && allIngredients.length > 0) {
-    allIngredients.forEach((i) => stockMap.set(i.id, i.available));
+    allIngredients.forEach((i) => {
+      stockMap.set(i.id, i.available);
+      if (i.name) stockByName.set(normalizeFoodName(i.name), i.available);
+    });
   } else {
     stockMap.set(main.id, main.available);
-    if (protein) stockMap.set(protein.id, protein.available);
-    if (supplementary) stockMap.set(supplementary.id, supplementary.available);
+    stockByName.set(normalizeFoodName(main.name), main.available);
+    if (protein) {
+      stockMap.set(protein.id, protein.available);
+      stockByName.set(normalizeFoodName(protein.name), protein.available);
+    }
+    if (supplementary) {
+      stockMap.set(supplementary.id, supplementary.available);
+      stockByName.set(normalizeFoodName(supplementary.name), supplementary.available);
+    }
   }
 
+  const isItemInStock = (id?: string, name?: string): boolean => {
+    if (id && stockMap.has(id)) return stockMap.get(id)!;
+    if (name && stockByName.has(normalizeFoodName(name))) return stockByName.get(normalizeFoodName(name))!;
+    return false;
+  };
+
   // Check that candidate ingredients are themselves in stock
-  if (stockMap.get(main.id) === false) return undefined;
-  if (protein && stockMap.get(protein.id) === false) return undefined;
-  if (supplementary && stockMap.get(supplementary.id) === false) return undefined;
+  if (!isItemInStock(main.id, main.name)) return undefined;
+  if (protein && !isItemInStock(protein.id, protein.name)) return undefined;
+  if (supplementary && !isItemInStock(supplementary.id, supplementary.name)) return undefined;
 
   const currentOwner = allIngredients?.[0]?.owner || main.owner;
 
@@ -154,19 +171,25 @@ export function findMatchingSavedRecipe(
       continue;
     }
 
-    // Check main ingredient match
-    if (recipe.mainIngredientId && recipe.mainIngredientId !== main.id) continue;
+    // Check main ingredient match (by ID or normalized name)
+    const matchesMain =
+      (recipe.mainIngredientId && recipe.mainIngredientId === main.id) ||
+      (recipe.mainIngredientName && normalizeFoodName(recipe.mainIngredientName) === normalizeFoodName(main.name));
+    if (!matchesMain) continue;
 
     // Collect all proteins required by the recipe
     const requiredProteins = (recipe.proteinIds && recipe.proteinIds.length > 0)
       ? recipe.proteinIds
       : (recipe.proteinId ? [recipe.proteinId] : []);
+    const requiredProteinNames = recipe.proteinNames?.length ? recipe.proteinNames : (recipe.proteinName ? [recipe.proteinName] : []);
 
     // Check protein match:
-    // If recipe requires proteins, candidate protein must be one of them.
-    // If recipe requires no proteins, candidate must have no protein.
-    if (requiredProteins.length > 0) {
-      if (!protein || !requiredProteins.includes(protein.id)) continue;
+    if (requiredProteins.length > 0 || requiredProteinNames.length > 0) {
+      const matchesCandidateProtein = protein && (
+        requiredProteins.includes(protein.id) ||
+        requiredProteinNames.some((pn) => normalizeFoodName(pn) === normalizeFoodName(protein.name))
+      );
+      if (!matchesCandidateProtein) continue;
     } else {
       if (protein) continue;
     }
@@ -175,18 +198,27 @@ export function findMatchingSavedRecipe(
     const requiredSupps = (recipe.supplementaryIds && recipe.supplementaryIds.length > 0)
       ? recipe.supplementaryIds
       : (recipe.supplementaryId ? [recipe.supplementaryId] : []);
+    const requiredSuppNames = recipe.supplementaryNames?.length ? recipe.supplementaryNames : (recipe.supplementaryName ? [recipe.supplementaryName] : []);
 
     // Check supplementary match
-    if (requiredSupps.length > 0) {
-      if (!supplementary || !requiredSupps.includes(supplementary.id)) continue;
+    if (requiredSupps.length > 0 || requiredSuppNames.length > 0) {
+      const matchesCandidateSupp = supplementary && (
+        requiredSupps.includes(supplementary.id) ||
+        requiredSuppNames.some((sn) => normalizeFoodName(sn) === normalizeFoodName(supplementary.name))
+      );
+      if (!matchesCandidateSupp) continue;
     } else {
       if (supplementary) continue;
     }
 
     // Verify ALL required components in recipe are available in stock
-    const mainInStock = recipe.mainIngredientId ? (stockMap.get(recipe.mainIngredientId) ?? false) : true;
-    const allProteinsInStock = requiredProteins.every((id) => stockMap.get(id) ?? false);
-    const allSuppsInStock = requiredSupps.every((id) => stockMap.get(id) ?? false);
+    const mainInStock = isItemInStock(recipe.mainIngredientId, recipe.mainIngredientName);
+    const allProteinsInStock = requiredProteins.length > 0
+      ? requiredProteins.every((id, idx) => isItemInStock(id, requiredProteinNames[idx]))
+      : true;
+    const allSuppsInStock = requiredSupps.length > 0
+      ? requiredSupps.every((id, idx) => isItemInStock(id, requiredSuppNames[idx]))
+      : true;
 
     if (mainInStock && allProteinsInStock && allSuppsInStock) {
       return recipe;
