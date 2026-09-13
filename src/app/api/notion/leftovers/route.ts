@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { getSessionOwner } from "@/lib/owner-authorization";
-import { handleLeftoverDecision } from "@/lib/notion";
+import { handleDbLeftoverDecision } from "@/lib/db-supplies";
 import { LeftoverDecision } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     body.owner = owner;
 
-    const result = await handleLeftoverDecision(body);
+    const result = await handleDbLeftoverDecision(body);
     return NextResponse.json(result);
   } catch (error) {
     console.error("API error handling leftovers:", error);

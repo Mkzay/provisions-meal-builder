@@ -1,6 +1,10 @@
 import { auth } from "@/auth";
 import { getSessionOwner } from "@/lib/owner-authorization";
-import { fetchOwnerMealRatings, logMeal, updateMealRating } from "@/lib/notion";
+import {
+  fetchDbOwnerMealRatings,
+  logDbMeal,
+  updateDbMealRating,
+} from "@/lib/db-meal-log";
 import { MealLogEntry, MealRating } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -20,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     body.owner = owner;
 
-    const result = await logMeal(body);
+    const result = await logDbMeal(body);
     return NextResponse.json(result);
   } catch (error) {
     console.error("API error logging meal:", error);
@@ -47,7 +51,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const result = await updateMealRating(id, rating, owner);
+    const result = await updateDbMealRating(id, rating, owner);
     return NextResponse.json(result);
   } catch (error) {
     console.error("API error updating meal rating:", error);
@@ -67,7 +71,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const targetOwner = searchParams.get("owner") || owner;
 
-    const ratings = await fetchOwnerMealRatings(targetOwner);
+    const ratings = await fetchDbOwnerMealRatings(targetOwner);
     return NextResponse.json({ ratings });
   } catch (error) {
     console.error("API error fetching meal ratings:", error);

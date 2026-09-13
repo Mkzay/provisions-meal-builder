@@ -1,10 +1,10 @@
 import { auth } from "@/auth";
 import { getSessionOwner } from "@/lib/owner-authorization";
 import {
-  addSupplyToNotion,
-  deleteSupplyFromNotion,
-  updateSupplyAvailability,
-} from "@/lib/notion";
+  addDbSupply,
+  deleteDbSupply,
+  updateDbSupplyAvailability,
+} from "@/lib/db-supplies";
 import { AddSupplyInput } from "@/lib/types";
 import { NextResponse } from "next/server";
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
     body.owner = owner;
 
-    const result = await addSupplyToNotion(body);
+    const result = await addDbSupply(body);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error in POST /api/notion/supplies:", error);
@@ -46,7 +46,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const result = await updateSupplyAvailability(body.id, body.available, owner);
+    const result = await updateDbSupplyAvailability(body.id, body.available, owner);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error in PATCH /api/notion/supplies:", error);
@@ -80,7 +80,7 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const result = await deleteSupplyFromNotion(id, owner);
+    const result = await deleteDbSupply(id, owner);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error in DELETE /api/notion/supplies:", error);

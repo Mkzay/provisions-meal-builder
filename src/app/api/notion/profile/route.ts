@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { getSessionOwner } from "@/lib/owner-authorization";
-import { fetchMealProfile, saveMealProfile } from "@/lib/notion-profile";
+import { fetchDbMealProfile, saveDbMealProfile } from "@/lib/db-profile";
 import { UserGoal } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     const owner = getSessionOwner(session);
     if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const profile = await fetchMealProfile(owner);
+    const profile = await fetchDbMealProfile(owner);
     return NextResponse.json(
       { profile },
       {
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await saveMealProfile({
+    const result = await saveDbMealProfile({
       owner,
       goal,
       height,

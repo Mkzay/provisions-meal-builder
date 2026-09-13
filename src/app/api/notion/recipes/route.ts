@@ -1,5 +1,9 @@
 import { auth } from "@/auth";
-import { fetchCatalogue, fetchSavedRecipes, createSavedRecipe, deleteSavedRecipe } from "@/lib/notion";
+import {
+  createDbSavedRecipe,
+  deleteDbSavedRecipe,
+  fetchDbSavedRecipes,
+} from "@/lib/db-recipes";
 import { getSessionOwner } from "@/lib/owner-authorization";
 import { CreateSavedRecipeInput } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
@@ -12,13 +16,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const catalogue = await fetchCatalogue(owner);
-    const ingredientMap = new Map<string, string>();
-    if (catalogue?.ingredients) {
-      catalogue.ingredients.forEach((i) => ingredientMap.set(i.id, i.name));
-    }
-
-    const recipes = await fetchSavedRecipes(owner, ingredientMap);
+    const recipes = await fetchDbSavedRecipes(owner);
     return NextResponse.json(
       { recipes },
       {
@@ -61,7 +59,8 @@ export async function POST(req: NextRequest) {
     }
 
     body.owner = owner;
-    const result = await createSavedRecipe(body);
+
+    const result = await createDbSavedRecipe(body);
     return NextResponse.json(result);
   } catch (error) {
     console.error("API error creating saved recipe:", error);
@@ -81,15 +80,25 @@ export async function DELETE(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    let id = searchParams.get("id");
+
+    if (!id) {
+      try {
+        const body = (await req.json()) as { id?: string };
+        id = body?.id || null;
+      } catch {
+        // no body
+      }
+    }
+
     if (!id) {
       return NextResponse.json(
-        { error: "Missing recipe id parameter" },
+        { error: "Recipe ID is required" },
         { status: 400 }
       );
     }
 
-    const result = await deleteSavedRecipe(id, owner);
+    const result = await deleteDbSavedRecipe(id, owner);
     return NextResponse.json(result);
   } catch (error) {
     console.error("API error deleting saved recipe:", error);

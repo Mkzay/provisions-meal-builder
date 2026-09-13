@@ -1,10 +1,10 @@
 import { auth } from "@/auth";
 import { getSessionOwner } from "@/lib/owner-authorization";
 import {
-  addWeightLogEntry,
-  deleteWeightLogEntry,
-  fetchWeightLogs,
-} from "@/lib/notion-profile";
+  addDbWeightLogEntry,
+  deleteDbWeightLogEntry,
+  fetchDbWeightLogs,
+} from "@/lib/db-profile";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const owner = getSessionOwner(session);
     if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const logs = await fetchWeightLogs(owner);
+    const logs = await fetchDbWeightLogs(owner);
     return NextResponse.json(
       { logs },
       {
@@ -49,14 +49,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const unit = body.unit === "lbs" ? "lbs" : "kg";
-
-    const result = await addWeightLogEntry({
-      owner,
-      date,
-      weight,
-      unit,
-    });
+    const result = await addDbWeightLogEntry(owner, weight, date);
 
     return NextResponse.json(result);
   } catch (error) {
@@ -78,7 +71,7 @@ export async function DELETE(req: NextRequest) {
     if (!id) {
       try {
         const body = await req.json();
-        id = body?.id;
+        id = body?.id || null;
       } catch {
         // no body
       }
@@ -91,7 +84,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const result = await deleteWeightLogEntry(id, owner);
+    const result = await deleteDbWeightLogEntry(id, owner);
     return NextResponse.json(result);
   } catch (error) {
     console.error("API error deleting weight log:", error);
