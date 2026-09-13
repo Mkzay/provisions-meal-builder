@@ -55,4 +55,13 @@ describe("Meals Per Day Logic & Clean UI Verification", () => {
     expect(profileSectionCode.includes("count: 3")).toBe(true);
     expect(profileSectionCode.includes("count: 4")).toBe(true);
   });
+
+  it("verifies 3rd card in 3-meal plan expands to full width on desktop view", () => {
+    const selectorCode = fs.readFileSync(
+      path.join(__dirname, "../components/MealTypeSelector.tsx"),
+      "utf-8"
+    );
+    expect(selectorCode.includes('isThirdInThree ? "sm:col-span-2 w-full" : ""')).toBe(true);
+    expect(selectorCode.includes("calc(50%-0.625rem)")).toBe(false);
+  });
 });

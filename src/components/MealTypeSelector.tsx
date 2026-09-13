@@ -175,7 +175,7 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
         </p>
       </div>
 
-      {/* Responsive Grid: 2 Columns for all plans (3-meal plan places 2 on top, 3rd centered below) */}
+      {/* Responsive Grid: 2 Columns for all plans (3-meal plan places 2 on top, 3rd card spans full width) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
         {visibleOptions.map((opt, index) => {
           const isSelected = selectedType === opt.type;
@@ -198,7 +198,7 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
               className={`relative flex flex-col justify-between p-5 sm:p-6 rounded-3xl border-[2.5px] border-stone-900 text-left overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stone-900 focus-visible:ring-offset-2 ${
                 opt.cardBg
               } ${
-                isThirdInThree ? "sm:col-span-2 sm:w-[calc(50%-0.625rem)] sm:mx-auto" : ""
+                isThirdInThree ? "sm:col-span-2 w-full" : ""
               } ${
                 isSelected
                   ? "shadow-[6px_6px_0px_#1C1917] dark:shadow-[6px_6px_0px_#000000] ring-2 ring-stone-900 dark:ring-amber-400/40 -translate-y-1"
