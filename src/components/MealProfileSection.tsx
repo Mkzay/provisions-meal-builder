@@ -42,6 +42,12 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
   const [weightInput, setWeightInput] = useState<string>(() =>
     cachedInitial?.weight ? String(cachedInitial.weight) : ""
   );
+  const [twoMealSchedule, setTwoMealSchedule] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("meal_builder_two_meal_schedule") || "lunch_dinner";
+    }
+    return "lunch_dinner";
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
@@ -59,31 +65,35 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
     }
   };
 
-  const handleFeetChange = (val: string) => {
-    setFeet(val);
-    const f = parseInt(val) || 0;
-    const i = parseFloat(inches) || 0;
+  const syncImperialToCm = (fStr: string, inStr: string) => {
+    const f = parseInt(fStr) || 0;
+    const i = parseFloat(inStr) || 0;
     setHeightCm(f > 0 || i > 0 ? String(Math.round((f * 12 + i) * 2.54)) : "");
   };
-
-  const handleInchesChange = (val: string) => {
-    setInches(val);
-    const f = parseInt(feet) || 0;
-    const i = parseFloat(val) || 0;
-    setHeightCm(f > 0 || i > 0 ? String(Math.round((f * 12 + i) * 2.54)) : "");
-  };
+  const handleFeetChange = (val: string) => { setFeet(val); syncImperialToCm(val, inches); };
+  const handleInchesChange = (val: string) => { setInches(val); syncImperialToCm(feet, val); };
 
   const handleWeightUnitChange = (u: "kg" | "lbs") => {
     if (u === weightUnit) return;
     setWeightUnit(u);
     const num = parseFloat(weightInput);
     if (!isNaN(num) && num > 0) {
-      setWeightInput(
-        u === "lbs"
-          ? String(Math.round(num * 2.20462 * 10) / 10)
-          : String(Math.round((num / 2.20462) * 10) / 10)
-      );
+      setWeightInput(String(Math.round((u === "lbs" ? num * 2.20462 : num / 2.20462) * 10) / 10));
     }
+  };
+
+  const vibrate = (ms = 8) => {
+    if (typeof window !== "undefined" && window.navigator?.vibrate) window.navigator.vibrate(ms);
+  };
+
+  const handleScheduleSelect = (sch: string) => {
+    vibrate(8);
+    setTwoMealSchedule(sch);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("meal_builder_two_meal_schedule", sch);
+      window.dispatchEvent(new Event("two_meal_schedule_changed"));
+    }
+    handleSave({ mealsPerDay: 2 });
   };
 
   useEffect(() => {
@@ -91,35 +101,27 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
     setIsLoading(true);
     fetchClientProfile(owner)
       .then((existing) => {
-        if (!active) return;
-        if (existing) {
-          setSelectedGoal(existing.goal || getDefaultGoalForOwner(owner));
-          if (existing.mealsPerDay) setMealsPerDay(existing.mealsPerDay);
-          setSelectedPriorities(existing.nutrientPriorities || []);
-          if (existing.height) {
-            const cmVal = existing.height;
-            setHeightCm(String(cmVal));
-            const totalIn = Math.round(cmVal / 2.54);
-            setFeet(String(Math.floor(totalIn / 12)));
-            setInches(String(totalIn % 12));
-          }
-          if (existing.weight) {
-            setWeightInput(String(existing.weight));
-          } else {
-            fetchClientWeightLogs(owner).then((logs) => {
-              if (active && logs[0]?.weight) {
-                setWeightInput(String(logs[0].weight));
-              }
-            });
-          }
+        if (!active || !existing) return;
+        setSelectedGoal(existing.goal || getDefaultGoalForOwner(owner));
+        if (existing.mealsPerDay) setMealsPerDay(existing.mealsPerDay);
+        setSelectedPriorities(existing.nutrientPriorities || []);
+        if (existing.height) {
+          const cmVal = existing.height;
+          setHeightCm(String(cmVal));
+          const totalIn = Math.round(cmVal / 2.54);
+          setFeet(String(Math.floor(totalIn / 12)));
+          setInches(String(totalIn % 12));
+        }
+        if (existing.weight) {
+          setWeightInput(String(existing.weight));
+        } else {
+          fetchClientWeightLogs(owner).then((logs) => {
+            if (active && logs[0]?.weight) setWeightInput(String(logs[0].weight));
+          });
         }
       })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+      .finally(() => { if (active) setIsLoading(false); });
+    return () => { active = false; };
   }, [owner]);
 
   const togglePriority = (tag: NutrientTag) => {
@@ -132,24 +134,17 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
 
   const handleSave = async (overrides?: Partial<MealProfile>) => {
     setIsSaving(true);
-    let validHeight: number | undefined;
-    if (heightUnit === "cm") {
-      const num = parseFloat(heightCm);
-      if (!isNaN(num) && num > 0) validHeight = Math.round(num);
-    } else {
-      const f = parseInt(feet) || 0;
-      const i = parseFloat(inches) || 0;
-      if (f > 0 || i > 0) validHeight = Math.round((f * 12 + i) * 2.54);
-    }
+    const parsedCm = parseFloat(heightCm);
+    const parsedFt = parseInt(feet) || 0;
+    const parsedIn = parseFloat(inches) || 0;
+    const validHeight = heightUnit === "cm"
+      ? (!isNaN(parsedCm) && parsedCm > 0 ? Math.round(parsedCm) : undefined)
+      : (parsedFt > 0 || parsedIn > 0 ? Math.round((parsedFt * 12 + parsedIn) * 2.54) : undefined);
 
     const wNum = parseFloat(weightInput);
-    let validWeight: number | undefined;
-    if (!isNaN(wNum) && wNum > 0) {
-      validWeight =
-        weightUnit === "kg"
-          ? Math.round(wNum * 10) / 10
-          : Math.round((wNum / 2.20462) * 10) / 10;
-    }
+    const validWeight = !isNaN(wNum) && wNum > 0
+      ? Math.round((weightUnit === "kg" ? wNum : wNum / 2.20462) * 10) / 10
+      : undefined;
 
     const res = await saveClientProfile({
       owner,
@@ -221,9 +216,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                 key={item.goal}
                 type="button"
                 onClick={() => {
-                  if (typeof window !== "undefined" && window.navigator?.vibrate) {
-                    window.navigator.vibrate(8);
-                  }
+                  vibrate(8);
                   setSelectedGoal(item.goal);
                   handleSave({ goal: item.goal });
                 }}
@@ -284,9 +277,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                 key={item.count}
                 type="button"
                 onClick={() => {
-                  if (typeof window !== "undefined" && window.navigator?.vibrate) {
-                    window.navigator.vibrate(8);
-                  }
+                  vibrate(8);
                   setMealsPerDay(item.count);
                   handleSave({ mealsPerDay: item.count });
                 }}
@@ -304,6 +295,37 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
             );
           })}
         </div>
+
+        {mealsPerDay === 2 && (
+          <div className="mt-2.5 p-2.5 bg-stone-50 rounded-2xl border-2 border-stone-900 space-y-1.5">
+            <div className="flex items-center justify-between px-0.5">
+              <span className="text-[10px] font-black uppercase tracking-wider text-stone-700">
+                2-Meal Combination
+              </span>
+              <span className="text-[10px] font-bold text-stone-500">Pick daily cadence</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {[
+                { id: "lunch_dinner", label: "Lunch & Dinner" },
+                { id: "breakfast_dinner", label: "Breakfast & Dinner" },
+                { id: "breakfast_lunch", label: "Breakfast & Lunch" },
+              ].map((sch) => (
+                <button
+                  key={sch.id}
+                  type="button"
+                  onClick={() => handleScheduleSelect(sch.id)}
+                  className={`py-2 px-1 rounded-xl text-[11px] font-black border-2 border-stone-900 transition-all text-center leading-tight ${
+                    twoMealSchedule === sch.id
+                      ? "bg-amber-300 shadow-brutal-xs -translate-y-0.5 text-stone-900"
+                      : "bg-white hover:bg-stone-100 text-stone-700"
+                  }`}
+                >
+                  {sch.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Nutrient Priorities Configuration */}
@@ -358,18 +380,12 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
 
       {/* Unified Weight & Height Configuration */}
       <ProfileMetricsInputs
-        heightUnit={heightUnit}
-        onHeightUnitChange={setHeightUnit}
-        heightCm={heightCm}
-        onCmChange={handleCmChange}
-        feet={feet}
-        onFeetChange={handleFeetChange}
-        inches={inches}
-        onInchesChange={handleInchesChange}
-        weightUnit={weightUnit}
-        onWeightUnitChange={handleWeightUnitChange}
-        weightInput={weightInput}
-        onWeightChange={setWeightInput}
+        heightUnit={heightUnit} onHeightUnitChange={setHeightUnit}
+        heightCm={heightCm} onCmChange={handleCmChange}
+        feet={feet} onFeetChange={handleFeetChange}
+        inches={inches} onInchesChange={handleInchesChange}
+        weightUnit={weightUnit} onWeightUnitChange={handleWeightUnitChange}
+        weightInput={weightInput} onWeightChange={setWeightInput}
       />
     </div>
   );

@@ -124,13 +124,20 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
 
   const isThreeColumns = visibleOptions.length === 3;
 
-  const handleScheduleChange = (schedule: TwoMealSchedule) => {
-    setTwoMealSchedule(schedule);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("meal_builder_two_meal_schedule", schedule);
-      if (window.navigator?.vibrate) window.navigator.vibrate(10);
-    }
-  };
+  useEffect(() => {
+    const handleSync = () => {
+      const saved = localStorage.getItem("meal_builder_two_meal_schedule");
+      if (saved === "lunch_dinner" || saved === "breakfast_dinner" || saved === "breakfast_lunch") {
+        setTwoMealSchedule(saved);
+      }
+    };
+    window.addEventListener("two_meal_schedule_changed", handleSync);
+    window.addEventListener("storage", handleSync);
+    return () => {
+      window.removeEventListener("two_meal_schedule_changed", handleSync);
+      window.removeEventListener("storage", handleSync);
+    };
+  }, []);
 
   return (
     <div className="w-full space-y-4">
@@ -155,56 +162,18 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
         </div>
         <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
           {isTwoMealsPlan
-            ? "Calibrated to your 2-meals-a-day schedule. Choose your meal slot below."
+            ? `Calibrated to your 2-meals schedule (${
+                twoMealSchedule === "breakfast_dinner"
+                  ? "Breakfast & Dinner"
+                  : twoMealSchedule === "breakfast_lunch"
+                  ? "Breakfast & Lunch"
+                  : "Lunch & Dinner"
+              }).`
             : isThreeMealsPlan
             ? "Breakfast, Lunch & Dinner calibrated to your 3-meals daily goal."
             : "Select a meal to explore ready-cooked meals or delicious pantry pairings."}
         </p>
       </div>
-
-      {/* 2-Meals Schedule Switcher Toolbar on its own line */}
-      {isTwoMealsPlan && (
-        <div className="flex items-center gap-2 flex-wrap p-2 bg-stone-100/90 rounded-2xl border-2 border-stone-900 shadow-brutal-xs">
-          <span className="text-[11px] font-black uppercase tracking-wider text-stone-600 px-2 shrink-0">
-            Schedule:
-          </span>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              type="button"
-              onClick={() => handleScheduleChange("lunch_dinner")}
-              className={`text-xs font-black px-3 py-1.5 rounded-xl transition-all ${
-                twoMealSchedule === "lunch_dinner"
-                  ? "bg-amber-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs"
-                  : "text-stone-700 hover:text-stone-900 hover:bg-stone-200"
-              }`}
-            >
-              Lunch &amp; Dinner
-            </button>
-            <button
-              type="button"
-              onClick={() => handleScheduleChange("breakfast_dinner")}
-              className={`text-xs font-black px-3 py-1.5 rounded-xl transition-all ${
-                twoMealSchedule === "breakfast_dinner"
-                  ? "bg-amber-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs"
-                  : "text-stone-700 hover:text-stone-900 hover:bg-stone-200"
-              }`}
-            >
-              Breakfast &amp; Dinner
-            </button>
-            <button
-              type="button"
-              onClick={() => handleScheduleChange("breakfast_lunch")}
-              className={`text-xs font-black px-3 py-1.5 rounded-xl transition-all ${
-                twoMealSchedule === "breakfast_lunch"
-                  ? "bg-amber-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs"
-                  : "text-stone-700 hover:text-stone-900 hover:bg-stone-200"
-              }`}
-            >
-              Breakfast &amp; Lunch
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Responsive Grid: 2 Columns for all plans (3-meal plan places 2 on top, 3rd centered below) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
