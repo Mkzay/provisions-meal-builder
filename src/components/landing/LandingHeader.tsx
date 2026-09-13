@@ -106,12 +106,18 @@ export const LandingHeader: React.FC = () => {
 
         {/* CTAs & Mobile Menu Toggle */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Distinctive Colorful Sign In Button */}
+          {/* Distinctive Colorful Sign In & Sign Up Buttons */}
           <Link
             href="/login"
             className="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-xl bg-emerald-200 hover:bg-emerald-300 text-emerald-950 text-xs font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.97] transition-all"
           >
             Sign In
+          </Link>
+          <Link
+            href="/signup"
+            className="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-900 text-xs font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.97] transition-all"
+          >
+            Sign Up
           </Link>
           <Link
             href="/app"
@@ -169,13 +175,22 @@ export const LandingHeader: React.FC = () => {
                   <span>Launch Provisions App</span>
                   <span>→</span>
                 </Link>
-                <Link
-                  href="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-center py-2.5 rounded-xl bg-emerald-200 hover:bg-emerald-300 text-emerald-950 font-black text-xs uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs active:scale-[0.99] transition-all block"
-                >
-                  Sign In to Your Kitchen
-                </Link>
+                <div className="grid grid-cols-2 gap-2">
+                  <Link
+                    href="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full text-center py-2.5 rounded-xl bg-emerald-200 hover:bg-emerald-300 text-emerald-950 font-black text-xs uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs active:scale-[0.99] transition-all block"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full text-center py-2.5 rounded-xl bg-white hover:bg-stone-100 text-stone-900 font-black text-xs uppercase tracking-wider border-2 border-stone-900 shadow-brutal-xs active:scale-[0.99] transition-all block"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
                 <div className="flex items-center justify-between text-[10px] font-bold text-stone-500 px-1 pt-1">
                   <span>Provisions Intelligence</span>
                   <span>v1.0 Nigerian Cuisine</span>

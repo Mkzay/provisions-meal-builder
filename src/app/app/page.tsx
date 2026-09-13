@@ -326,18 +326,27 @@ export default function MealBuilderAppPage() {
         onCloseFoodIdeas={() => setIsFoodIdeasOpen(false)}
         onOpenFoodIdeas={() => setIsFoodIdeasOpen(true)}
         isInventoryOpen={isInventoryOpen}
-        onCloseInventory={() => setIsInventoryOpen(false)}
+        onCloseInventory={() => {
+          setIsInventoryOpen(false);
+          setActiveNavTab("builder");
+        }}
         onOpenAddSupply={() => setIsAddSupplyOpen(true)}
         onToggleAvailability={handleToggleAvailability}
         onDeleteSupply={handleDeleteSupply}
         isPersonalHubOpen={isPersonalHubOpen}
         personalHubTab={personalHubTab}
-        onClosePersonalHub={() => setIsPersonalHubOpen(false)}
+        onClosePersonalHub={() => {
+          setIsPersonalHubOpen(false);
+          setActiveNavTab("builder");
+        }}
         onProfileSaved={() => setHasProfile(true)}
         isWalkthroughOpen={isWalkthroughOpen}
         onCloseWalkthrough={() => setIsWalkthroughOpen(false)}
         isSavedRecipesOpen={isSavedRecipesOpen}
-        onCloseSavedRecipes={closeSavedRecipes}
+        onCloseSavedRecipes={() => {
+          closeSavedRecipes();
+          setActiveNavTab("builder");
+        }}
         savedRecipes={savedRecipes}
         onCreateRecipe={createRecipe}
         onDeleteRecipe={deleteRecipe}

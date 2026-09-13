@@ -89,6 +89,9 @@ export const LandingFooter: React.FC = () => {
             <Link href="/login" className="hover:text-amber-300 transition-colors">
               Sign In
             </Link>
+            <Link href="/signup" className="hover:text-amber-300 transition-colors">
+              Sign Up
+            </Link>
           </div>
         </div>
 

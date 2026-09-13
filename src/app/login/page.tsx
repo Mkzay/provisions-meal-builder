@@ -16,6 +16,7 @@ import { CulinaryBackdropSvg } from "@/components/CulinaryBackdropSvg";
 import { ProvisionsLogo } from "@/components/ProvisionsLogo";
 import { motion, TargetAndTransition } from "framer-motion";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useState } from "react";
 
@@ -46,60 +47,28 @@ interface StickerItem {
 // Floating Culinary Stickers (responsive on mobile & desktop)
 const STICKERS: StickerItem[] = [
   {
-    id: "pot",
-    label: "Fresh Provisions",
-    shortLabel: "Fresh Eats",
+    id: "pot", label: "Fresh Provisions", shortLabel: "Fresh Eats",
     icon: <CookingPot size={16} weight="duotone" className="text-emerald-800 shrink-0" />,
-    bg: "bg-[#A7F3D0]",
-    textColor: "text-emerald-950",
-    pos: "top-3 -left-2 sm:top-12 sm:left-8 md:left-20 lg:left-32",
-    floatAnim: {
-      y: [0, -10, 0],
-      rotate: [-5, 1, -5],
-      transition: { duration: 4.8, repeat: Infinity, ease: "easeInOut" },
-    },
+    bg: "bg-[#A7F3D0]", textColor: "text-emerald-950", pos: "top-3 -left-2 sm:top-12 sm:left-8 md:left-20 lg:left-32",
+    floatAnim: { y: [0, -10, 0], rotate: [-5, 1, -5], transition: { duration: 4.8, repeat: Infinity, ease: "easeInOut" } },
   },
   {
-    id: "egg",
-    label: "Morning Fuel",
-    shortLabel: "Fuel Up",
+    id: "egg", label: "Morning Fuel", shortLabel: "Fuel Up",
     icon: <Egg size={16} weight="duotone" className="text-amber-800 shrink-0" />,
-    bg: "bg-[#FEF08A]",
-    textColor: "text-amber-950",
-    pos: "top-4 -right-2 sm:top-14 sm:right-8 md:right-24 lg:right-36",
-    floatAnim: {
-      y: [0, 8, 0],
-      rotate: [4, -2, 4],
-      transition: { duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 0.3 },
-    },
+    bg: "bg-[#FEF08A]", textColor: "text-amber-950", pos: "top-4 -right-2 sm:top-14 sm:right-8 md:right-24 lg:right-36",
+    floatAnim: { y: [0, 8, 0], rotate: [4, -2, 4], transition: { duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 0.3 } },
   },
   {
-    id: "snack",
-    label: "Quick Bites",
-    shortLabel: "Snack Ready",
+    id: "snack", label: "Quick Bites", shortLabel: "Snack Ready",
     icon: <Cookie size={16} weight="duotone" className="text-purple-800 shrink-0" />,
-    bg: "bg-[#DDD6FE]",
-    textColor: "text-purple-950",
-    pos: "bottom-4 -left-2 sm:bottom-14 sm:left-8 md:left-24 lg:left-40",
-    floatAnim: {
-      y: [0, -8, 0],
-      rotate: [-3, 3, -3],
-      transition: { duration: 5.4, repeat: Infinity, ease: "easeInOut", delay: 0.6 },
-    },
+    bg: "bg-[#DDD6FE]", textColor: "text-purple-950", pos: "bottom-4 -left-2 sm:bottom-14 sm:left-8 md:left-24 lg:left-40",
+    floatAnim: { y: [0, -8, 0], rotate: [-3, 3, -3], transition: { duration: 5.4, repeat: Infinity, ease: "easeInOut", delay: 0.6 } },
   },
   {
-    id: "dinner",
-    label: "Comfort Dinners",
-    shortLabel: "Warm Meals",
+    id: "dinner", label: "Comfort Dinners", shortLabel: "Warm Meals",
     icon: <BowlFood size={16} weight="duotone" className="text-rose-800 shrink-0" />,
-    bg: "bg-[#FECDD3]",
-    textColor: "text-rose-950",
-    pos: "bottom-5 -right-2 sm:bottom-16 sm:right-8 md:right-20 lg:right-36",
-    floatAnim: {
-      y: [0, 10, 0],
-      rotate: [3, -3, 3],
-      transition: { duration: 4.6, repeat: Infinity, ease: "easeInOut", delay: 0.5 },
-    },
+    bg: "bg-[#FECDD3]", textColor: "text-rose-950", pos: "bottom-5 -right-2 sm:bottom-16 sm:right-8 md:right-20 lg:right-36",
+    floatAnim: { y: [0, 10, 0], rotate: [3, -3, 3], transition: { duration: 4.6, repeat: Infinity, ease: "easeInOut", delay: 0.5 } },
   },
 ];
 
@@ -263,6 +232,23 @@ function LoginForm() {
             </p>
           </div>
 
+          {/* Developer Test Invite Notice */}
+          <div className="p-3 bg-amber-100/90 border-2 border-stone-900 rounded-2xl text-left shadow-brutal-xs space-y-1">
+            <div className="flex items-center gap-1.5 text-stone-950 font-black text-xs">
+              <span>🔒</span>
+              <span>Signups are currently invite-only.</span>
+            </div>
+            <p className="text-[11px] text-stone-700 font-medium leading-tight">
+              To test Provisions, reach out to{" "}
+              <a
+                href="mailto:ayomikunwahab18@gmail.com?subject=Provisions%20Access%20Request"
+                className="font-black text-stone-950 underline decoration-amber-500 hover:text-emerald-800"
+              >
+                ayomikunwahab18@gmail.com
+              </a>
+            </p>
+          </div>
+
           {/* Error Alert with spring shake */}
           {errorMessage && (
             <motion.div
@@ -358,13 +344,20 @@ function LoginForm() {
             </motion.button>
           </form>
 
-          {/* Info note */}
-          <div className="pt-2 border-t-2 border-stone-100 flex items-center justify-between text-[11px] font-bold text-stone-500">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Private Access
-            </span>
-            <span className="text-stone-400">Notion Synced</span>
+          {/* Info note & Signup link */}
+          <div className="pt-3 border-t-2 border-stone-100 flex flex-col gap-2 text-center text-xs font-bold text-stone-600">
+            <div>
+              Don&apos;t have an account?{" "}
+              <Link href="/signup" className="text-stone-950 underline decoration-amber-400 decoration-2 font-black">
+                Sign Up
+              </Link>
+            </div>
+            <div className="flex items-center justify-between text-[10px] text-stone-400 pt-1">
+              <Link href="/" className="hover:text-stone-950 transition-colors">
+                ← Back to Home
+              </Link>
+              <span>Notion Synced</span>
+            </div>
           </div>
         </div>
       </motion.div>

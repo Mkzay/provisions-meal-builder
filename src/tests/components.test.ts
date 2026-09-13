@@ -165,6 +165,14 @@ describe("Component import integrity", () => {
     await import("../app/page");
   });
 
+  it("imports LoginPage", async () => {
+    await import("../app/login/page");
+  });
+
+  it("imports SignupPage", async () => {
+    await import("../app/signup/page");
+  });
+
   it("imports MealBuilderAppPage", async () => {
     await import("../app/app/page");
   });

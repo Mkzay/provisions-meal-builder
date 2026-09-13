@@ -10,6 +10,8 @@ export default auth((req) => {
   const pathname = req.nextUrl.pathname;
   const isLandingPage = pathname === "/";
   const isLoginPage = pathname.startsWith("/login");
+  const isSignupPage = pathname.startsWith("/signup");
+  const isAuthPage = isLoginPage || isSignupPage;
   const isAuthApi = pathname.startsWith("/api/auth");
 
   if (isAuthApi) {
@@ -40,14 +42,14 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // If already logged in and visiting login, go straight to /app
-  if (isLoggedIn && isLoginPage) {
+  // If already logged in and visiting login or signup, go straight to /app
+  if (isLoggedIn && isAuthPage) {
     return NextResponse.redirect(new URL("/app", req.nextUrl.origin));
   }
 
   // If unauthenticated and trying to access protected routes
   if (!isLoggedIn) {
-    if (isLoginPage) {
+    if (isAuthPage) {
       return NextResponse.next();
     }
     if (pathname.startsWith("/api/")) {

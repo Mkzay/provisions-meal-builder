@@ -38,7 +38,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
           }`}
         >
           <CookingPot size={22} weight={activeTab === "builder" ? "fill" : "bold"} />
-          <span className="text-[10px] tracking-tight mt-0.5">Build</span>
+          <span className="text-[10px] tracking-tight mt-0.5">Kitchen</span>
         </button>
 
         {/* Saved Recipes Tab */}
