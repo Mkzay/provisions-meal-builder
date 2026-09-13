@@ -2,6 +2,10 @@
 
 import { AddSupplyModal } from "@/components/AddSupplyModal";
 import { AppHeader } from "@/components/AppHeader";
+import {
+  AppWalkthroughModal,
+  WALKTHROUGH_STORAGE_KEY,
+} from "@/components/AppWalkthroughModal";
 import { CompanionNoteCard } from "@/components/CompanionNoteCard";
 import { CulinaryCompanion } from "@/components/CulinaryCompanion";
 import { FoodIdeasModal } from "@/components/FoodIdeasModal";
@@ -22,6 +26,7 @@ import {
   PersonalHubTab,
 } from "@/components/PersonalHubModal";
 import { ProfileOnboardingBanner } from "@/components/ProfileOnboardingBanner";
+import { PulsingLogoLoader } from "@/components/PulsingLogoLoader";
 import { ReadyMealHero } from "@/components/ReadyMealHero";
 import {
   fetchClientProfile,
@@ -44,6 +49,16 @@ export default function MealBuilderPage() {
   const [isPromptDismissed, setIsPromptDismissed] = useState<boolean>(() =>
     hasProfilePromptBeenDismissed()
   );
+  const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const seen = localStorage.getItem(WALKTHROUGH_STORAGE_KEY);
+      if (!seen) {
+        setIsWalkthroughOpen(true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     fetchClientProfile(owner).then((p) => {
@@ -74,9 +89,10 @@ export default function MealBuilderPage() {
 
   if (!isClientReady || status === "loading") {
     return (
-      <div className="flex-1 flex items-center justify-center p-6 bg-background">
-        <div className="w-10 h-10 rounded-full border-3 border-basil-500 border-t-transparent animate-spin" />
-      </div>
+      <PulsingLogoLoader
+        label="Opening your kitchen..."
+        sublabel="Checking in-stock ingredients & pantry staples"
+      />
     );
   }
 
@@ -91,6 +107,7 @@ export default function MealBuilderPage() {
           onOpenNotifications={() => setIsNotificationOpen(true)}
           onOpenAddSupply={() => setIsAddSupplyOpen(true)}
           onOpenPersonalHub={handleOpenPersonalHub}
+          onOpenWalkthrough={() => setIsWalkthroughOpen(true)}
         />
 
         {/* Soft, non-blocking onboarding banner when no profile has been saved yet */}
@@ -355,9 +372,14 @@ export default function MealBuilderPage() {
         initialTab={personalHubTab}
         owner={owner}
         onClose={() => setIsPersonalHubOpen(false)}
-        onProfileSaved={() => {
-          setHasProfile(true);
-        }}
+        onProfileSaved={() => setHasProfile(true)}
+      />
+
+      {/* First-Time User Onboarding Walkthrough */}
+      <AppWalkthroughModal
+        isOpen={isWalkthroughOpen}
+        onClose={() => setIsWalkthroughOpen(false)}
+        owner={owner}
       />
     </div>
   );

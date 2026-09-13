@@ -9,6 +9,7 @@ import {
   ForkKnife,
   Sparkle,
 } from "@/components/icons";
+import { ProvisionsLogo } from "@/components/ProvisionsLogo";
 import { getFirstStepKickoff, getSuggestedComboName } from "@/lib/pairings";
 import { Ingredient, MealSource, MealType, ReadyMeal } from "@/lib/types";
 import { getComboNutrientTags } from "@/lib/nutrient-curation";
@@ -212,7 +213,7 @@ export const MealConfirmation: React.FC<MealConfirmationProps> = ({
         >
           {isLogging ? (
             <span className="inline-flex items-center gap-2.5">
-              <span className="w-5 h-5 rounded-full border-2 border-stone-900 border-t-transparent animate-spin" />
+              <ProvisionsLogo size={20} className="w-5 h-5 animate-pulse shrink-0 shadow-none border-stone-900" />
               <span>Logging to Notion...</span>
             </span>
           ) : (

@@ -1,8 +1,12 @@
-"use client";
+﻿"use client";
 
 import { Check } from "@/components/icons";
+import { ProfileMetricsInputs } from "@/components/ProfileMetricsInputs";
+import { GOAL_OPTIONS, NUTRIENT_OPTIONS } from "@/lib/profile-constants";
 import {
+  addClientWeightLog,
   fetchClientProfile,
+  fetchClientWeightLogs,
   getClientProfileCached,
   getCurrentOwner,
   getDefaultGoalForOwner,
@@ -15,20 +19,6 @@ interface MealProfileSectionProps {
   owner?: string;
   onSaved?: (profile: MealProfile) => void;
 }
-
-const NUTRIENT_OPTIONS: { tag: NutrientTag; label: string; icon: string; desc: string }[] = [
-  { tag: "High Fiber", label: "High Fiber", icon: "🌾", desc: "Digestion & steady blood sugar" },
-  { tag: "High Protein", label: "High Protein", icon: "🍗", desc: "Strength & long-lasting satiety" },
-  { tag: "High Carb", label: "High Carb", icon: "⚡", desc: "Immediate fuel & stamina" },
-  { tag: "High Fat", label: "High Fat", icon: "🥑", desc: "Clean cell energy & calm focus" },
-];
-
-const GOAL_OPTIONS: { goal: UserGoal; label: string; badge: string; description: string }[] = [
-  { goal: "Gain weight", label: "Gain weight", badge: "Default", description: "Hearty, nourishing meals to steadily increase intake and energy." },
-  { goal: "Eat healthier", label: "Eat healthier", badge: "Balanced", description: "Wholesome foods, vibrant proteins, and consistent daily fuel." },
-  { goal: "Eat more food generally", label: "Eat more food generally", badge: "Regular Intake", description: "Overcoming meal skipping with low-friction, appetizing plates." },
-  { goal: "Lose weight", label: "Lose weight", badge: "Paced", description: "Satisfying, mindful meals that leave you light and refreshed." },
-];
 
 export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
   owner: propOwner,
@@ -43,6 +33,10 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
   const initInches = cachedInitial?.height ? Math.round(cachedInitial.height / 2.54) : null;
   const [feet, setFeet] = useState<string>(() => initInches ? String(Math.floor(initInches / 12)) : "");
   const [inches, setInches] = useState<string>(() => initInches ? String(initInches % 12) : "");
+  const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
+  const [weightInput, setWeightInput] = useState<string>(() =>
+    cachedInitial?.weight ? String(cachedInitial.weight) : ""
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
@@ -74,6 +68,19 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
     setHeightCm(f > 0 || i > 0 ? String(Math.round((f * 12 + i) * 2.54)) : "");
   };
 
+  const handleWeightUnitChange = (u: "kg" | "lbs") => {
+    if (u === weightUnit) return;
+    setWeightUnit(u);
+    const num = parseFloat(weightInput);
+    if (!isNaN(num) && num > 0) {
+      setWeightInput(
+        u === "lbs"
+          ? String(Math.round(num * 2.20462 * 10) / 10)
+          : String(Math.round((num / 2.20462) * 10) / 10)
+      );
+    }
+  };
+
   useEffect(() => {
     let active = true;
     setIsLoading(true);
@@ -89,6 +96,15 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
             const totalIn = Math.round(cmVal / 2.54);
             setFeet(String(Math.floor(totalIn / 12)));
             setInches(String(totalIn % 12));
+          }
+          if (existing.weight) {
+            setWeightInput(String(existing.weight));
+          } else {
+            fetchClientWeightLogs(owner).then((logs) => {
+              if (active && logs[0]?.weight) {
+                setWeightInput(String(logs[0].weight));
+              }
+            });
           }
         }
       })
@@ -115,17 +131,34 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
     } else {
       const f = parseInt(feet) || 0;
       const i = parseFloat(inches) || 0;
-      if (f > 0 || i > 0) {
-        validHeight = Math.round((f * 12 + i) * 2.54);
-      }
+      if (f > 0 || i > 0) validHeight = Math.round((f * 12 + i) * 2.54);
+    }
+
+    const wNum = parseFloat(weightInput);
+    let validWeight: number | undefined;
+    if (!isNaN(wNum) && wNum > 0) {
+      validWeight =
+        weightUnit === "kg"
+          ? Math.round(wNum * 10) / 10
+          : Math.round((wNum / 2.20462) * 10) / 10;
     }
 
     const res = await saveClientProfile({
       owner,
       goal: selectedGoal,
       height: validHeight,
+      weight: validWeight,
       nutrientPriorities: selectedPriorities,
     });
+
+    if (res.success && validWeight) {
+      addClientWeightLog({
+        owner,
+        date: new Date().toISOString().slice(0, 10),
+        weight: validWeight,
+        unit: "kg",
+      }).catch(() => {});
+    }
 
     setIsSaving(false);
     if (res.success) {
@@ -134,9 +167,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
       }
       setJustSaved(true);
       onSaved?.(res.profile);
-      setTimeout(() => {
-        setJustSaved(false);
-      }, 1800);
+      setTimeout(() => setJustSaved(false), 1800);
     }
   };
 
@@ -261,109 +292,21 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
         </div>
       </div>
 
-      {/* Height Configuration */}
-      <div className="p-4 bg-white rounded-2xl border-2 border-stone-900 shadow-brutal-xs space-y-2.5">
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-black uppercase tracking-wider text-stone-900">
-            Height (Optional)
-          </label>
-          {/* Segmented Pill Switcher */}
-          <div className="inline-flex items-center p-0.5 bg-stone-200/90 rounded-lg border border-stone-900">
-            <button
-              type="button"
-              onClick={() => setHeightUnit("cm")}
-              className={`px-2.5 py-0.5 rounded-md text-[10px] font-black transition-all ${
-                heightUnit === "cm"
-                  ? "bg-amber-300 text-stone-900 border border-stone-900 shadow-xs"
-                  : "text-stone-600 hover:text-stone-900"
-              }`}
-            >
-              cm
-            </button>
-            <button
-              type="button"
-              onClick={() => setHeightUnit("ft")}
-              className={`px-2.5 py-0.5 rounded-md text-[10px] font-black transition-all ${
-                heightUnit === "ft"
-                  ? "bg-purple-300 text-stone-900 border border-stone-900 shadow-xs"
-                  : "text-stone-600 hover:text-stone-900"
-              }`}
-            >
-              ft / in
-            </button>
-          </div>
-        </div>
-
-        <p className="text-[11px] text-stone-600 leading-snug">
-          Stored in your profile. No derived BMI or calories calculated.
-        </p>
-
-        {heightUnit === "cm" ? (
-          <div className="relative">
-            <input
-              type="number"
-              min="50"
-              max="260"
-              step="1"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              enterKeyHint="done"
-              value={heightCm}
-              onChange={(e) => handleCmChange(e.target.value)}
-              placeholder="e.g. 178"
-              className="w-full bg-[#FAF8F5] border-2 border-stone-900 rounded-xl px-3.5 py-2.5 pr-14 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
-            />
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-black text-stone-600 px-2 py-1 bg-stone-200/80 border border-stone-900 rounded-lg">
-              cm
-            </span>
-          </div>
-        ) : (
-          <div className="space-y-1.5">
-            <div className="grid grid-cols-2 gap-2">
-              <div className="relative">
-                <input
-                  type="number"
-                  min="3"
-                  max="8"
-                  step="1"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  enterKeyHint="next"
-                  value={feet}
-                  onChange={(e) => handleFeetChange(e.target.value)}
-                  placeholder="5"
-                  className="w-full bg-[#FAF8F5] border-2 border-stone-900 rounded-xl px-3.5 py-2.5 pr-12 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
-                />
-                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-black text-stone-600 px-2 py-1 bg-stone-200/80 border border-stone-900 rounded-lg">
-                  ft
-                </span>
-              </div>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="0"
-                  max="11.9"
-                  step="any"
-                  inputMode="decimal"
-                  enterKeyHint="done"
-                  value={inches}
-                  onChange={(e) => handleInchesChange(e.target.value)}
-                  placeholder="10"
-                  className="w-full bg-[#FAF8F5] border-2 border-stone-900 rounded-xl px-3.5 py-2.5 pr-12 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
-                />
-                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-black text-stone-600 px-2 py-1 bg-stone-200/80 border border-stone-900 rounded-lg">
-                  in
-                </span>
-              </div>
-            </div>
-            {heightCm && (
-              <p className="text-[10px] font-bold text-stone-500 pl-1">
-                Equivalent to ~{heightCm} cm
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Unified Weight & Height Configuration */}
+      <ProfileMetricsInputs
+        heightUnit={heightUnit}
+        onHeightUnitChange={setHeightUnit}
+        heightCm={heightCm}
+        onCmChange={handleCmChange}
+        feet={feet}
+        onFeetChange={handleFeetChange}
+        inches={inches}
+        onInchesChange={handleInchesChange}
+        weightUnit={weightUnit}
+        onWeightUnitChange={handleWeightUnitChange}
+        weightInput={weightInput}
+        onWeightChange={setWeightInput}
+      />
 
       {/* Action CTA */}
       <button
@@ -382,8 +325,8 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
           {isSaving
             ? "Saving Profile..."
             : justSaved
-            ? "✓ Profile Saved!"
-            : "Save Eating Profile"}
+            ? "✓ Profile & Weight Saved!"
+            : "Save Eating Profile & Weight"}
         </span>
       </button>
     </div>

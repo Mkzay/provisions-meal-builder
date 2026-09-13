@@ -18,6 +18,7 @@ interface AppHeaderProps {
   onOpenPersonalHub?: (initialTab?: "profile" | "progress") => void;
   onOpenProfile?: () => void;
   onOpenProgressLog?: () => void;
+  onOpenWalkthrough?: () => void;
   owner?: string;
 }
 
@@ -30,6 +31,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onOpenPersonalHub,
   onOpenProfile,
   onOpenProgressLog,
+  onOpenWalkthrough,
   owner: propOwner,
 }) => {
   const owner = propOwner?.trim() || "";
@@ -112,6 +114,18 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             >
               <Bell size={17} weight="bold" />
             </button>
+
+            {/* How It Works Tour Button */}
+            {onOpenWalkthrough && (
+              <button
+                onClick={onOpenWalkthrough}
+                className="inline-flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 sm:min-h-[42px] sm:min-w-[42px] p-2 sm:p-2.5 rounded-xl bg-purple-200 hover:bg-purple-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs sm:shadow-brutal-sm hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 transition-all shrink-0 font-display font-black text-xs"
+                title="How Provisions Works (Tour)"
+                aria-label="How Provisions Works"
+              >
+                ?
+              </button>
+            )}
 
             {/* Personal Hub Button (Unified Eating Goal & Weight Log) */}
             {(onOpenPersonalHub || onOpenProfile || onOpenProgressLog) && (

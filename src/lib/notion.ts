@@ -57,12 +57,25 @@ export async function fetchCatalogue(owner?: string): Promise<KitchenCatalogue> 
       : undefined;
 
     // 1. Query Ingredients Catalogue
-    const ingredientsResponse = await notion.databases.query({
-      database_id: ingredientsDbId,
-      ...(filter ? { filter } : {}),
-    });
+    let ingredientsResults: any[] = [];
+    try {
+      const ingredientsResponse = await notion.databases.query({
+        database_id: ingredientsDbId,
+        ...(filter ? { filter } : {}),
+      });
+      ingredientsResults = ingredientsResponse.results;
+    } catch (queryErr: any) {
+      if (
+        queryErr?.code === "validation_error" &&
+        queryErr?.message?.includes("select option")
+      ) {
+        ingredientsResults = [];
+      } else {
+        throw queryErr;
+      }
+    }
 
-    const ingredients: Ingredient[] = ingredientsResponse.results
+    const ingredients: Ingredient[] = ingredientsResults
       .map((page) => parseNotionIngredient(page))
       .filter((item): item is Ingredient => item !== null);
 
@@ -78,12 +91,25 @@ export async function fetchCatalogue(owner?: string): Promise<KitchenCatalogue> 
     }
 
     // 2. Query Ready Meals
-    const readyMealsResponse = await notion.databases.query({
-      database_id: readyMealsDbId,
-      ...(filter ? { filter } : {}),
-    });
+    let readyMealsResults: any[] = [];
+    try {
+      const readyMealsResponse = await notion.databases.query({
+        database_id: readyMealsDbId,
+        ...(filter ? { filter } : {}),
+      });
+      readyMealsResults = readyMealsResponse.results;
+    } catch (queryErr: any) {
+      if (
+        queryErr?.code === "validation_error" &&
+        queryErr?.message?.includes("select option")
+      ) {
+        readyMealsResults = [];
+      } else {
+        throw queryErr;
+      }
+    }
 
-    const readyMeals: ReadyMeal[] = readyMealsResponse.results
+    const readyMeals: ReadyMeal[] = readyMealsResults
       .map((page) => parseNotionReadyMeal(page))
       .filter((meal): meal is ReadyMeal => meal !== null);
 
@@ -96,6 +122,21 @@ export async function fetchCatalogue(owner?: string): Promise<KitchenCatalogue> 
         seenMealNames.add(norm);
         uniqueReadyMeals.push(meal);
       }
+    }
+
+    // If new user has 0 ingredients, provide starter Nigerian staples so they can build meals
+    if (uniqueIngredients.length === 0 && owner) {
+      const starterItems = SEED_CATALOGUE.ingredients.map((ing) => ({
+        ...ing,
+        id: `starter-${ing.id}`,
+        owner,
+      }));
+      return {
+        ingredients: starterItems,
+        readyMeals: uniqueReadyMeals,
+        lastSynced: new Date().toISOString(),
+        isCachedFallback: false,
+      };
     }
 
     return {
