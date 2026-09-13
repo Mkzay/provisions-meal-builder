@@ -14,6 +14,7 @@ import {
   getStoredNotificationConfig,
   requestNotificationPermission,
   saveNotificationConfig,
+  sendTestNudge,
 } from "@/lib/notifications";
 import { DayOfWeek, NotificationConfig, ReminderFrequency } from "@/lib/types";
 import { ReminderPicker } from "@/components/ReminderPickers";
@@ -50,6 +51,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
 }) => {
   const [config, setConfig] = useState<NotificationConfig>(() => getStoredNotificationConfig(owner));
   const [permission, setPermission] = useState<NotificationPermission>("default");
+  const [testStatus, setTestStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -90,37 +92,29 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
     }
   };
 
-  const handleToggleGroceryNudges = () => {
-    updateConfig({ ...config, includeGroceryNudges: !config.includeGroceryNudges });
+  const handleSendTest = async () => {
+    let curPerm = permission;
+    if (curPerm !== "granted") {
+      curPerm = await requestNotificationPermission();
+      setPermission(curPerm);
+    }
+    if (curPerm === "granted") {
+      const sent = sendTestNudge(config.includeGroceryNudges, "Crisp Plantains", owner);
+      setTestStatus(sent ? "Sent! Check notification center." : "Failed to trigger.");
+    } else {
+      setTestStatus("Permission not granted.");
+    }
+    setTimeout(() => setTestStatus(null), 3500);
   };
 
-  const handleTogglePantryAudit = () => {
-    updateConfig({ ...config, pantryAuditReminder: !config.pantryAuditReminder });
-  };
-
-  const handlePantryFrequencyChange = (freq: ReminderFrequency) => {
-    updateConfig({ ...config, pantryAuditFrequency: freq });
-  };
-
-  const handlePantryDayChange = (day: DayOfWeek) => {
-    updateConfig({ ...config, pantryAuditDay: day });
-  };
-
-  const handleToggleGroceryShopping = () => {
-    updateConfig({ ...config, groceryShoppingReminder: !config.groceryShoppingReminder });
-  };
-
-  const handleGroceryFrequencyChange = (freq: ReminderFrequency) => {
-    updateConfig({ ...config, groceryShoppingFrequency: freq });
-  };
-
-  const handleGroceryDayChange = (day: DayOfWeek) => {
-    updateConfig({ ...config, groceryShoppingDay: day });
-  };
-
-  const handleTimeChange = (field: keyof NotificationConfig, value: string) => {
-    updateConfig({ ...config, [field]: value });
-  };
+  const handleToggleGroceryNudges = () => updateConfig({ ...config, includeGroceryNudges: !config.includeGroceryNudges });
+  const handleTogglePantryAudit = () => updateConfig({ ...config, pantryAuditReminder: !config.pantryAuditReminder });
+  const handlePantryFrequencyChange = (freq: ReminderFrequency) => updateConfig({ ...config, pantryAuditFrequency: freq });
+  const handlePantryDayChange = (day: DayOfWeek) => updateConfig({ ...config, pantryAuditDay: day });
+  const handleToggleGroceryShopping = () => updateConfig({ ...config, groceryShoppingReminder: !config.groceryShoppingReminder });
+  const handleGroceryFrequencyChange = (freq: ReminderFrequency) => updateConfig({ ...config, groceryShoppingFrequency: freq });
+  const handleGroceryDayChange = (day: DayOfWeek) => updateConfig({ ...config, groceryShoppingDay: day });
+  const handleTimeChange = (field: keyof NotificationConfig, value: string) => updateConfig({ ...config, [field]: value });
 
   if (!isOpen) return null;
 
@@ -357,7 +351,22 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
           </div>
 
           {/* Pinned Footer */}
-          <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 bg-stone-100/90 shrink-0 flex items-center justify-end gap-3 safe-area-bottom">
+          <div className="px-5 sm:px-6 py-3.5 border-t-2 border-stone-900 bg-stone-100/90 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3 safe-area-bottom">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={handleSendTest}
+                className="w-full sm:w-auto px-4 py-2 rounded-xl font-black text-xs bg-amber-200 hover:bg-amber-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center justify-center gap-1.5"
+              >
+                <Bell size={14} weight="bold" />
+                <span>Send Test Notification</span>
+              </button>
+              {testStatus && (
+                <span className="text-[11px] font-bold text-stone-800">
+                  {testStatus}
+                </span>
+              )}
+            </div>
             <button
               type="button"
               onClick={onClose}

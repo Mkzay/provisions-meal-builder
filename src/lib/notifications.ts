@@ -135,3 +135,71 @@ export function sendTestNudge(
     "Lunch"
   );
 }
+
+export interface ReminderDispatchResult {
+  dispatched: boolean;
+  window?: "breakfast" | "lunch" | "snack" | "dinner" | "grocery";
+  reason?: string;
+}
+
+export function checkAndDispatchScheduledReminders(
+  owner?: string,
+  missingItems?: string[]
+): ReminderDispatchResult {
+  if (typeof window === "undefined" || !("Notification" in window)) {
+    return { dispatched: false, reason: "notifications-unsupported" };
+  }
+  if (Notification.permission !== "granted") {
+    return { dispatched: false, reason: "permission-not-granted" };
+  }
+
+  const config = getStoredNotificationConfig(owner);
+  if (!config.enabled) {
+    return { dispatched: false, reason: "notifications-disabled" };
+  }
+
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  const currentTime = `${hh}:${mm}`;
+  const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  const windows: { key: "breakfast" | "lunch" | "snack" | "dinner"; time: string; mealType: MealType }[] = [
+    { key: "breakfast", time: config.breakfastTime, mealType: "Breakfast" },
+    { key: "lunch", time: config.lunchTime, mealType: "Lunch" },
+    { key: "snack", time: config.snackTime, mealType: "Snack" },
+    { key: "dinner", time: config.dinnerTime, mealType: "Dinner" },
+  ];
+
+  for (const w of windows) {
+    if (currentTime === w.time) {
+      const storageKey = `meal_notif_sent_${owner || "default"}_${todayDateStr}_${w.key}`;
+      if (!sessionStorage.getItem(storageKey)) {
+        const msg = getReminderMessage(w.mealType, missingItems, owner);
+        const sent = sendBrowserNotification(msg.title, msg.body, w.mealType);
+        if (sent) {
+          sessionStorage.setItem(storageKey, "1");
+          return { dispatched: true, window: w.key };
+        }
+      }
+    }
+  }
+
+  if (config.includeGroceryNudges && config.groceryReminderTime && currentTime === config.groceryReminderTime) {
+    const storageKey = `meal_notif_sent_${owner || "default"}_${todayDateStr}_grocery`;
+    if (!sessionStorage.getItem(storageKey)) {
+      const sampleItem = missingItems && missingItems.length > 0 ? missingItems[0] : "Pantry Staples";
+      const sent = sendBrowserNotification(
+        `🛒 Restock Note${owner ? `, ${owner}` : ""}!`,
+        `Quick check before heading out: check in on ${sampleItem} and update your pantry list!`,
+        "Grocery"
+      );
+      if (sent) {
+        sessionStorage.setItem(storageKey, "1");
+        return { dispatched: true, window: "grocery" };
+      }
+    }
+  }
+
+  return { dispatched: false, reason: "no-matching-window" };
+}

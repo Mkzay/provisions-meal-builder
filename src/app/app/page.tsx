@@ -26,6 +26,7 @@ import { ReadyMealHero } from "@/components/ReadyMealHero";
 import { fetchClientProfile, hasProfilePromptBeenDismissed } from "@/lib/profile-storage";
 import { useMealBuilder } from "@/lib/useMealBuilder";
 import { useSavedRecipes } from "@/lib/useSavedRecipes";
+import { useNotificationRunner } from "@/lib/useNotificationRunner";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
@@ -79,6 +80,9 @@ export default function MealBuilderAppPage() {
     handleToggleAvailability, handleDeleteSupply, handleCookSavedRecipe,
     isRatingCardOpen, setIsRatingCardOpen, handleRateMeal, handleSkipRating,
   } = useMealBuilder(owner, undefined, savedRecipes);
+
+  const missingIngredientNames = catalogue.ingredients.filter((i) => !i.available).map((i) => i.name);
+  useNotificationRunner(owner, missingIngredientNames);
 
   const [isStaplesDrawerOpen, setIsStaplesDrawerOpen] = useState(false);
 
