@@ -79,15 +79,19 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     } catch (e) { console.error("Refresh failed:", e); }
   };
 
-  const handleResetSeedData = () => {
-    const ownerSeed: KitchenCatalogue = {
-      ...SEED_CATALOGUE,
-      ingredients: SEED_CATALOGUE.ingredients.map((i) => ({ ...i, owner })),
-      readyMeals: SEED_CATALOGUE.readyMeals.map((m) => ({ ...m, owner })),
-    };
-    setCatalogue(ownerSeed);
-    saveCachedCatalogue(ownerSeed, owner);
-    setIsSettingsOpen(false);
+  const handleSeedStarterIngredients = async () => {
+    try {
+      const res = await fetch("/api/notion/catalogue", { method: "POST" });
+      if (res.ok) {
+        const fresh: KitchenCatalogue = await res.json();
+        setCatalogue(fresh);
+        saveCachedCatalogue(fresh, owner);
+        return;
+      }
+    } catch {}
+    const fallback: KitchenCatalogue = { ...EMPTY_CATALOGUE, ingredients: SEED_CATALOGUE.ingredients.map((i) => ({ ...i, owner })), readyMeals: [] };
+    setCatalogue(fallback);
+    saveCachedCatalogue(fallback, owner);
   };
 
   const handleResetToHome = () => {
@@ -384,7 +388,8 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     catalogue, isClientReady, isSettingsOpen, setIsSettingsOpen, isNotificationOpen, setIsNotificationOpen, isAddSupplyOpen, setIsAddSupplyOpen,
     mealType, currentStep, setCurrentStep, selectedSource, selectedReadyMeal, selectedMain, selectedProtein, selectedSupplementary,
     selectedSupplementaries, setSelectedSupplementaries, pairingResult, isLeftoverModalOpen, setIsLeftoverModalOpen, isLogging,
-    availableReadyMeals, availableMains, totalAvailableInMealType, handleRefreshCatalogue, handleResetSeedData, handleResetToHome,
+    availableReadyMeals, availableMains, totalAvailableInMealType, handleRefreshCatalogue, handleSeedStarterIngredients,
+    handleResetSeedData: handleSeedStarterIngredients, handleResetToHome,
     handleSelectMealType, handleSelectReadyMeal, handleBypassReadyMeal, handleSuggestForMe, handleManualPickMode, handleSelectMain,
     handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision, handleQuickAddStaples, handleAddSupply, handleAddBulkSupplies,
     handleToggleAvailability, handleDeleteSupply, handleCookSavedRecipe, isRatingCardOpen, setIsRatingCardOpen, activeLogId, handleRateMeal, handleSkipRating, ratedHistory,

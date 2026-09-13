@@ -5,6 +5,7 @@ import {
   deleteDbSupply,
   fetchDbCatalogue,
   handleDbLeftoverDecision,
+  seedStarterPantryForOwner,
   updateDbSupplyAvailability,
 } from "../lib/db-supplies";
 import {
@@ -34,12 +35,19 @@ describe("Neon Serverless PostgreSQL Database Layer", () => {
   });
 
   describe("Pantry & Supplies (Catalogue)", () => {
-    it("fetches catalogue with fallback or live database items", async () => {
+    it("fetches catalogue with fallback or live database items (never seeds ready meals)", async () => {
       const catalogue = await fetchDbCatalogue("test_owner_neon");
       expect(catalogue).toBeDefined();
       expect(Array.isArray(catalogue.ingredients)).toBe(true);
       expect(Array.isArray(catalogue.readyMeals)).toBe(true);
-      expect(catalogue.ingredients.length).toBeGreaterThan(0);
+      expect(catalogue.readyMeals).toHaveLength(0);
+    });
+
+    it("seeds starter ingredients only when explicitly requested (Option B)", async () => {
+      await seedStarterPantryForOwner("test_seed_optin_owner");
+      const catalogue = await fetchDbCatalogue("test_seed_optin_owner");
+      expect(catalogue).toBeDefined();
+      expect(catalogue.readyMeals).toHaveLength(0);
     });
 
     it("adds a new ingredient supply", async () => {

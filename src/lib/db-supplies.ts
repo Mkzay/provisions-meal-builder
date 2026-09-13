@@ -23,14 +23,14 @@ async function ensureSchema() {
 
 /**
  * Fetches ingredients and ready meals for an owner from Neon Postgres.
- * Automatically seeds starter Nigerian staples if owner has 0 items.
+ * For new owners, returns an empty pantry (seeding starter staples is opt-in).
  */
 export async function fetchDbCatalogue(owner?: string): Promise<KitchenCatalogue> {
   const sql = getSql();
   if (!sql) {
     return {
       ingredients: SEED_CATALOGUE.ingredients.map((i) => ({ ...i, owner: owner || "Esther" })),
-      readyMeals: SEED_CATALOGUE.readyMeals.map((r) => ({ ...r, owner: owner || "Esther" })),
+      readyMeals: [],
       lastSynced: new Date().toISOString(),
       isCachedFallback: true,
     };
@@ -56,16 +56,8 @@ export async function fetchDbCatalogue(owner?: string): Promise<KitchenCatalogue
       ORDER BY name ASC;
     `;
 
-    // If owner has 0 ingredients and 0 ready meals, check if they have ever been seeded before
-    if (ingRows.length === 0 && mealRows.length === 0 && owner) {
-      const settings = await sql`
-        SELECT seeded FROM user_pantry_settings WHERE LOWER(owner) = ${targetOwner} LIMIT 1;
-      `;
-      if (settings.length === 0) {
-        await seedStarterPantryForOwner(owner);
-        return fetchDbCatalogue(owner);
-      }
-    }
+    // Note: Automatic seeding is disabled (Option B) so new accounts start with an empty pantry.
+    // Starter staples can be loaded opt-in by the user via the UI.
 
     const ingredients: Ingredient[] = ingRows.map((r: any) => ({
       id: r.id,
@@ -93,10 +85,10 @@ export async function fetchDbCatalogue(owner?: string): Promise<KitchenCatalogue
       isCachedFallback: false,
     };
   } catch (error) {
-    console.error("Error fetching catalogue from Neon DB, falling back to seed:", error);
+    console.error("Error fetching catalogue from Neon DB:", error);
     return {
-      ingredients: SEED_CATALOGUE.ingredients.map((i) => ({ ...i, owner: owner || "Esther" })),
-      readyMeals: SEED_CATALOGUE.readyMeals.map((r) => ({ ...r, owner: owner || "Esther" })),
+      ingredients: [],
+      readyMeals: [],
       lastSynced: new Date().toISOString(),
       isCachedFallback: true,
     };
@@ -104,7 +96,7 @@ export async function fetchDbCatalogue(owner?: string): Promise<KitchenCatalogue
 }
 
 /**
- * Seeds starting verified Nigerian ingredients & ready meals into Postgres for a new owner.
+ * Seeds starting verified Nigerian ingredients into Postgres for an owner (opt-in; ingredients only, never ready meals).
  */
 export async function seedStarterPantryForOwner(owner: string): Promise<void> {
   const sql = getSql();
@@ -125,22 +117,6 @@ export async function seedStarterPantryForOwner(owner: string): Promise<void> {
         ${ing.available ?? true},
         ${ing.mealTypes || []},
         ${ing.nutrientTags || []}
-      )
-      ON CONFLICT (id) DO NOTHING;
-    `;
-  }
-
-  for (const rm of SEED_CATALOGUE.readyMeals) {
-    const id = `ready-${targetOwner.toLowerCase()}-${rm.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
-    await sql`
-      INSERT INTO ready_meals (id, owner, name, available, meal_types, nutrient_tags)
-      VALUES (
-        ${id},
-        ${targetOwner},
-        ${rm.name},
-        ${rm.available ?? true},
-        ${rm.mealTypes || []},
-        ${rm.nutrientTags || []}
       )
       ON CONFLICT (id) DO NOTHING;
     `;

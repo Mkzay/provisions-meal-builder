@@ -22,6 +22,7 @@ interface AppModalsProps {
   isInventoryOpen: boolean;
   onCloseInventory: () => void;
   onOpenAddSupply: () => void;
+  onSeedStarterIngredients?: () => Promise<void> | void;
   onToggleAvailability: (id: string, kind: "ingredient" | "ready_meal", available: boolean) => void;
   onDeleteSupply: (id: string, kind: "ingredient" | "ready_meal", name?: string) => void;
   isPersonalHubOpen: boolean;
@@ -51,6 +52,7 @@ export const AppModals: React.FC<AppModalsProps> = ({
   isInventoryOpen,
   onCloseInventory,
   onOpenAddSupply,
+  onSeedStarterIngredients,
   onToggleAvailability,
   onDeleteSupply,
   isPersonalHubOpen,
@@ -95,6 +97,7 @@ export const AppModals: React.FC<AppModalsProps> = ({
         onDeleteSupply={onDeleteSupply}
         onOpenAddSupply={onOpenAddSupply}
         onOpenFoodIdeas={onOpenFoodIdeas}
+        onSeedStarterIngredients={onSeedStarterIngredients}
         owner={owner}
       />
 

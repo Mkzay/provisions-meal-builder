@@ -23,6 +23,7 @@ interface KitchenInventoryModalProps {
   onDeleteSupply: (id: string, kind: "ingredient" | "ready_meal", name?: string) => void;
   onOpenAddSupply: () => void;
   onOpenFoodIdeas?: () => void;
+  onSeedStarterIngredients?: () => Promise<void> | void;
   owner: string;
 }
 
@@ -47,11 +48,13 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
   onDeleteSupply,
   onOpenAddSupply,
   onOpenFoodIdeas,
+  onSeedStarterIngredients,
   owner,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [isSeeding, setIsSeeding] = useState(false);
 
   const allItems: InventoryRowItem[] = useMemo(() => {
     const list: InventoryRowItem[] = [];
@@ -193,7 +196,47 @@ export const KitchenInventoryModal: React.FC<KitchenInventoryModalProps> = ({
             className="flex-1 overflow-y-auto no-scrollbar p-3.5 sm:p-6 min-h-0 space-y-2"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {filteredItems.length === 0 ? (
+            {allItems.length === 0 ? (
+              <div className="text-center py-10 px-4 bg-white rounded-3xl border-2 border-stone-900 shadow-brutal-sm space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-200 border-2 border-stone-900 text-stone-900 flex items-center justify-center mx-auto shadow-brutal-xs">
+                  <Package size={24} weight="bold" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-base font-black text-stone-900">Your kitchen is empty</h4>
+                  <p className="text-xs text-stone-600 font-medium max-w-sm mx-auto">
+                    Start fresh by adding your own items, or load standard Nigerian starter ingredients.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+                  {onSeedStarterIngredients && (
+                    <button
+                      type="button"
+                      disabled={isSeeding}
+                      onClick={async () => {
+                        setIsSeeding(true);
+                        try {
+                          await onSeedStarterIngredients();
+                        } finally {
+                          setIsSeeding(false);
+                        }
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl border-2 border-stone-900 bg-amber-300 hover:bg-amber-400 text-stone-900 text-xs font-black shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] transition-all disabled:opacity-50"
+                    >
+                      <Sparkle size={14} weight="fill" className={isSeeding ? "animate-spin" : "text-amber-700"} />
+                      <span>{isSeeding ? "Loading Starter Staples..." : "Load Starter Ingredients (Staples)"}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={onOpenAddSupply}
+                    className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl border-2 border-stone-900 bg-white hover:bg-stone-50 text-stone-900 text-xs font-black shadow-brutal-xs active:translate-x-[1px] active:translate-y-[1px] transition-all"
+                  >
+                    <Plus size={14} weight="bold" />
+                    <span>+ Add Manually</span>
+                  </button>
+                </div>
+              </div>
+            ) : filteredItems.length === 0 ? (
               <div className="text-center py-10 px-4 bg-white rounded-2xl border-2 border-dashed border-stone-300 space-y-2">
                 <p className="text-sm font-bold text-stone-700">No items found matching your filters.</p>
                 <div className="flex items-center justify-center gap-2 pt-2">

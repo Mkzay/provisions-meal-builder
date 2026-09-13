@@ -72,7 +72,7 @@ export default function MealBuilderAppPage() {
     selectedSupplementary, selectedSupplementaries, pairingResult,
     isLeftoverModalOpen, setIsLeftoverModalOpen, isLogging,
     availableReadyMeals, availableMains, totalAvailableInMealType,
-    handleRefreshCatalogue, handleResetSeedData, handleResetToHome,
+    handleRefreshCatalogue, handleSeedStarterIngredients, handleResetSeedData, handleResetToHome,
     handleSelectMealType, handleSelectReadyMeal, handleBypassReadyMeal,
     handleSuggestForMe, handleManualPickMode, handleSelectMain,
     handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision,
@@ -336,6 +336,7 @@ export default function MealBuilderAppPage() {
           setActiveNavTab("builder");
         }}
         onOpenAddSupply={() => setIsAddSupplyOpen(true)}
+        onSeedStarterIngredients={handleSeedStarterIngredients}
         onToggleAvailability={handleToggleAvailability}
         onDeleteSupply={handleDeleteSupply}
         isPersonalHubOpen={isPersonalHubOpen}
