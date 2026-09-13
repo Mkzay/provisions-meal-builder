@@ -56,4 +56,7 @@ export { TrashSimple } from "@phosphor-icons/react/dist/ssr/TrashSimple";
 export { SignOut } from "@phosphor-icons/react/dist/ssr/SignOut";
 export { Eye } from "@phosphor-icons/react/dist/ssr/Eye";
 export { EyeSlash } from "@phosphor-icons/react/dist/ssr/EyeSlash";
+export { ThumbsUp } from "@phosphor-icons/react/dist/ssr/ThumbsUp";
+export { ThumbsDown } from "@phosphor-icons/react/dist/ssr/ThumbsDown";
+export { SmileyMeh } from "@phosphor-icons/react/dist/ssr/SmileyMeh";
 

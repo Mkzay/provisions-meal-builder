@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { getSessionOwner } from "@/lib/owner-authorization";
 import {
   addSupplyToNotion,
   deleteSupplyFromNotion,
@@ -10,6 +11,8 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const session = await auth();
+    const owner = getSessionOwner(session);
+    if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = (await request.json()) as AddSupplyInput;
     if (!body || !body.name || !body.kind) {
       return NextResponse.json(
@@ -18,13 +21,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (session?.user?.ownerName) {
-      body.owner = session.user.ownerName;
-    } else if (session?.user?.name) {
-      body.owner = session.user.name;
-    } else if (!body.owner) {
-      body.owner = "User";
-    }
+    body.owner = owner;
 
     const result = await addSupplyToNotion(body);
     return NextResponse.json(result);
@@ -39,6 +36,8 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const owner = getSessionOwner(await auth());
+    if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = (await request.json()) as { id: string; available: boolean };
     if (!body || !body.id || typeof body.available !== "boolean") {
       return NextResponse.json(
@@ -47,7 +46,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const result = await updateSupplyAvailability(body.id, body.available);
+    const result = await updateSupplyAvailability(body.id, body.available, owner);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error in PATCH /api/notion/supplies:", error);
@@ -60,6 +59,8 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const owner = getSessionOwner(await auth());
+    if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { searchParams } = new URL(request.url);
     let id = searchParams.get("id");
 
@@ -79,7 +80,7 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const result = await deleteSupplyFromNotion(id);
+    const result = await deleteSupplyFromNotion(id, owner);
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error in DELETE /api/notion/supplies:", error);

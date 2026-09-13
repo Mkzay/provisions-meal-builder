@@ -1,24 +1,29 @@
 import { sanitizeMealWithAI } from "@/lib/meal-sanitizer";
+import { auth } from "@/auth";
+import { getSessionOwner } from "@/lib/owner-authorization";
+import { validateCurateRequest } from "@/lib/curate-validation";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { main, protein, supplementary, mealType, dishName, culinaryNote } = body;
-
-    if (!main || !mealType) {
+    if (!getSessionOwner(await auth())) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const validated = validateCurateRequest(await req.json());
+    if (!validated.ok) {
       return NextResponse.json(
-        { success: false, error: "Missing required fields" },
+        { success: false, error: "Invalid meal curation payload" },
         { status: 400 }
       );
     }
+    const { main, protein, supplementary, mealType, dishName, culinaryNote } = validated.value;
 
     const sanitized = await sanitizeMealWithAI({
       main,
       protein,
-      supplementary: Array.isArray(supplementary) ? supplementary : supplementary ? [supplementary] : [],
+      supplementary,
       mealType,
       dishName,
       culinaryNote,

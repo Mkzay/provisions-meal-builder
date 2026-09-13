@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { getSessionOwner } from "@/lib/owner-authorization";
 import { fetchMealProfile } from "@/lib/notion-profile";
 import { fetchOpenRouterNote } from "@/lib/openrouter";
 import { MealType } from "@/lib/types";
@@ -11,7 +12,8 @@ export async function GET(req: NextRequest) {
     const session = await auth();
     const { searchParams } = new URL(req.url);
 
-    const owner = searchParams.get("owner") || session?.user?.ownerName || session?.user?.name || "User";
+    const owner = getSessionOwner(session);
+    if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const mealType = (searchParams.get("mealType") as MealType) || "Lunch";
     const rawTags = searchParams.get("tags");
     const matchedNutrientTags = rawTags

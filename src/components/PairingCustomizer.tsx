@@ -64,6 +64,7 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
+    setAiSanitized(null);
 
     fetch("/api/curate", {
       method: "POST",
@@ -82,6 +83,10 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
       .then((data) => {
         if (active && data?.success && data.dishName && data.culinaryNote) {
           setAiSanitized({ dishName: data.dishName, culinaryNote: data.culinaryNote });
+          if (Array.isArray(data.validSides)) {
+            const allowedSides = new Set(data.validSides.map((side: string) => side.trim().toLowerCase()));
+            setSelectedSupplementaries((current) => current.filter((side) => allowedSides.has(side.name.trim().toLowerCase())));
+          }
         }
       })
       .catch(() => {});
@@ -90,7 +95,7 @@ export const PairingCustomizer: React.FC<PairingCustomizerProps> = ({
       active = false;
       controller.abort();
     };
-  }, [selectedMain.id, selectedProtein?.id, selectedSupplementaries.length]);
+  }, [selectedMain.id, selectedProtein?.id, selectedSupplementaries.map((side) => side.id).join(","), mealType, curatedTitle, curatedNote]);
 
   const displayTitle = aiSanitized?.dishName || curatedTitle;
   const displayNote = aiSanitized?.culinaryNote || curatedNote;

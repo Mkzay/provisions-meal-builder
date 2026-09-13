@@ -1,12 +1,13 @@
-import { findMatchingDishBlueprint, isCookingOil, isSideCompatibleWithBase } from "./dish-blueprints";
+import { cleanBase, findMatchingDishBlueprint, isCookingOil, isSideCompatibleWithBase } from "./dish-blueprints";
 import { findBestPairings, getSuggestedComboName } from "./pairings";
-import { Ingredient, MealType, NutrientTag, PairingResult, ReadyMeal } from "./types";
+import { Ingredient, MealType, NutrientTag, PairingResult, RatedMealRecord, ReadyMeal } from "./types";
 
 export interface SuggestNutrientComboInput {
   availableMains: Ingredient[];
   allIngredients: Ingredient[];
   mealType: MealType;
   nutrientPriorities?: NutrientTag[];
+  ratedHistory?: RatedMealRecord[];
 }
 
 export interface SuggestedNutrientComboResult {
@@ -16,6 +17,84 @@ export interface SuggestedNutrientComboResult {
   pairings: PairingResult;
   matchedPriorities: NutrientTag[];
   comboNutrientTags: NutrientTag[];
+}
+
+function normalizeFoodName(name?: string): string {
+  if (!name) return "";
+  return name
+    .toLowerCase()
+    .replace(/\(.*?\)/g, "")
+    .replace(/[^a-z0-9 ]/g, " ")
+    .trim();
+}
+
+/**
+ * Calculates a bounded feedback score (-3.0 to +2.0) based on user's rating history.
+ * Cold start: returns 0 if no rating history exists.
+ */
+export function calculateFeedbackScore(
+  main: Ingredient,
+  protein?: Ingredient,
+  history?: RatedMealRecord[]
+): number {
+  if (!history || history.length === 0) {
+    return 0;
+  }
+
+  const normMain = normalizeFoodName(main.name);
+  const cleanMain = cleanBase(main.name).toLowerCase();
+  const normProt = protein ? normalizeFoodName(protein.name) : "";
+
+  let liked = 0;
+  let disliked = 0;
+  let neutral = 0;
+
+  for (const r of history) {
+    const rBase = normalizeFoodName(r.baseName);
+    const rCleanBase = cleanBase(r.baseName).toLowerCase();
+    const baseMatches =
+      normMain === rBase ||
+      cleanMain === rCleanBase ||
+      normMain.includes(rBase) ||
+      rBase.includes(normMain) ||
+      (cleanMain.length > 2 && rCleanBase.length > 2 && (cleanMain.includes(rCleanBase) || rCleanBase.includes(cleanMain)));
+
+    if (!baseMatches) continue;
+
+    const rProt = r.proteinName ? normalizeFoodName(r.proteinName) : "";
+
+    let protMatches = false;
+    if (!normProt && !rProt) {
+      protMatches = true;
+    } else if (normProt && rProt) {
+      protMatches =
+        normProt === rProt ||
+        normProt.includes(rProt) ||
+        rProt.includes(normProt) ||
+        (normProt.includes("egg") && rProt.includes("egg")) ||
+        (normProt.includes("beef") && rProt.includes("beef")) ||
+        (normProt.includes("fish") && rProt.includes("fish")) ||
+        (normProt.includes("chicken") && rProt.includes("chicken")) ||
+        (normProt.includes("turkey") && rProt.includes("turkey")) ||
+        (normProt.includes("bean") && rProt.includes("bean")) ||
+        (normProt.includes("sardine") && rProt.includes("sardine"));
+    }
+
+    if (!protMatches) continue;
+
+    if (r.rating === "Liked") liked++;
+    else if (r.rating === "Disliked") disliked++;
+    else if (r.rating === "Neutral") neutral++;
+  }
+
+  if (liked === 0 && disliked === 0) return 0;
+  if (liked > disliked) {
+    return Math.min(2.0, 1.5 + (liked - disliked - 1) * 0.25);
+  }
+  if (disliked > liked) {
+    return Math.max(-3.0, -2.0 - (disliked - liked - 1) * 0.5);
+  }
+  return 0;
 }
 
 /**
@@ -40,36 +119,16 @@ export function getComboNutrientTags(
 }
 
 /**
- * Lightweight suggestion weighting:
- * If nutrient priorities are set, prefers combos covering as many priorities as possible.
- * Soft preference: if no priorities match or priorities are empty, falls back to standard affinity pairing.
+ * Suggestion weighting factoring nutrient priorities, affinity, and historical feedback.
+ * Disliked dishes are bounded-penalized but NEVER hard excluded when options are limited.
  */
 export function suggestNutrientAwareCombo(
   input: SuggestNutrientComboInput
 ): SuggestedNutrientComboResult | null {
-  const { availableMains, allIngredients, mealType, nutrientPriorities } = input;
+  const { availableMains, allIngredients, mealType, nutrientPriorities, ratedHistory } = input;
 
   if (!availableMains || availableMains.length === 0) {
     return null;
-  }
-
-  // Fallback: If no priorities are set, use standard random main + affinity pairings
-  if (!nutrientPriorities || nutrientPriorities.length === 0) {
-    const randomMain = availableMains[Math.floor(Math.random() * availableMains.length)];
-    const pairings = findBestPairings(randomMain, allIngredients, mealType);
-    const comboNutrientTags = getComboNutrientTags(
-      randomMain,
-      pairings.recommendedProtein,
-      pairings.recommendedSupplementary
-    );
-    return {
-      main: randomMain,
-      protein: pairings.recommendedProtein,
-      supplementary: pairings.recommendedSupplementary,
-      pairings,
-      matchedPriorities: [],
-      comboNutrientTags,
-    };
   }
 
   const availableProteins = allIngredients.filter(
@@ -88,6 +147,8 @@ export function suggestNutrientAwareCombo(
     comboNutrientTags: NutrientTag[];
     priorityCount: number;
     affinityScore: number;
+    feedbackScore: number;
+    totalScore: number;
   }
 
   const candidates: Candidate[] = [];
@@ -108,7 +169,7 @@ export function suggestNutrientAwareCombo(
     for (const prot of proteinOptions) {
       for (const supp of suppOptions) {
         const tags = getComboNutrientTags(main, prot, supp);
-        const matched = nutrientPriorities.filter((p) => tags.includes(p));
+        const matched = (nutrientPriorities || []).filter((p) => tags.includes(p));
 
         let affinityScore = 0;
         if (prot && prot.id === standardPairing.recommendedProtein?.id) {
@@ -117,6 +178,9 @@ export function suggestNutrientAwareCombo(
         if (supp && supp.id === standardPairing.recommendedSupplementary?.id) {
           affinityScore += 3;
         }
+
+        const feedbackScore = calculateFeedbackScore(main, prot, ratedHistory);
+        const totalScore = matched.length * 10 + affinityScore + feedbackScore;
 
         candidates.push({
           main,
@@ -127,42 +191,25 @@ export function suggestNutrientAwareCombo(
           comboNutrientTags: tags,
           priorityCount: matched.length,
           affinityScore,
+          feedbackScore,
+          totalScore,
         });
       }
     }
   }
 
-  const maxPriorityCount = Math.max(0, ...candidates.map((c) => c.priorityCount));
-
-  // If nothing available covers any priority, fall back to existing pairing logic
-  if (maxPriorityCount === 0) {
-    const randomMain = availableMains[Math.floor(Math.random() * availableMains.length)];
-    const pairings = findBestPairings(randomMain, allIngredients, mealType);
-    const comboNutrientTags = getComboNutrientTags(
-      randomMain,
-      pairings.recommendedProtein,
-      pairings.recommendedSupplementary
-    );
-    return {
-      main: randomMain,
-      protein: pairings.recommendedProtein,
-      supplementary: pairings.recommendedSupplementary,
-      pairings,
-      matchedPriorities: [],
-      comboNutrientTags,
-    };
+  if (candidates.length === 0) {
+    return null;
   }
 
-  // Filter candidates matching the highest priority coverage
-  const topCandidates = candidates.filter((c) => c.priorityCount === maxPriorityCount);
+  // Find maximum score across candidates
+  const maxScore = Math.max(...candidates.map((c) => c.totalScore));
 
-  // Sort by affinityScore descending
-  topCandidates.sort((a, b) => b.affinityScore - a.affinityScore);
+  // Top candidates band (within 0.5 of max score to preserve variety and tie breaking)
+  const topCandidates = candidates.filter((c) => c.totalScore >= maxScore - 0.5);
 
-  // Pick among the top-tied affinity candidates for delightful variety
-  const topScore = topCandidates[0].affinityScore;
-  const bestTies = topCandidates.filter((c) => c.affinityScore === topScore);
-  const chosen = bestTies[Math.floor(Math.random() * bestTies.length)];
+  // Pick among the top band randomly for variety
+  const chosen = topCandidates[Math.floor(Math.random() * topCandidates.length)];
 
   // Order available list in pairings so the selected ones appear first
   const inStock = allIngredients.filter((i) => i.available);

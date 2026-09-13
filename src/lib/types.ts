@@ -25,6 +25,8 @@ export interface ReadyMeal {
 
 export type MealSource = "Ready Meal" | "Built";
 
+export type MealRating = "Liked" | "Neutral" | "Disliked";
+
 export interface MealLogEntry {
   id?: string;
   mealType: MealType;
@@ -41,6 +43,15 @@ export interface MealLogEntry {
   readyMeal?: string;
   date: string;
   hadLeftovers: boolean;
+  owner: string;
+  rating?: MealRating;
+}
+
+export interface RatedMealRecord {
+  id?: string;
+  baseName: string;
+  proteinName: string;
+  rating: MealRating;
   owner: string;
 }
 

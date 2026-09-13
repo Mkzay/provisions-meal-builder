@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { getSessionOwner } from "@/lib/owner-authorization";
 import { fetchMealProfile, saveMealProfile } from "@/lib/notion-profile";
 import { UserGoal } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
@@ -8,8 +9,8 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
-    const { searchParams } = new URL(req.url);
-    const owner = searchParams.get("owner") || session?.user?.ownerName || session?.user?.name || "User";
+    const owner = getSessionOwner(session);
+    if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const profile = await fetchMealProfile(owner);
     return NextResponse.json(
@@ -33,7 +34,8 @@ export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     const body = await req.json();
-    const owner = body.owner || session?.user?.ownerName || session?.user?.name || "User";
+    const owner = getSessionOwner(session);
+    if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const goal = body.goal as UserGoal;
     const height =
       typeof body.height === "number" && !isNaN(body.height) && body.height > 0

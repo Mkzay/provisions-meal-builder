@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  classifyBaseCategory,
+  classifySideCategory,
   findMatchingDishBlueprint,
   isCookingOil,
   isFruit,
@@ -165,5 +167,104 @@ describe("Culinary Dish Blueprints & Suggestion Engine", () => {
     );
 
     expect(result).toBeNull();
+  });
+
+  describe("Generalized Category Classification & Compatibility Matrix", () => {
+    it("correctly classifies bases into swallow, breakfast_grain, savory_starch, and snack", () => {
+      expect(classifyBaseCategory({ name: "Amala (Yam Flour / Elubo)" })).toBe("swallow");
+      expect(classifyBaseCategory({ name: "Eba (Yellow Garri)" })).toBe("swallow");
+      expect(classifyBaseCategory({ name: "Tuwo Shinkafa" })).toBe("swallow");
+      expect(classifyBaseCategory({ name: "Rolled Oats / Oatmeal" })).toBe("breakfast_grain");
+      expect(classifyBaseCategory({ name: "Custard Powder / Ogi" })).toBe("breakfast_grain");
+      expect(classifyBaseCategory({ name: "Sliced White Bread" })).toBe("breakfast_grain");
+      expect(classifyBaseCategory({ name: "White Rice" })).toBe("savory_starch");
+      expect(classifyBaseCategory({ name: "Yam (Tuber / Raw Slices)" })).toBe("savory_starch");
+      expect(classifyBaseCategory({ name: "Spaghetti / Pasta" })).toBe("savory_starch");
+      expect(classifyBaseCategory({ name: "Honey Beans Porridge" })).toBe("savory_starch");
+      expect(classifyBaseCategory({ name: "Chin Chin Snack" })).toBe("snack");
+    });
+
+    it("correctly classifies sides into standard culinary categories", () => {
+      expect(classifySideCategory({ name: "Red Palm Oil (Unrefined)" })).toBe("cooking_oil");
+      expect(classifySideCategory({ name: "Cold Pressed Avocado Oil" })).toBe("cooking_oil");
+      expect(classifySideCategory({ name: "Dragonfruit Slices" })).toBe("raw_fruit");
+      expect(classifySideCategory({ name: "Fresh Strawberries" })).toBe("raw_fruit");
+      expect(classifySideCategory({ name: "Ewedu Leaf / Jute Soup" })).toBe("leafy_soup");
+      expect(classifySideCategory({ name: "Okra Soup" })).toBe("leafy_soup");
+      expect(classifySideCategory({ name: "Organic Honey / Agave" })).toBe("breakfast_sweet_topping");
+      expect(classifySideCategory({ name: "Chia Seeds" })).toBe("breakfast_sweet_topping");
+      expect(classifySideCategory({ name: "Sliced Tomatoes & Onions" })).toBe("raw_condiment_aromatic");
+      expect(classifySideCategory({ name: "Fried Sweet Plantains (Dodo)" })).toBe("savory_side");
+    });
+
+    it("automatically enforces category compatibility for newly added unknown ingredients without new blueprints", () => {
+      // Newly added fruit: "Golden Papaya"
+      const papaya: Ingredient = {
+        id: "papaya",
+        name: "Golden Papaya Chunks",
+        role: "Supplementary",
+        mealTypes: ["Breakfast", "Snack"],
+        owner: "User",
+        available: true,
+      };
+      // Newly added oil: "Sesame Oil"
+      const sesameOil: Ingredient = {
+        id: "sesame_oil",
+        name: "Toasted Sesame Oil",
+        role: "Supplementary",
+        mealTypes: ["Lunch", "Dinner"],
+        owner: "User",
+        available: true,
+      };
+      // Newly added sweet topping: "Maple Syrup"
+      const mapleSyrup: Ingredient = {
+        id: "maple_syrup",
+        name: "Pure Maple Syrup",
+        role: "Supplementary",
+        mealTypes: ["Breakfast"],
+        owner: "User",
+        available: true,
+      };
+
+      const amala: Ingredient = {
+        id: "amala",
+        name: "Amala (Yam Flour)",
+        role: "Main",
+        mealTypes: ["Lunch", "Dinner"],
+        owner: "User",
+        available: true,
+      };
+      const rice: Ingredient = {
+        id: "rice",
+        name: "Basmati Rice",
+        role: "Main",
+        mealTypes: ["Lunch", "Dinner"],
+        owner: "User",
+        available: true,
+      };
+      const oatmeal: Ingredient = {
+        id: "oats",
+        name: "Rolled Oatmeal",
+        role: "Main",
+        mealTypes: ["Breakfast"],
+        owner: "User",
+        available: true,
+      };
+
+      // Cooking oil is NEVER compatible with any base as a side
+      expect(isSideCompatibleWithBase(sesameOil, amala)).toBe(false);
+      expect(isSideCompatibleWithBase(sesameOil, rice)).toBe(false);
+      expect(isSideCompatibleWithBase(sesameOil, oatmeal)).toBe(false);
+
+      // Raw fruit is NOT compatible with swallow or savory starch, but IS compatible with breakfast grain
+      expect(isSideCompatibleWithBase(papaya, amala)).toBe(false);
+      expect(isSideCompatibleWithBase(papaya, rice)).toBe(false);
+      expect(isSideCompatibleWithBase(papaya, oatmeal, "Breakfast")).toBe(true);
+
+      // Sweet topping is NOT compatible with swallow or savory starch, but IS compatible with breakfast grain
+      expect(isSideCompatibleWithBase(mapleSyrup, amala)).toBe(false);
+      expect(isSideCompatibleWithBase(mapleSyrup, rice)).toBe(false);
+      expect(isSideCompatibleWithBase(mapleSyrup, oatmeal, "Breakfast")).toBe(true);
+    });
   });
 });

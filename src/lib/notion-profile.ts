@@ -5,6 +5,7 @@ import {
   parseNotionWeightLog,
 } from "./notion-parser";
 import { getNotionClient } from "./notion";
+import { pageBelongsToOwner } from "./owner-authorization";
 import { MealProfile, UserGoal, WeightLogEntry } from "./types";
 
 /**
@@ -262,7 +263,7 @@ export async function addWeightLogEntry(input: {
   }
 }
 
-export async function deleteWeightLogEntry(id: string): Promise<{ success: boolean }> {
+export async function deleteWeightLogEntry(id: string, owner: string): Promise<{ success: boolean }> {
   const notion = getNotionClient();
 
   if (!notion) {
@@ -270,6 +271,10 @@ export async function deleteWeightLogEntry(id: string): Promise<{ success: boole
   }
 
   try {
+    const page = await notion.pages.retrieve({ page_id: id }) as any;
+    if (!pageBelongsToOwner(page?.properties?.Owner?.select?.name, owner)) {
+      return { success: false };
+    }
     await notion.pages.update({
       page_id: id,
       archived: true,

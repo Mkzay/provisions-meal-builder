@@ -6,6 +6,7 @@ import {
   buildWeightLogProperties,
   parseNotionIngredient,
   parseNotionMealProfile,
+  parseNotionRatedMealRecord,
   parseNotionReadyMeal,
   parseNotionWeightLog,
 } from "../lib/notion-parser";
@@ -118,6 +119,7 @@ describe("Notion API Data Parser & Transformer", () => {
 
     const properties: any = buildMealLogProperties(entry);
     expect(properties.Date.date.start).toBe("2026-09-12T12:30:00.000Z");
+    expect(properties.Name.title[0].text.content).toBe("Basmati Rice + Beef Stew");
     expect(properties["Meal Type"].select.name).toBe("Lunch");
     expect(properties.Source.select.name).toBe("Built");
     expect(properties["Had Leftovers"].checkbox).toBe(true);
@@ -135,7 +137,7 @@ describe("Notion API Data Parser & Transformer", () => {
     ]);
   });
 
-  it("builds ready meal relation for Ready Meal source in Meal Log", () => {
+  it("builds ready meal relation and rating for Meal Log", () => {
     const entry: MealLogEntry = {
       date: "2026-09-12T13:00:00.000Z",
       mealType: "Dinner",
@@ -144,12 +146,39 @@ describe("Notion API Data Parser & Transformer", () => {
       readyMeal: "Jollof Rice & Chicken",
       hadLeftovers: false,
       owner: "Esther",
+      rating: "Liked",
     };
 
     const properties: any = buildMealLogProperties(entry);
+    expect(properties.Name.title[0].text.content).toBe("Jollof Rice & Chicken");
+    expect(properties.Rating.select.name).toBe("Liked");
     expect(properties["Ready Meal"].relation).toEqual([
       { id: "8f9a2b3c-4d5e-6f7a-8b9c-0d1e2f3a4b5c" },
     ]);
+  });
+
+  it("parses Notion rated meal record correctly", () => {
+    const rawPage: any = {
+      id: "log-1",
+      properties: {
+        Name: {
+          title: [{ plain_text: "Yam + Fresh Eggs" }],
+        },
+        Rating: {
+          select: { name: "Liked" },
+        },
+        Owner: {
+          select: { name: "Esther" },
+        },
+      },
+    };
+
+    const record = parseNotionRatedMealRecord(rawPage);
+    expect(record).not.toBeNull();
+    expect(record?.baseName).toBe("Yam");
+    expect(record?.proteinName).toBe("Fresh Eggs");
+    expect(record?.rating).toBe("Liked");
+    expect(record?.owner).toBe("Esther");
   });
 
   it("builds valid payload properties for creating new Ready Meal", () => {

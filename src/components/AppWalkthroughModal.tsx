@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ArrowRight, Check, Sparkle, X } from "@/components/icons";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface AppWalkthroughModalProps {
   isOpen: boolean;
@@ -66,10 +66,16 @@ export const AppWalkthroughModal: React.FC<AppWalkthroughModalProps> = ({
   owner,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocus = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       setCurrentStep(0);
+      previousFocus.current = document.activeElement as HTMLElement;
+      requestAnimationFrame(() => dialogRef.current?.querySelector<HTMLElement>("button")?.focus());
+    } else {
+      previousFocus.current?.focus();
     }
   }, [isOpen]);
 
@@ -77,6 +83,12 @@ export const AppWalkthroughModal: React.FC<AppWalkthroughModalProps> = ({
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleFinish();
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>("button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"));
+        const first = focusable[0]; const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -122,6 +134,7 @@ export const AppWalkthroughModal: React.FC<AppWalkthroughModalProps> = ({
         aria-labelledby="walkthrough-title"
       >
         <motion.div
+          ref={dialogRef}
           initial={{ opacity: 0, scale: 0.94, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 16 }}

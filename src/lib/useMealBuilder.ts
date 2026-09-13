@@ -1,10 +1,10 @@
 import { getDefaultMealTypeByHour, getAvailableMains, getAvailableReadyMeals } from "./flow-logic";
-import { applyOptimisticLeftover, loadCachedCatalogue, queueOfflineMutation, saveCachedCatalogue } from "./offline-storage";
+import { applyOptimisticLeftover, getOfflineOutbox, loadCachedCatalogue, queueOfflineMutation, replayOfflineMutations, saveCachedCatalogue, saveOfflineOutbox } from "./offline-storage";
 import { findBestPairings } from "./pairings";
 import { suggestNutrientAwareCombo } from "./nutrient-curation";
 import { getClientProfileCached } from "./profile-storage";
 import { SEED_CATALOGUE } from "./seed-data";
-import { AddSupplyInput, EMPTY_CATALOGUE, Ingredient, KitchenCatalogue, LeftoverDecision, MealLogEntry, MealSource, MealType, NutrientTag, PairingResult, ReadyMeal } from "./types";
+import { AddSupplyInput, EMPTY_CATALOGUE, Ingredient, KitchenCatalogue, LeftoverDecision, MealLogEntry, MealRating, MealSource, MealType, NutrientTag, PairingResult, RatedMealRecord, ReadyMeal } from "./types";
 import { useEffect, useState } from "react";
 
 export type FlowStep = "meal_type" | "ready_meal" | "mode_select" | "manual_pick" | "pairing" | "confirm";
@@ -31,6 +31,9 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
 
   const [isLeftoverModalOpen, setIsLeftoverModalOpen] = useState(false);
   const [isLogging, setIsLogging] = useState(false);
+  const [ratedHistory, setRatedHistory] = useState<RatedMealRecord[]>([]);
+  const [activeLogId, setActiveLogId] = useState<string | undefined>();
+  const [isRatingCardOpen, setIsRatingCardOpen] = useState(false);
 
   useEffect(() => {
     const cached = loadCachedCatalogue(owner);
@@ -45,10 +48,29 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
           saveCachedCatalogue(freshCatalogue, owner);
         }
       })
-      .catch((err) => {
-        console.log("Using cached catalogue snapshot:", err);
-      });
+      .catch((err) => console.log("Using cached catalogue snapshot:", err));
+
+    fetch(`/api/notion/log?owner=${encodeURIComponent(owner)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => data?.ratings && setRatedHistory(data.ratings))
+      .catch(() => {});
   }, [owner]);
+
+  useEffect(() => {
+    const replay = async () => {
+      const remaining = await replayOfflineMutations(getOfflineOutbox(), async (entry) => {
+        const endpoint = entry.type === "log" ? "/api/notion/log" : entry.type === "leftovers" ? "/api/notion/leftovers" : "/api/notion/supplies";
+        try {
+          const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(entry.payload) });
+          return response.ok;
+        } catch { return false; }
+      });
+      saveOfflineOutbox(remaining);
+    };
+    void replay();
+    window.addEventListener("online", replay);
+    return () => window.removeEventListener("online", replay);
+  }, []);
 
   const availableReadyMeals = getAvailableReadyMeals(catalogue.readyMeals, mealType);
   const availableMains = getAvailableMains(catalogue.ingredients, mealType);
@@ -121,6 +143,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
       allIngredients: catalogue.ingredients,
       mealType,
       nutrientPriorities: activePriorities,
+      ratedHistory,
     });
     if (!combo) return;
 
@@ -194,11 +217,15 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     };
 
     try {
-      await fetch("/api/notion/log", {
+      const res = await fetch("/api/notion/log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(entry),
       });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.id) setActiveLogId(data.id);
+      }
     } catch {
       queueOfflineMutation("log", entry);
     } finally {
@@ -296,61 +323,57 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     return handleAddBulkSupplies([input]);
   };
 
-  const handleToggleAvailability = async (
-    id: string,
-    kind: "ingredient" | "ready_meal",
-    available: boolean
-  ) => {
-    const nextCatalogue = {
-      ...catalogue,
-      ingredients:
-        kind === "ingredient"
-          ? catalogue.ingredients.map((i) => (i.id === id ? { ...i, available } : i))
-          : catalogue.ingredients,
-      readyMeals:
-        kind === "ready_meal"
-          ? catalogue.readyMeals.map((m) => (m.id === id ? { ...m, available } : m))
-          : catalogue.readyMeals,
-    };
-    setCatalogue(nextCatalogue);
-    saveCachedCatalogue(nextCatalogue, owner);
+  const handleRateMeal = async (rating: MealRating) => {
+    setIsRatingCardOpen(false);
+    handleResetToHome();
+
+    if (!activeLogId) return;
+
+    if (selectedMain && selectedSource === "Built") {
+      setRatedHistory((prev) => [
+        ...prev,
+        { baseName: selectedMain.name, proteinName: selectedProtein?.name || "", rating, owner },
+      ]);
+    }
 
     try {
-      await fetch("/api/notion/supplies", {
+      await fetch("/api/notion/log", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, available }),
+        body: JSON.stringify({ id: activeLogId, rating }),
       });
-    } catch {
-      // offline mutation recorded
-    }
+    } catch {}
   };
 
-  const handleDeleteSupply = async (
-    id: string,
-    kind: "ingredient" | "ready_meal"
-  ) => {
+  const handleSkipRating = () => {
+    setIsRatingCardOpen(false);
+    handleResetToHome();
+  };
+
+  const handleToggleAvailability = async (id: string, kind: "ingredient" | "ready_meal", available: boolean) => {
     const nextCatalogue = {
       ...catalogue,
-      ingredients:
-        kind === "ingredient"
-          ? catalogue.ingredients.filter((i) => i.id !== id)
-          : catalogue.ingredients,
-      readyMeals:
-        kind === "ready_meal"
-          ? catalogue.readyMeals.filter((m) => m.id !== id)
-          : catalogue.readyMeals,
+      ingredients: kind === "ingredient" ? catalogue.ingredients.map((i) => (i.id === id ? { ...i, available } : i)) : catalogue.ingredients,
+      readyMeals: kind === "ready_meal" ? catalogue.readyMeals.map((m) => (m.id === id ? { ...m, available } : m)) : catalogue.readyMeals,
     };
     setCatalogue(nextCatalogue);
     saveCachedCatalogue(nextCatalogue, owner);
-
     try {
-      await fetch(`/api/notion/supplies?id=${encodeURIComponent(id)}`, {
-        method: "DELETE",
-      });
-    } catch {
-      // offline deletion recorded
-    }
+      await fetch("/api/notion/supplies", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, available }) });
+    } catch {}
+  };
+
+  const handleDeleteSupply = async (id: string, kind: "ingredient" | "ready_meal") => {
+    const nextCatalogue = {
+      ...catalogue,
+      ingredients: kind === "ingredient" ? catalogue.ingredients.filter((i) => i.id !== id) : catalogue.ingredients,
+      readyMeals: kind === "ready_meal" ? catalogue.readyMeals.filter((m) => m.id !== id) : catalogue.readyMeals,
+    };
+    setCatalogue(nextCatalogue);
+    saveCachedCatalogue(nextCatalogue, owner);
+    try {
+      await fetch(`/api/notion/supplies?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+    } catch {}
   };
 
   return {
@@ -367,5 +390,6 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision,
     handleQuickAddStaples, handleAddSupply, handleAddBulkSupplies,
     handleToggleAvailability, handleDeleteSupply,
+    isRatingCardOpen, setIsRatingCardOpen, activeLogId, handleRateMeal, handleSkipRating, ratedHistory,
   };
 }

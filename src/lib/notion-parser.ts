@@ -3,65 +3,41 @@ import {
   IngredientRole,
   MealLogEntry,
   MealProfile,
+  MealRating,
   MealType,
   NutrientTag,
+  RatedMealRecord,
   ReadyMeal,
   UserGoal,
   WeightLogEntry,
 } from "./types";
+
+function extractMealTypes(props: any): MealType[] {
+  const raw = props["Meal Type"] || props.MealType;
+  if (raw?.type === "multi_select") {
+    const list = (raw.multi_select || []).map((m: any) => m.name as MealType).filter(Boolean);
+    if (list.length > 0) return list;
+  } else if (raw?.type === "select" && raw.select?.name) {
+    return [raw.select.name as MealType];
+  }
+  return ["Lunch", "Dinner"];
+}
 
 export function parseNotionIngredient(page: any): Ingredient | null {
   try {
     const props = page.properties;
     if (!props) return null;
 
-    // Title / Name
     const titleArray = props.Name?.title || props.name?.title || [];
     const name = titleArray.map((t: any) => t.plain_text).join("").trim();
     if (!name) return null;
 
-    // Meal Type (can be multi_select or select)
-    let mealTypes: MealType[] = [];
-    if (props["Meal Type"]?.type === "multi_select") {
-      mealTypes = (props["Meal Type"].multi_select || [])
-        .map((m: any) => m.name as MealType)
-        .filter(Boolean);
-    } else if (props["Meal Type"]?.type === "select" && props["Meal Type"].select?.name) {
-      mealTypes = [props["Meal Type"].select.name as MealType];
-    } else if (props.MealType?.type === "multi_select") {
-      mealTypes = (props.MealType.multi_select || [])
-        .map((m: any) => m.name as MealType)
-        .filter(Boolean);
-    } else if (props.MealType?.type === "select" && props.MealType.select?.name) {
-      mealTypes = [props.MealType.select.name as MealType];
-    }
-
-    if (mealTypes.length === 0) {
-      mealTypes = ["Lunch", "Dinner"]; // Sensible fallback
-    }
-
-    // Role
+    const mealTypes = extractMealTypes(props);
     const roleName = props.Role?.select?.name || props.role?.select?.name || "Main";
-    const role: IngredientRole =
-      roleName === "Protein" || roleName === "Supplementary"
-        ? roleName
-        : "Main";
+    const role: IngredientRole = roleName === "Protein" || roleName === "Supplementary" ? roleName : "Main";
+    const available = props.Available?.type === "checkbox" ? Boolean(props.Available.checkbox) : true;
+    const owner = props.Owner?.select?.name || props.Owner?.rich_text?.[0]?.plain_text || "Esther";
 
-    // Available Checkbox
-    const available =
-      props.Available?.type === "checkbox"
-        ? Boolean(props.Available.checkbox)
-        : props.available?.type === "checkbox"
-        ? Boolean(props.available.checkbox)
-        : true;
-
-    // Owner
-    const owner =
-      props.Owner?.select?.name ||
-      props.Owner?.rich_text?.[0]?.plain_text ||
-      "Esther";
-
-    // Nutrient Tags
     const rawNutrients = props["Nutrient Tags"]?.multi_select || props.NutrientTags?.multi_select || [];
     const nutrientTags: NutrientTag[] = rawNutrients.map((n: any) => n.name).filter(Boolean);
 
@@ -85,42 +61,14 @@ export function parseNotionReadyMeal(page: any): ReadyMeal | null {
     const props = page.properties;
     if (!props) return null;
 
-    // Title / Name
     const titleArray = props.Name?.title || props.name?.title || [];
     const name = titleArray.map((t: any) => t.plain_text).join("").trim();
     if (!name) return null;
 
-    // Meal Type
-    let mealTypes: MealType[] = [];
-    if (props["Meal Type"]?.type === "multi_select") {
-      mealTypes = (props["Meal Type"].multi_select || [])
-        .map((m: any) => m.name as MealType)
-        .filter(Boolean);
-    } else if (props["Meal Type"]?.type === "select" && props["Meal Type"].select?.name) {
-      mealTypes = [props["Meal Type"].select.name as MealType];
-    } else if (props.MealType?.type === "multi_select") {
-      mealTypes = (props.MealType.multi_select || [])
-        .map((m: any) => m.name as MealType)
-        .filter(Boolean);
-    }
+    const mealTypes = extractMealTypes(props);
+    const available = props.Available?.type === "checkbox" ? Boolean(props.Available.checkbox) : true;
+    const owner = props.Owner?.select?.name || props.Owner?.rich_text?.[0]?.plain_text || "Esther";
 
-    if (mealTypes.length === 0) {
-      mealTypes = ["Lunch", "Dinner"];
-    }
-
-    // Available
-    const available =
-      props.Available?.type === "checkbox"
-        ? Boolean(props.Available.checkbox)
-        : true;
-
-    // Owner
-    const owner =
-      props.Owner?.select?.name ||
-      props.Owner?.rich_text?.[0]?.plain_text ||
-      "Esther";
-
-    // Nutrient Tags
     const rawNutrients = props["Nutrient Tags"]?.multi_select || props.NutrientTags?.multi_select || [];
     const nutrientTags: NutrientTag[] = rawNutrients.map((n: any) => n.name).filter(Boolean);
 
@@ -138,8 +86,18 @@ export function parseNotionReadyMeal(page: any): ReadyMeal | null {
   }
 }
 
+
+
 export function buildMealLogProperties(entry: MealLogEntry): Record<string, any> {
+  const mealName =
+    entry.source === "Ready Meal"
+      ? entry.readyMeal || "Ready Meal"
+      : [entry.mainIngredient, entry.protein].filter(Boolean).join(" + ") || "Built Meal";
+
   const properties: Record<string, any> = {
+    Name: {
+      title: [{ text: { content: mealName } }],
+    },
     Date: {
       date: {
         start: entry.date,
@@ -164,6 +122,14 @@ export function buildMealLogProperties(entry: MealLogEntry): Record<string, any>
       },
     },
   };
+
+  if (entry.rating) {
+    properties.Rating = {
+      select: {
+        name: entry.rating,
+      },
+    };
+  }
 
   // Relations to Ingredients Catalogue
   if (entry.mainIngredientId) {
@@ -196,6 +162,62 @@ export function buildMealLogProperties(entry: MealLogEntry): Record<string, any>
   }
 
   return properties;
+}
+
+export function parseNotionRatedMealRecord(
+  page: any,
+  ingredientMap?: Map<string, string>
+): RatedMealRecord | null {
+  try {
+    const props = page.properties;
+    if (!props) return null;
+
+    const rating = props.Rating?.select?.name as MealRating | undefined;
+    if (!rating) return null;
+
+    const owner = props.Owner?.select?.name || props.Owner?.rich_text?.[0]?.plain_text || "User";
+    const title = props.Name?.title?.[0]?.plain_text || "";
+
+    let baseName = "";
+    let proteinName = "";
+
+    const mainRelId = props["Main Ingredient"]?.relation?.[0]?.id;
+    const protRelId = props.Protein?.relation?.[0]?.id;
+
+    if (ingredientMap && mainRelId && ingredientMap.has(mainRelId)) {
+      baseName = ingredientMap.get(mainRelId)!;
+    }
+    if (ingredientMap && protRelId && ingredientMap.has(protRelId)) {
+      proteinName = ingredientMap.get(protRelId)!;
+    }
+
+    if (!baseName && title) {
+      if (title.includes(" + ")) {
+        const parts = title.split(" + ");
+        baseName = parts[0].trim();
+        proteinName = parts[1]?.trim() || proteinName;
+      } else if (title.includes(" & ")) {
+        const parts = title.split(" & ");
+        baseName = parts[0].trim();
+        proteinName = parts[1]?.trim() || proteinName;
+      } else {
+        baseName = title.trim();
+      }
+    }
+
+    if (!baseName) return null;
+
+    return {
+      id: page.id,
+      baseName,
+      proteinName,
+      rating,
+      owner,
+    };
+  } catch (err) {
+    console.error("Error parsing rated meal record:", err);
+    return null;
+  }
 }
 
 export function buildNewReadyMealProperties(

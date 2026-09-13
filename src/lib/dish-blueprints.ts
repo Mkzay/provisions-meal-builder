@@ -12,55 +12,15 @@ export interface DishBlueprint {
   generateTitle: (base: Ingredient, protein?: Ingredient, sides?: Ingredient[]) => string;
 }
 
-export function isCookingOil(ingredient: Ingredient | { name: string }): boolean {
-  const name = ingredient.name.toLowerCase();
-  return (
-    name.includes("olive oil") ||
-    name.includes("palm oil") ||
-    name.includes("vegetable oil") ||
-    name.includes("groundnut oil") ||
-    name.includes("cooking oil")
-  );
-}
-
-export function isFruit(ingredient: Ingredient | { name: string }): boolean {
-  return /watermelon|grape|apple|banana|orange|berry|fruit|pawpaw|mango/i.test(ingredient.name);
-}
-
-export function isSideCompatibleWithBase(
-  side: Ingredient,
-  base: Ingredient,
-  mealType?: MealType
-): boolean {
-  if (isCookingOil(side)) return false;
-
-  const baseName = base.name.toLowerCase();
-  const sideName = side.name.toLowerCase();
-
-  const isSwallow = /amala|elubo|fufu|akpu|semo|tuwo|wheat|garri|eba/i.test(baseName);
-  const isBreakfastGrain = /oat|custard|akamu|ogi|pancake|toast|bread|cereal|yogurt/i.test(baseName);
-  const isSavoryStarch = /rice|spaghetti|pasta|yam|potato|bean|cassava|cocoyam/i.test(baseName);
-
-  if (isFruit(side)) {
-    if (isSwallow || isSavoryStarch) return false;
-    return isBreakfastGrain || mealType === "Breakfast" || mealType === "Snack";
-  }
-
-  if (/ewedu|okra|efo|bitterleaf|waterleaf|spinach/i.test(sideName)) {
-    return !isBreakfastGrain;
-  }
-
-  if (/chia|flax|milk|honey|peanut butter/i.test(sideName)) {
-    if (isSwallow || isSavoryStarch) return false;
-    return isBreakfastGrain || mealType === "Breakfast";
-  }
-
-  if (/sliced tomatoes & onions|tomato|onion/i.test(sideName)) {
-    if (isSwallow || isBreakfastGrain) return false;
-  }
-
-  return true;
-}
+export type { BaseCategory, SideCategory } from "./ingredient-categories";
+export {
+  classifyBaseCategory,
+  classifySideCategory,
+  isCookingOil,
+  isFruit,
+  isSideCompatibleWithBase,
+} from "./ingredient-categories";
+import { isCookingOil, isFruit } from "./ingredient-categories";
 
 function clean(name?: string): string {
   if (!name) return "";

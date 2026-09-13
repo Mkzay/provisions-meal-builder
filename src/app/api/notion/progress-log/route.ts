@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { getSessionOwner } from "@/lib/owner-authorization";
 import {
   addWeightLogEntry,
   deleteWeightLogEntry,
@@ -11,8 +12,8 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
-    const { searchParams } = new URL(req.url);
-    const owner = searchParams.get("owner") || session?.user?.ownerName || session?.user?.name || "User";
+    const owner = getSessionOwner(session);
+    if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const logs = await fetchWeightLogs(owner);
     return NextResponse.json(
@@ -36,7 +37,8 @@ export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     const body = await req.json();
-    const owner = body.owner || session?.user?.ownerName || session?.user?.name || "User";
+    const owner = getSessionOwner(session);
+    if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const date = body.date || new Date().toISOString().slice(0, 10);
     const weight = typeof body.weight === "number" ? body.weight : parseFloat(body.weight);
 
@@ -68,6 +70,8 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const owner = getSessionOwner(await auth());
+    if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const { searchParams } = new URL(req.url);
     let id = searchParams.get("id");
 
@@ -87,7 +91,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const result = await deleteWeightLogEntry(id);
+    const result = await deleteWeightLogEntry(id, owner);
     return NextResponse.json(result);
   } catch (error) {
     console.error("API error deleting weight log:", error);

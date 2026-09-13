@@ -1,5 +1,6 @@
 import { Client } from "@notionhq/client";
 import { resolveLeftoverAction } from "./flow-logic";
+import { pageBelongsToOwner } from "./owner-authorization";
 import {
   buildMealLogProperties,
   buildMealProfileProperties,
@@ -30,6 +31,11 @@ export function getNotionClient(): Client | null {
     return null;
   }
   return new Client({ auth: apiKey });
+}
+
+async function assertPageOwner(notion: Client, pageId: string, owner: string): Promise<boolean> {
+  const page = await notion.pages.retrieve({ page_id: pageId }) as any;
+  return pageBelongsToOwner(page?.properties?.Owner?.select?.name, owner);
 }
 
 export async function fetchCatalogue(owner?: string): Promise<KitchenCatalogue> {
@@ -208,6 +214,9 @@ export async function handleLeftoverDecision(decision: LeftoverDecision): Promis
   try {
     // If ready meal was eaten and no leftovers remained -> uncheck available
     if (result.action === "uncheck_ready" && result.readyMealId) {
+      if (!(await assertPageOwner(notion, result.readyMealId, decision.owner || ""))) {
+        return { success: false, action: result.action };
+      }
       await notion.pages.update({
         page_id: result.readyMealId,
         properties: {
@@ -310,7 +319,8 @@ export async function addSupplyToNotion(
 
 export async function updateSupplyAvailability(
   pageId: string,
-  available: boolean
+  available: boolean,
+  owner: string
 ): Promise<{ success: boolean }> {
   const notion = getNotionClient();
   if (
@@ -324,6 +334,7 @@ export async function updateSupplyAvailability(
   }
 
   try {
+    if (!(await assertPageOwner(notion, pageId, owner))) return { success: false };
     await notion.pages.update({
       page_id: pageId,
       properties: {
@@ -340,7 +351,8 @@ export async function updateSupplyAvailability(
 }
 
 export async function deleteSupplyFromNotion(
-  pageId: string
+  pageId: string,
+  owner: string
 ): Promise<{ success: boolean }> {
   const notion = getNotionClient();
   if (
@@ -354,6 +366,7 @@ export async function deleteSupplyFromNotion(
   }
 
   try {
+    if (!(await assertPageOwner(notion, pageId, owner))) return { success: false };
     await notion.pages.update({
       page_id: pageId,
       archived: true,
@@ -374,6 +387,9 @@ export {
   deleteWeightLogEntry,
 } from "./notion-profile";
 
-
+export {
+  updateMealRating,
+  fetchOwnerMealRatings,
+} from "./notion-ratings";
 
 

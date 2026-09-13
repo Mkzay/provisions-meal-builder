@@ -1,12 +1,13 @@
 import { auth } from "@/auth";
+import { getSessionOwner } from "@/lib/owner-authorization";
 import { fetchCatalogue } from "@/lib/notion";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
-    const { searchParams } = new URL(req.url);
-    const owner = session?.user?.ownerName || searchParams.get("owner") || undefined;
+    const owner = getSessionOwner(session);
+    if (!owner) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const catalogue = await fetchCatalogue(owner);
     return NextResponse.json(catalogue, {
       headers: {

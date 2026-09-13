@@ -13,6 +13,7 @@ function getCatalogueKey(owner?: string): string {
 }
 
 const OFFLINE_OUTBOX_KEY = "provisions_offline_outbox_v1";
+export type OfflineMutation = { type: string; payload: any; timestamp: number };
 
 export function loadCachedCatalogue(owner?: string): KitchenCatalogue {
   if (typeof window === "undefined") {
@@ -54,7 +55,7 @@ export function queueOfflineMutation(
   }
 }
 
-export function getOfflineOutbox(): Array<{ type: string; payload: any; timestamp: number }> {
+export function getOfflineOutbox(): OfflineMutation[] {
   if (typeof window === "undefined") return [];
   try {
     const outboxRaw = localStorage.getItem(OFFLINE_OUTBOX_KEY);
@@ -62,6 +63,25 @@ export function getOfflineOutbox(): Array<{ type: string; payload: any; timestam
   } catch {
     return [];
   }
+}
+
+export async function replayOfflineMutations(
+  entries: OfflineMutation[],
+  send: (entry: OfflineMutation) => Promise<boolean>
+): Promise<OfflineMutation[]> {
+  const remaining: OfflineMutation[] = [];
+  for (const entry of entries) {
+    if (remaining.length > 0 || !(await send(entry))) {
+      remaining.push(entry);
+    }
+  }
+  return remaining;
+}
+
+export function saveOfflineOutbox(entries: OfflineMutation[]): void {
+  if (typeof window === "undefined") return;
+  if (entries.length === 0) localStorage.removeItem(OFFLINE_OUTBOX_KEY);
+  else localStorage.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(entries));
 }
 
 export function clearOfflineOutbox(): void {

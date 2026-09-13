@@ -4,12 +4,6 @@ import bcrypt from "bcryptjs";
 import { findUserByUsername } from "@/lib/db";
 import { authConfig } from "./auth.config";
 
-const DEFAULT_SECRET = "32f3c9046052408d9107cc3459dc736db39e23517214acbc7c903cf9027f0a22";
-
-if (!process.env.AUTH_SECRET && !process.env.NEXTAUTH_SECRET) {
-  process.env.AUTH_SECRET = DEFAULT_SECRET;
-}
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [

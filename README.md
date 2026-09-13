@@ -132,6 +132,10 @@ POSTGRES_URL=postgresql://user:pass@ep-example.neon.tech/neondb?sslmode=require
 
 # NextAuth / Auth.js
 AUTH_SECRET=your_generated_32_char_secret_key
+
+# Optional AI meal curation (requests send selected ingredient names and meal type)
+OPENROUTER_API_KEY=your_openrouter_key
+OPENROUTER_MODEL=google/gemini-2.0-flash-exp:free
 ```
 
 > If omitted, the app runs in offline demo mode with realistic seed data.
@@ -170,6 +174,8 @@ npm start
 
 Every push to `main` triggers automatic production deployments.
 
+Set `AUTH_SECRET` in every deployed environment; the app intentionally has no fallback. OpenRouter is optional: without its key, meal curation and companion notes use local fallbacks. The built-in curator limiter is per running instance; use a shared rate-limit store before horizontally scaling a production deployment.
+
 ### User Management & Multi-Owner Access
 
 Accounts are managed directly by the administrator via the CLI script against Neon Postgres:
@@ -201,6 +207,7 @@ When a user logs in, their authenticated session automatically scopes all meal q
 | `/api/notion/supplies` | POST | Add new ingredient or ready meal |
 | `/api/notion/profile` | GET, POST | Fetch or save eating goal and height in Notion |
 | `/api/notion/progress-log` | GET, POST, DELETE | Track, log, or archive weigh-in entries in Notion |
+| `/api/curate` | POST | Validate and optionally refine a selected meal with OpenRouter |
 
 ---
 

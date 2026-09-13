@@ -2,10 +2,7 @@
 
 import { AddSupplyModal } from "@/components/AddSupplyModal";
 import { AppHeader } from "@/components/AppHeader";
-import {
-  AppWalkthroughModal,
-  WALKTHROUGH_STORAGE_KEY,
-} from "@/components/AppWalkthroughModal";
+import { AppWalkthroughModal, WALKTHROUGH_STORAGE_KEY } from "@/components/AppWalkthroughModal";
 import { CompanionNoteCard } from "@/components/CompanionNoteCard";
 import { CulinaryCompanion } from "@/components/CulinaryCompanion";
 import { FoodIdeasModal } from "@/components/FoodIdeasModal";
@@ -16,22 +13,17 @@ import { KitchenSidebar } from "@/components/KitchenSidebar";
 import { LeftoverModal } from "@/components/LeftoverModal";
 import { MainIngredientGrid } from "@/components/MainIngredientGrid";
 import { MealConfirmation } from "@/components/MealConfirmation";
+import { MealRatingCard } from "@/components/MealRatingCard";
 import { MealTypeSelector } from "@/components/MealTypeSelector";
 import { ModeSelect } from "@/components/ModeSelect";
 import { NotificationModal } from "@/components/NotificationModal";
 import { PairingCustomizer } from "@/components/PairingCustomizer";
 import { PantryStatCard } from "@/components/PantryStatCard";
-import {
-  PersonalHubModal,
-  PersonalHubTab,
-} from "@/components/PersonalHubModal";
+import { PersonalHubModal, PersonalHubTab } from "@/components/PersonalHubModal";
 import { ProfileOnboardingBanner } from "@/components/ProfileOnboardingBanner";
 import { PulsingLogoLoader } from "@/components/PulsingLogoLoader";
 import { ReadyMealHero } from "@/components/ReadyMealHero";
-import {
-  fetchClientProfile,
-  hasProfilePromptBeenDismissed,
-} from "@/lib/profile-storage";
+import { fetchClientProfile, hasProfilePromptBeenDismissed } from "@/lib/profile-storage";
 import { useMealBuilder } from "@/lib/useMealBuilder";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSession } from "next-auth/react";
@@ -83,6 +75,7 @@ export default function MealBuilderPage() {
     handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision,
     handleQuickAddStaples, handleAddSupply, handleAddBulkSupplies,
     handleToggleAvailability, handleDeleteSupply,
+    isRatingCardOpen, setIsRatingCardOpen, handleRateMeal, handleSkipRating,
   } = useMealBuilder(owner);
 
   const [isStaplesDrawerOpen, setIsStaplesDrawerOpen] = useState(false);
@@ -319,11 +312,27 @@ export default function MealBuilderPage() {
         protein={selectedProtein?.name}
         supplementary={selectedSupplementary?.name}
         owner={owner}
-        onSubmitDecision={handleSubmitLeftoverDecision}
+        onSubmitDecision={(decision) => {
+          handleSubmitLeftoverDecision(decision);
+          setIsLeftoverModalOpen(false);
+          setIsRatingCardOpen(true);
+        }}
         onClose={() => {
           setIsLeftoverModalOpen(false);
-          handleResetToHome();
+          setIsRatingCardOpen(true);
         }}
+      />
+
+      {/* Post-Meal 1-Tap Rating Card */}
+      <MealRatingCard
+        isOpen={isRatingCardOpen}
+        mealName={
+          selectedSource === "Ready Meal"
+            ? selectedReadyMeal?.name
+            : [selectedMain?.name, selectedProtein?.name].filter(Boolean).join(" + ")
+        }
+        onRate={handleRateMeal}
+        onSkip={handleSkipRating}
       />
 
       {/* Meal Notification Reminders Modal */}
