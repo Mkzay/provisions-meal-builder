@@ -119,12 +119,14 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
   }, [owner]);
 
   const togglePriority = (tag: NutrientTag) => {
-    setSelectedPriorities((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
+    const next = selectedPriorities.includes(tag)
+      ? selectedPriorities.filter((t) => t !== tag)
+      : [...selectedPriorities, tag];
+    setSelectedPriorities(next);
+    handleSave({ nutrientPriorities: next });
   };
 
-  const handleSave = async () => {
+  const handleSave = async (overrides?: Partial<MealProfile>) => {
     setIsSaving(true);
     let validHeight: number | undefined;
     if (heightUnit === "cm") {
@@ -147,11 +149,11 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
 
     const res = await saveClientProfile({
       owner,
-      goal: selectedGoal,
+      goal: overrides?.goal || selectedGoal,
       height: validHeight,
       weight: validWeight,
-      nutrientPriorities: selectedPriorities,
-      mealsPerDay,
+      nutrientPriorities: overrides?.nutrientPriorities || selectedPriorities,
+      mealsPerDay: overrides?.mealsPerDay || mealsPerDay,
     });
 
     if (res.success && validWeight) {
@@ -166,11 +168,11 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
     setIsSaving(false);
     if (res.success) {
       if (typeof window !== "undefined" && window.navigator?.vibrate) {
-        window.navigator.vibrate(12);
+        window.navigator.vibrate(10);
       }
       setJustSaved(true);
       onSaved?.(res.profile);
-      setTimeout(() => setJustSaved(false), 1800);
+      setTimeout(() => setJustSaved(false), 2000);
     }
   };
 
@@ -211,6 +213,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                     window.navigator.vibrate(8);
                   }
                   setSelectedGoal(item.goal);
+                  handleSave({ goal: item.goal });
                 }}
                 className={`w-full text-left p-3.5 rounded-2xl border-2 border-stone-900 transition-all flex items-start justify-between gap-3 ${
                   isSelected
@@ -273,6 +276,7 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
                     window.navigator.vibrate(8);
                   }
                   setMealsPerDay(item.count);
+                  handleSave({ mealsPerDay: item.count });
                 }}
                 className={`py-2.5 px-1.5 rounded-xl border-2 border-stone-900 text-center transition-all flex flex-col items-center justify-center ${
                   isSelected
@@ -356,27 +360,31 @@ export const MealProfileSection: React.FC<MealProfileSectionProps> = ({
         onWeightChange={setWeightInput}
       />
 
-      {/* Action CTA */}
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={isSaving || isLoading}
-        className={`w-full py-3 px-4 rounded-xl font-black text-xs border-2 border-stone-900 shadow-brutal-sm transition-all active:translate-x-[1px] active:translate-y-[1px] flex items-center justify-center gap-2 ${
-          justSaved
-            ? "bg-emerald-400 text-stone-900"
-            : isSaving
-            ? "bg-amber-200 text-stone-700 cursor-wait"
-            : "bg-amber-300 hover:bg-amber-400 text-stone-900"
-        }`}
-      >
-        <span>
-          {isSaving
-            ? "Saving Profile..."
-            : justSaved
-            ? "✓ Profile & Weight Saved!"
-            : "Save Eating Profile & Weight"}
-        </span>
-      </button>
+      {/* Sticky Action CTA */}
+      <div className="sticky bottom-0 z-20 -mx-5 sm:-mx-6 -mb-5 sm:-mb-6 p-3 bg-[#FAF8F5]/95 backdrop-blur-md border-t-2 border-stone-900 shadow-brutal-sm flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${justSaved ? "bg-emerald-500 animate-pulse" : "bg-emerald-400"}`} />
+          <span className="text-[11px] sm:text-xs font-bold text-stone-700 truncate">
+            {justSaved ? "✓ Saved to cloud!" : "Auto-saves on tap"}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => handleSave()}
+          disabled={isSaving || isLoading}
+          className={`py-2 px-3 sm:px-4 rounded-xl font-black text-xs border-2 border-stone-900 shadow-brutal-xs transition-all active:translate-x-[1px] active:translate-y-[1px] shrink-0 ${
+            justSaved
+              ? "bg-emerald-400 text-stone-900"
+              : isSaving
+              ? "bg-amber-200 text-stone-700 cursor-wait"
+              : "bg-amber-300 hover:bg-amber-400 text-stone-900"
+          }`}
+        >
+          <span>
+            {isSaving ? "Saving..." : justSaved ? "✓ Saved!" : "Save Profile & Weight"}
+          </span>
+        </button>
+      </div>
     </div>
   );
 };

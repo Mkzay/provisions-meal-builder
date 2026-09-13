@@ -108,11 +108,9 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
     }
 
     if (isThreeMealsPlan) {
-      // 3 meals: removes the snack option entirely
       return options.filter((opt) => opt.type !== "Snack");
     }
 
-    // 4 meals (default): includes snack
     return options;
   }, [isTwoMealsPlan, isThreeMealsPlan, twoMealSchedule, showSnack]);
 
@@ -136,44 +134,48 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-stone-900">
-              What meal are we having?
-            </h2>
-            {isTwoMealsPlan && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full bg-amber-200 border-2 border-stone-900 shadow-brutal-xs text-stone-900">
-                <Sparkle size={12} weight="fill" className="text-amber-700" />
-                <span>2 Meals / Day Schedule</span>
-              </span>
-            )}
-            {isThreeMealsPlan && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full bg-emerald-200 border-2 border-stone-900 shadow-brutal-xs text-stone-900">
-                <Sparkle size={12} weight="fill" className="text-emerald-700" />
-                <span>3 Meals / Day (No Snack)</span>
-              </span>
-            )}
-          </div>
-          <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
-            {isTwoMealsPlan
-              ? "Calibrated to your 2-meals-a-day schedule. Choose your meal slot below."
-              : isThreeMealsPlan
-              ? "Breakfast, Lunch & Dinner calibrated to your 3-meals daily goal."
-              : "Select a meal to explore ready-cooked meals or delicious pantry pairings."}
-          </p>
+      {/* Title & Description Row */}
+      <div className="space-y-1.5 px-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h2 className="text-2xl sm:text-3xl font-display font-black tracking-tight text-stone-900">
+            What meal are we having?
+          </h2>
+          {isTwoMealsPlan && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full bg-amber-200 border-2 border-stone-900 shadow-brutal-xs text-stone-900">
+              <Sparkle size={12} weight="fill" className="text-amber-700" />
+              <span>2 Meals / Day</span>
+            </span>
+          )}
+          {isThreeMealsPlan && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-black px-3 py-1 rounded-full bg-emerald-200 border-2 border-stone-900 shadow-brutal-xs text-stone-900">
+              <Sparkle size={12} weight="fill" className="text-emerald-700" />
+              <span>3 Meals / Day</span>
+            </span>
+          )}
         </div>
+        <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
+          {isTwoMealsPlan
+            ? "Calibrated to your 2-meals-a-day schedule. Choose your meal slot below."
+            : isThreeMealsPlan
+            ? "Breakfast, Lunch & Dinner calibrated to your 3-meals daily goal."
+            : "Select a meal to explore ready-cooked meals or delicious pantry pairings."}
+        </p>
+      </div>
 
-        {/* Schedule Selector for 2-Meals Plan */}
-        {isTwoMealsPlan && (
-          <div className="flex items-center gap-1 bg-stone-100 p-1.5 rounded-2xl border-2 border-stone-900 shadow-brutal-xs shrink-0 self-start sm:self-auto flex-wrap">
+      {/* 2-Meals Schedule Switcher Toolbar on its own line */}
+      {isTwoMealsPlan && (
+        <div className="flex items-center gap-2 flex-wrap p-2 bg-stone-100/90 rounded-2xl border-2 border-stone-900 shadow-brutal-xs">
+          <span className="text-[11px] font-black uppercase tracking-wider text-stone-600 px-2 shrink-0">
+            Schedule:
+          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
             <button
               type="button"
               onClick={() => handleScheduleChange("lunch_dinner")}
-              className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all ${
+              className={`text-xs font-black px-3 py-1.5 rounded-xl transition-all ${
                 twoMealSchedule === "lunch_dinner"
-                  ? "bg-amber-300 text-stone-900 border border-stone-900 shadow-xs"
-                  : "text-stone-600 hover:text-stone-900"
+                  ? "bg-amber-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs"
+                  : "text-stone-700 hover:text-stone-900 hover:bg-stone-200"
               }`}
             >
               Lunch &amp; Dinner
@@ -181,10 +183,10 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
             <button
               type="button"
               onClick={() => handleScheduleChange("breakfast_dinner")}
-              className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all ${
+              className={`text-xs font-black px-3 py-1.5 rounded-xl transition-all ${
                 twoMealSchedule === "breakfast_dinner"
-                  ? "bg-amber-300 text-stone-900 border border-stone-900 shadow-xs"
-                  : "text-stone-600 hover:text-stone-900"
+                  ? "bg-amber-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs"
+                  : "text-stone-700 hover:text-stone-900 hover:bg-stone-200"
               }`}
             >
               Breakfast &amp; Dinner
@@ -192,17 +194,17 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
             <button
               type="button"
               onClick={() => handleScheduleChange("breakfast_lunch")}
-              className={`text-[11px] font-black px-2.5 py-1 rounded-xl transition-all ${
+              className={`text-xs font-black px-3 py-1.5 rounded-xl transition-all ${
                 twoMealSchedule === "breakfast_lunch"
-                  ? "bg-amber-300 text-stone-900 border border-stone-900 shadow-xs"
-                  : "text-stone-600 hover:text-stone-900"
+                  ? "bg-amber-300 text-stone-900 border-2 border-stone-900 shadow-brutal-xs"
+                  : "text-stone-700 hover:text-stone-900 hover:bg-stone-200"
               }`}
             >
               Breakfast &amp; Lunch
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Responsive Grid: 3 Columns for 3-Meal plan, 2 Columns for 2 or 4 Meals */}
       <div
@@ -287,9 +289,9 @@ export const MealTypeSelector: React.FC<MealTypeSelectorProps> = ({
                 </p>
               </div>
 
-              {/* Card Footer Pill Strip */}
-              <div className="mt-3 pt-2.5 border-t-2 border-stone-900/15 w-full flex items-center justify-between gap-1.5 min-w-0">
-                <span className="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-stone-900 bg-white/85 px-2 py-0.5 rounded-xl border border-stone-900/30 truncate shrink-0 max-w-[110px]">
+              {/* Card Footer Pill Strip: unclipped, full text */}
+              <div className="mt-3 pt-2.5 border-t-2 border-stone-900/15 w-full flex items-center justify-between gap-2 min-w-0">
+                <span className="text-[10px] sm:text-[10.5px] font-black uppercase tracking-wider text-stone-900 bg-white/90 px-2.5 py-0.5 rounded-xl border border-stone-900/30 whitespace-nowrap shrink-0">
                   {opt.tagText}
                 </span>
                 <span className="text-xs sm:text-sm font-black text-stone-900 flex items-center gap-1 whitespace-nowrap shrink-0">
