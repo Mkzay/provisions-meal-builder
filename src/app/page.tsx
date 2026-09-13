@@ -17,7 +17,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-stone-50 font-sans text-stone-900 selection:bg-amber-300 selection:text-stone-900">
       <LandingHeader />
-      <main className="flex-1 relative overflow-hidden">
+      <main className="w-full relative">
         <LandingFlowingIcons />
         <LandingHero />
         <LandingInteractiveDemo />

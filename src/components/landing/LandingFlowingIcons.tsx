@@ -125,7 +125,7 @@ export const LandingFlowingIcons: React.FC = () => {
   return (
     <div
       aria-hidden="true"
-      className="absolute inset-0 pointer-events-none overflow-hidden select-none z-0"
+      className="absolute inset-0 pointer-events-none overflow-hidden select-none z-10"
     >
       {FLOWING_TOKENS.map((token) => (
         <motion.div

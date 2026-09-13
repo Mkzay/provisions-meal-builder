@@ -71,7 +71,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased scroll-smooth">
       <head>
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
         <link rel="alternate icon" href="/favicon.ico" />
@@ -83,7 +83,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="h-full flex flex-col bg-background text-foreground safe-area-bottom safe-area-top selection:bg-saffron-200 selection:text-foreground">
+      <body className="min-h-full flex flex-col bg-background text-foreground selection:bg-saffron-200 selection:text-foreground">
         <SessionWrapper>{children}</SessionWrapper>
         <script
           dangerouslySetInnerHTML={{

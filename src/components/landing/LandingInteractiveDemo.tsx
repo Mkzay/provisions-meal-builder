@@ -64,7 +64,7 @@ export const LandingInteractiveDemo: React.FC = () => {
   const currentProtein = isOutOfPrimaryProtein ? activeDish.proteinAlt : activeDish.protein;
 
   return (
-    <section id="demo" className="py-16 sm:py-24 border-b-2 border-stone-900 bg-white">
+    <section id="demo" className="scroll-mt-16 sm:scroll-mt-20 py-16 sm:py-24 border-b-2 border-stone-900 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
           <motion.span

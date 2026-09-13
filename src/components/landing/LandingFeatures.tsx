@@ -6,9 +6,9 @@ import React from "react";
 
 export const LandingFeatures: React.FC = () => {
   return (
-    <div id="features" className="divide-y-2 divide-stone-900 bg-stone-50">
+    <div id="features" className="scroll-mt-16 sm:scroll-mt-20 divide-y-2 divide-stone-900 bg-stone-50">
       {/* 1. The 15 Dish Blueprints Section */}
-      <section id="blueprints" className="py-14 sm:py-20 lg:py-24">
+      <section id="blueprints" className="scroll-mt-16 sm:scroll-mt-20 py-14 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             <motion.div
@@ -150,7 +150,7 @@ export const LandingFeatures: React.FC = () => {
       </section>
 
       {/* 3. Personal Recipe Vault */}
-      <section id="personal-recipes" className="py-16 sm:py-24 bg-white">
+      <section id="personal-recipes" className="scroll-mt-16 sm:scroll-mt-20 py-16 sm:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             <motion.div
