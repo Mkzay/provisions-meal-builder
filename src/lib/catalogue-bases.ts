@@ -277,4 +277,16 @@ export const BASE_IDEAS: FoodIdea[] = [
     description: "Near-instant prep requiring just steeping in boiled broth.",
     combos: "Fluff with Steamed Veggies and Grilled Chicken or Fish.",
   },
+  {
+    id: "idea-base-irish-potato",
+    name: "Irish Potato",
+    category: "Base",
+    role: "Main",
+    kind: "ingredient",
+    suitableMeals: ["Breakfast", "Lunch", "Dinner"],
+    origin: "Global",
+    nutrientTags: ["High Carb", "High Fiber"],
+    description: "Versatile starchy tuber ideal for boiling with egg sauce or simmering in rich peppersoup broth.",
+    combos: "Boil with Fried Egg Sauce, pair with Savory Stew, or simmer in Chicken Peppersoup.",
+  },
 ];

@@ -50,6 +50,10 @@ const PROTEIN_KEYWORDS = new Set([
   "meat",
   "akara",
   "crayfish",
+  "moimoi",
+  "moi",
+  "ponmo",
+  "shaki",
 ]);
 
 const MAIN_KEYWORDS = new Set([

@@ -253,4 +253,16 @@ export const PROTEIN_IDEAS: FoodIdea[] = [
     description: "Dense probiotics and high protein without any cooking required.",
     combos: "Layer with Honey, Berries, Chia Seeds, and Roasted Groundnuts.",
   },
+  {
+    id: "idea-prot-moimoi",
+    name: "Moi Moi (Steamed Bean Cake)",
+    category: "Protein",
+    role: "Protein",
+    kind: "ingredient",
+    suitableMeals: ["Breakfast", "Lunch", "Dinner"],
+    origin: "African",
+    nutrientTags: ["High Protein", "High Fiber"],
+    description: "Savory steamed puree of washed honey beans, peppers, onions, and fish or boiled eggs.",
+    combos: "Serve warm with Jollof Rice, Fried Rice, Pap (Ogi/Akamu), Custard, or warm Agege Bread.",
+  },
 ];

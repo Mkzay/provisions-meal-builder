@@ -267,4 +267,75 @@ describe("Culinary Dish Blueprints & Suggestion Engine", () => {
       expect(isSideCompatibleWithBase(mapleSyrup, oatmeal, "Breakfast")).toBe(true);
     });
   });
+
+  describe("Expanded Authentic Blueprints", () => {
+    it("requires peppersoup spice to trigger Nigerian Peppersoup Pot", () => {
+      const yam: Ingredient = { id: "yam", name: "Yam (Tuber / Raw Slices)", role: "Main", available: true };
+      const chicken: Ingredient = { id: "chk", name: "Chicken Breast", role: "Protein", available: true };
+      const spice: Ingredient = { id: "spice", name: "Peppersoup Spice Blend", role: "Supplementary", available: true };
+      const ugwu: Ingredient = { id: "ugwu", name: "Ugwu (Fluted Pumpkin Leaves)", role: "Supplementary", available: true };
+
+      // With peppersoup spice -> matches peppersoup-pot
+      const bpWithSpice = findMatchingDishBlueprint(yam, [yam, chicken, spice, ugwu], "Dinner");
+      expect(bpWithSpice?.id).toBe("peppersoup-pot");
+      expect(bpWithSpice?.generateTitle(yam, chicken, [ugwu])).toContain("Peppersoup with Chicken Breast");
+      expect(bpWithSpice?.generateTitle(yam, chicken, [ugwu])).toContain("Shredded Ugwu");
+
+      // Without peppersoup spice -> does NOT match peppersoup-pot
+      const bpWithoutSpice = findMatchingDishBlueprint(yam, [yam, chicken, ugwu], "Dinner");
+      expect(bpWithoutSpice?.id).not.toBe("peppersoup-pot");
+    });
+
+    it("triggers Asaro (Yam Porridge) when palm oil or crayfish are in stock", () => {
+      const yam: Ingredient = { id: "yam", name: "Yam Slices", role: "Main", available: true };
+      const palmOil: Ingredient = { id: "oil", name: "Pure Red Palm Oil", role: "Supplementary", available: true };
+      const fish: Ingredient = { id: "fish", name: "Smoked Titus Fish", role: "Protein", available: true };
+
+      const bp = findMatchingDishBlueprint(yam, [yam, palmOil, fish], "Lunch");
+      expect(bp?.id).toBe("asaro-yam-porridge");
+      expect(bp?.generateTitle(yam, fish)).toContain("Asaro (Yam Porridge)");
+    });
+
+    it("triggers Spiced Nigerian Noodles with toppings", () => {
+      const indomie: Ingredient = { id: "indomie", name: "Indomie Instant Noodles", role: "Main", available: true };
+      const egg: Ingredient = { id: "egg", name: "Fried Eggs", role: "Protein", available: true };
+      const dodo: Ingredient = { id: "dodo", name: "Fried Plantain / Dodo", role: "Supplementary", available: true };
+
+      const bp = findMatchingDishBlueprint(indomie, [indomie, egg, dodo], "Breakfast");
+      expect(bp?.id).toBe("spiced-nigerian-noodles");
+      expect(bp?.generateTitle(indomie, egg, [dodo])).toContain("Spiced Noodles with Fried Eggs & Fried Plantain");
+    });
+
+    it("triggers Nigerian Party Fried Rice with mixed veggies", () => {
+      const rice: Ingredient = { id: "rice", name: "White Rice", role: "Main", available: true };
+      const veggies: Ingredient = { id: "veg", name: "Sweet Corn & Green Peas", role: "Supplementary", available: true };
+      const chicken: Ingredient = { id: "chk", name: "Peppered Chicken", role: "Protein", available: true };
+
+      const bp = findMatchingDishBlueprint(rice, [rice, veggies, chicken], "Lunch");
+      expect(bp?.id).toBe("nigerian-fried-rice");
+      expect(bp?.generateTitle(rice, chicken)).toContain("Nigerian Fried White Rice with Peppered Chicken");
+    });
+
+    it("triggers Plantain Porridge and Ewa Aganyin appropriately", () => {
+      const plantain: Ingredient = { id: "pln", name: "Unripe Plantain", role: "Main", available: true };
+      const palmOil: Ingredient = { id: "po", name: "Palm Oil", role: "Supplementary", available: true };
+      const fish: Ingredient = { id: "fsh", name: "Dried Fish", role: "Protein", available: true };
+      const bpPorridge = findMatchingDishBlueprint(plantain, [plantain, palmOil, fish], "Lunch");
+      expect(bpPorridge?.id).toBe("plantain-porridge");
+
+      const beans: Ingredient = { id: "bns", name: "Honey Beans", role: "Main", available: true };
+      const agege: Ingredient = { id: "brd", name: "Agege Bread", role: "Supplementary", available: true };
+      const bpAganyin = findMatchingDishBlueprint(beans, [beans, agege], "Breakfast");
+      expect(bpAganyin?.id).toBe("ewa-aganyin-bread");
+    });
+
+    it("supports Irish Potatoes as a distinct base", () => {
+      const potato: Ingredient = { id: "pot", name: "Irish Potato", role: "Main", available: true };
+      const egg: Ingredient = { id: "egg", name: "Fresh Eggs", role: "Protein", available: true };
+
+      const bp = findMatchingDishBlueprint(potato, [potato, egg], "Breakfast");
+      expect(bp?.id).toBe("irish-potatoes-savory");
+      expect(bp?.generateTitle(potato, egg)).toContain("Boiled Irish Potatoes & Fresh Eggs");
+    });
+  });
 });
