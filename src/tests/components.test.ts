@@ -141,6 +141,10 @@ describe("Component import integrity", () => {
     await import("../components/landing/LandingHero");
   });
 
+  it("imports LandingHeroIllustration", async () => {
+    await import("../components/landing/LandingHeroIllustration");
+  });
+
   it("imports LandingInteractiveDemo", async () => {
     await import("../components/landing/LandingInteractiveDemo");
   });

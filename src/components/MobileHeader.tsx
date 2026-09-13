@@ -40,15 +40,15 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   };
 
   return (
-    <header className="sm:hidden sticky top-0 z-30 bg-stone-50/95 backdrop-blur-md border-b-2 border-stone-900 px-4 py-2.5 flex items-center justify-between">
+    <header className="sm:hidden sticky top-0 z-30 bg-stone-50/95 backdrop-blur-md border-b-2 border-stone-900 px-4 sm:px-6 pt-[max(0.875rem,env(safe-area-inset-top,14px))] pb-3.5 flex items-center justify-between shadow-[0_2px_8px_rgba(0,0,0,0.03)]">
       {/* Left: Greeting & Meal Badge */}
       <div className="flex flex-col">
-        <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+        <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider leading-none">
           {getGreeting()}, {owner}
         </span>
-        <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-sm">{getMealEmoji(mealType)}</span>
-          <span className="text-xs font-black text-stone-900 bg-amber-200 border border-stone-900 px-1.5 py-0.2 rounded-md shadow-brutal-xs">
+        <div className="flex items-center gap-1.5 mt-1.5">
+          <span className="text-sm leading-none">{getMealEmoji(mealType)}</span>
+          <span className="text-xs font-black text-stone-900 bg-amber-200 border border-stone-900 px-2 py-0.5 rounded-md shadow-brutal-xs leading-none">
             {mealType} Time
           </span>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import Link from "next/link";
 import React from "react";
 
@@ -7,10 +8,16 @@ export const LandingFeatures: React.FC = () => {
   return (
     <div id="features" className="divide-y-2 divide-stone-900 bg-stone-50">
       {/* 1. The 15 Dish Blueprints Section */}
-      <section id="blueprints" className="py-16 sm:py-24">
+      <section id="blueprints" className="py-14 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-5 space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.45 }}
+              className="lg:col-span-5 space-y-4 text-center sm:text-left"
+            >
               <span className="inline-block text-xs font-black uppercase tracking-wider text-emerald-800 bg-emerald-200 px-3 py-1 rounded-full border border-stone-900">
                 Pillar 1: Cultural Intelligence
               </span>
@@ -29,10 +36,16 @@ export const LandingFeatures: React.FC = () => {
                   <span>→</span>
                 </Link>
               </div>
-            </div>
+            </motion.div>
 
             {/* Blueprint Grid Cards */}
-            <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5 }}
+              className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3"
+            >
               {[
                 { name: "Party Jollof Rice", emoji: "🍚", type: "Rice Main" },
                 { name: "Puna Yam & Eggs", emoji: "🍠", type: "Tuber Main" },
@@ -46,9 +59,9 @@ export const LandingFeatures: React.FC = () => {
               ].map((bp) => (
                 <div
                   key={bp.name}
-                  className="p-3.5 bg-white rounded-2xl border-2 border-stone-900 shadow-brutal-xs hover:translate-x-[-1px] hover:translate-y-[-1px] transition-transform"
+                  className="p-3 sm:p-3.5 bg-white rounded-2xl border-2 border-stone-900 shadow-brutal-xs hover:translate-x-[-1px] hover:translate-y-[-1px] transition-transform"
                 >
-                  <span className="text-2xl block mb-2">{bp.emoji}</span>
+                  <span className="text-2xl block mb-1.5">{bp.emoji}</span>
                   <span className="text-xs font-black text-stone-900 block leading-tight">
                     {bp.name}
                   </span>
@@ -57,7 +70,7 @@ export const LandingFeatures: React.FC = () => {
                   </span>
                 </div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -77,43 +90,49 @@ export const LandingFeatures: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <div className="p-5 bg-white rounded-3xl border-2 border-stone-900 shadow-brutal space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-300 border-2 border-stone-900 flex items-center justify-center font-black text-lg">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 max-w-5xl mx-auto"
+          >
+            <div className="p-5 sm:p-6 bg-white rounded-3xl border-2 border-stone-900 shadow-brutal space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-amber-300 border-2 border-stone-900 flex items-center justify-center font-black text-lg shadow-brutal-xs">
                 1
               </div>
               <h3 className="font-display font-black text-lg text-stone-900">
                 One-Tap Leftover Prompt
               </h3>
-              <p className="text-xs text-stone-600 font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
                 Right after &quot;I&apos;m Eating This,&quot; Provisions asks: &quot;Did you cook enough for leftovers?&quot; No complex forms. Just a single tap.
               </p>
             </div>
 
-            <div className="p-5 bg-white rounded-3xl border-2 border-stone-900 shadow-brutal space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-300 border-2 border-stone-900 flex items-center justify-center font-black text-lg">
+            <div className="p-5 sm:p-6 bg-white rounded-3xl border-2 border-stone-900 shadow-brutal space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-300 border-2 border-stone-900 flex items-center justify-center font-black text-lg shadow-brutal-xs">
                 2
               </div>
               <h3 className="font-display font-black text-lg text-stone-900">
                 Prioritized at Lunchtime
               </h3>
-              <p className="text-xs text-stone-600 font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
                 When 1:00 PM arrives, Ready Meals appear first with heat-and-eat badges, saving you from cooking when work or life is busy.
               </p>
             </div>
 
-            <div className="p-5 bg-white rounded-3xl border-2 border-stone-900 shadow-brutal space-y-3">
-              <div className="w-10 h-10 rounded-2xl bg-sky-300 border-2 border-stone-900 flex items-center justify-center font-black text-lg">
+            <div className="p-5 sm:p-6 bg-white rounded-3xl border-2 border-stone-900 shadow-brutal space-y-3">
+              <div className="w-10 h-10 rounded-2xl bg-sky-300 border-2 border-stone-900 flex items-center justify-center font-black text-lg shadow-brutal-xs">
                 3
               </div>
               <h3 className="font-display font-black text-lg text-stone-900">
                 Pantry Stash Sync
               </h3>
-              <p className="text-xs text-stone-600 font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm text-stone-600 font-medium leading-relaxed">
                 Once eaten, the meal rotates out of stock automatically. Your household inventory stays accurate with zero manual upkeep.
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 

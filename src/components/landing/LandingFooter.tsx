@@ -1,5 +1,6 @@
 "use client";
 
+import { ProvisionsLogo } from "@/components/ProvisionsLogo";
 import Link from "next/link";
 import React from "react";
 
@@ -22,10 +23,10 @@ export const LandingFooter: React.FC = () => {
           <div className="pt-2">
             <Link
               href="/app"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-emerald-400 hover:bg-emerald-500 text-stone-950 text-sm font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal hover:shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.98] transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-emerald-400 hover:bg-emerald-500 text-stone-950 text-xs sm:text-sm font-black uppercase tracking-wider border-2 border-stone-900 shadow-brutal hover:shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 active:scale-[0.98] transition-all text-center leading-snug"
             >
               <span>Launch Provisions App</span>
-              <span className="text-lg">→</span>
+              <span className="text-base sm:text-lg">→</span>
             </Link>
           </div>
         </div>
@@ -35,9 +36,7 @@ export const LandingFooter: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-amber-400 text-stone-900 flex items-center justify-center font-black text-sm">
-              🍲
-            </div>
+            <ProvisionsLogo className="w-8 h-8 sm:w-9 sm:h-9 shrink-0" />
             <div>
               <span className="font-display font-black text-base tracking-tight text-white block">
                 Provisions

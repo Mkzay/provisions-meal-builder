@@ -61,3 +61,4 @@ export { ThumbsDown } from "@phosphor-icons/react/dist/ssr/ThumbsDown";
 export { SmileyMeh } from "@phosphor-icons/react/dist/ssr/SmileyMeh";
 export { BookmarkSimple } from "@phosphor-icons/react/dist/ssr/BookmarkSimple";
 export { BookOpen } from "@phosphor-icons/react/dist/ssr/BookOpen";
+export { List } from "@phosphor-icons/react/dist/ssr/List";
