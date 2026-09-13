@@ -1,7 +1,13 @@
-﻿"use client";
+"use client";
 
-import { ArrowLeft, ArrowRight, Check, Sparkle, X } from "@/components/icons";
-import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, ArrowRight, Check, X } from "@/components/icons";
+import {
+  MealMomentPreview,
+  NavigationGuidePreview,
+  PantryPlatePreview,
+  SwapDemoPreview,
+} from "@/components/WalkthroughPreviews";
+import { AnimatePresence, motion, PanInfo } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 
 interface AppWalkthroughModalProps {
@@ -10,51 +16,38 @@ interface AppWalkthroughModalProps {
   owner?: string;
 }
 
-interface StepContent {
-  badge: string;
-  title: string;
-  description: string;
-  bullet: string;
-  icon: string;
-  bgAccent: string;
-}
-
-const STEPS: StepContent[] = [
+const STEPS = [
   {
-    badge: "Step 1 of 4",
-    title: "Pick Your Meal Moment",
+    stepNumber: "1/4",
+    tag: "Meal Moments",
+    title: "Choose Your Meal Window",
     description:
-      "Start by tapping your meal slot—Breakfast, Lunch, or Dinner. Provisions automatically detects the time of day and prepares options that fit your routine.",
-    bullet: "☀️ Breakfast · 🍲 Lunch · 🌙 Dinner",
-    icon: "🍽️",
-    bgAccent: "bg-amber-100",
+      "Tap your meal slot. Provisions tailors recipes to the exact time of day—from quick breakfast eggs to rich evening swallows.",
+    Component: MealMomentPreview,
   },
   {
-    badge: "Step 2 of 4",
-    title: "Curated Pantry Plates",
+    stepNumber: "2/4",
+    tag: "Kitchen Intelligence",
+    title: "100% In-Stock Nigerian Meals",
     description:
-      "No more staring into the fridge wondering what to eat. We combine what's actually in your kitchen—pairing anchor grains with proteins, stews, and vegetables.",
-    bullet: "✨ Real Nigerian staples · No phantom grocery items",
-    icon: "🍱",
-    bgAccent: "bg-emerald-100",
+      "No phantom recipes or missing grocery runs. Provisions matches your pantry grains with verified in-stock proteins and fresh greens.",
+    Component: PantryPlatePreview,
   },
   {
-    badge: "Step 3 of 4",
-    title: "Swap Anything In One Tap",
+    stepNumber: "3/4",
+    tag: "Instant Customization",
+    title: "Swap Any Item In One Tap",
     description:
-      "Don't like the suggested protein or side? Simply tap the card or swap button to choose another available ingredient from your kitchen.",
-    bullet: "🔄 Tap to swap · Full control of your plate",
-    icon: "⚡",
-    bgAccent: "bg-purple-100",
+      "Don't feel like chicken tonight? Tap any protein or side on your plate to swap it with another ingredient from your pantry.",
+    Component: SwapDemoPreview,
   },
   {
-    badge: "Step 4 of 4",
-    title: "Cook, Log & Personalize",
+    stepNumber: "4/4",
+    tag: "Kitchen Navigation",
+    title: "Your 4 Essential Tools",
     description:
-      "Confirm your plate in 10 seconds to log what you ate. You can also track your eating goal and weight anytime from the profile button at the top.",
-    bullet: "🚀 Zero calorie stress · Low friction everyday fuel",
-    icon: "🎉",
-    bgAccent: "bg-rose-100",
+      "Use the bottom navigation to build meals in the Kitchen, save family recipes, track pantry stock, and personalize your health goals.",
+    Component: NavigationGuidePreview,
   },
 ];
 
@@ -73,26 +66,19 @@ export const AppWalkthroughModal: React.FC<AppWalkthroughModalProps> = ({
     if (isOpen) {
       setCurrentStep(0);
       previousFocus.current = document.activeElement as HTMLElement;
-      requestAnimationFrame(() => dialogRef.current?.querySelector<HTMLElement>("button")?.focus());
+      requestAnimationFrame(() =>
+        dialogRef.current?.querySelector<HTMLElement>("button")?.focus()
+      );
     } else {
       previousFocus.current?.focus();
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleFinish();
-      if (e.key === "Tab" && dialogRef.current) {
-        const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>("button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"));
-        const first = focusable[0]; const last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
+  const triggerHaptic = (ms = 8) => {
+    if (typeof window !== "undefined" && window.navigator?.vibrate) {
+      window.navigator.vibrate(ms);
+    }
+  };
 
   const handleFinish = () => {
     try {
@@ -102,10 +88,8 @@ export const AppWalkthroughModal: React.FC<AppWalkthroughModalProps> = ({
   };
 
   const handleNext = () => {
+    triggerHaptic(8);
     if (currentStep < STEPS.length - 1) {
-      if (typeof window !== "undefined" && window.navigator?.vibrate) {
-        window.navigator.vibrate(8);
-      }
       setCurrentStep((s) => s + 1);
     } else {
       handleFinish();
@@ -113,42 +97,108 @@ export const AppWalkthroughModal: React.FC<AppWalkthroughModalProps> = ({
   };
 
   const handlePrev = () => {
+    triggerHaptic(6);
     if (currentStep > 0) {
-      if (typeof window !== "undefined" && window.navigator?.vibrate) {
-        window.navigator.vibrate(6);
-      }
       setCurrentStep((s) => s - 1);
+    }
+  };
+
+  // Keyboard navigation & a11y focus trapping (iPad/Desktop friendly)
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleFinish();
+      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "ArrowLeft") handlePrev();
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = Array.from(
+          dialogRef.current.querySelectorAll<HTMLElement>(
+            "button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex='-1'])"
+          )
+        );
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, currentStep]);
+
+  // Touch swipe gesture handler (Mobile thumb-friendly)
+  const handleDragEnd = (
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo
+  ) => {
+    const swipeThreshold = 45;
+    const velocityThreshold = 280;
+    if (info.offset.x < -swipeThreshold || info.velocity.x < -velocityThreshold) {
+      handleNext();
+    } else if (info.offset.x > swipeThreshold || info.velocity.x > velocityThreshold) {
+      handlePrev();
     }
   };
 
   if (!isOpen) return null;
 
   const step = STEPS[currentStep];
+  const StepComponent = step.Component;
 
   return (
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs"
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-stone-900/60 backdrop-blur-xs"
         role="dialog"
         aria-modal="true"
         aria-labelledby="walkthrough-title"
       >
         <motion.div
           ref={dialogRef}
-          initial={{ opacity: 0, scale: 0.94, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.94, y: 16 }}
-          transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
-          className="relative w-full max-w-md bg-[#FAF8F5] border-[2.5px] border-stone-900 rounded-3xl shadow-brutal-lg overflow-hidden flex flex-col"
+          initial={{ opacity: 0, y: 32, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 32, scale: 0.96 }}
+          transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+          className="relative w-full max-w-lg bg-[#FAF8F5] border-t-[2.5px] sm:border-[2.5px] border-stone-900 rounded-t-[28px] sm:rounded-3xl shadow-brutal-lg overflow-hidden flex flex-col max-h-[92dvh] sm:max-h-[88vh]"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b-2 border-stone-900/10 shrink-0">
+          {/* Mobile Bottom-Sheet Pull Indicator */}
+          <div className="sm:hidden w-12 h-1.5 bg-stone-300 rounded-full mx-auto mt-2.5 mb-1 shrink-0" />
+
+          {/* Story-Style Segmented Progress Bar */}
+          <div className="flex items-center gap-1.5 px-5 pt-3 pb-1 shrink-0">
+            {STEPS.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => {
+                  triggerHaptic(6);
+                  setCurrentStep(idx);
+                }}
+                className="flex-1 h-1.5 rounded-full overflow-hidden bg-stone-200 transition-colors focus:outline-none"
+                aria-label={`Go to step ${idx + 1}`}
+              >
+                <div
+                  className={`h-full transition-all duration-300 ${
+                    idx <= currentStep ? "bg-stone-900" : "bg-transparent"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+
+          {/* Top Header */}
+          <div className="flex items-center justify-between px-5 pt-2 pb-2.5 border-b border-stone-900/10 shrink-0">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-300 border border-stone-900 text-stone-900 shadow-2xs">
-                {step.badge}
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-300 border border-stone-900 text-stone-900 shadow-2xs">
+                {step.tag}
               </span>
               {owner && (
-                <span className="text-xs font-bold text-stone-500">
+                <span className="text-xs font-bold text-stone-500 hidden xs:inline">
                   Welcome, {owner}
                 </span>
               )}
@@ -163,54 +213,50 @@ export const AppWalkthroughModal: React.FC<AppWalkthroughModalProps> = ({
             </button>
           </div>
 
-          {/* Body Content */}
-          <div className="p-6 space-y-4">
-            {/* Visual Icon Box */}
-            <div
-              className={`w-16 h-16 rounded-2xl ${step.bgAccent} border-2 border-stone-900 shadow-brutal-xs flex items-center justify-center text-3xl mx-auto`}
-            >
-              {step.icon}
-            </div>
-
-            <div className="text-center space-y-2">
+          {/* Swipeable Body Stage */}
+          <motion.div
+            key={currentStep}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.25}
+            onDragEnd={handleDragEnd}
+            initial={{ opacity: 0, x: 18 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -18 }}
+            transition={{ duration: 0.2 }}
+            className="p-5 sm:p-6 space-y-4 overflow-y-auto no-scrollbar modal-scroll-contain select-none cursor-grab active:cursor-grabbing"
+          >
+            {/* Title & Description */}
+            <div className="text-center space-y-1.5">
               <h3
                 id="walkthrough-title"
-                className="text-xl font-display font-black text-stone-900 leading-tight"
+                className="text-lg sm:text-xl font-display font-black text-stone-900 leading-tight tracking-tight"
               >
                 {step.title}
               </h3>
-              <p className="text-xs sm:text-sm text-stone-700 font-medium leading-relaxed max-w-sm mx-auto">
+              <p className="text-xs sm:text-sm text-stone-700 font-medium leading-relaxed max-w-md mx-auto">
                 {step.description}
               </p>
             </div>
 
-            {/* Feature Highlight Pill */}
-            <div className="p-3 bg-white rounded-xl border-2 border-stone-900 shadow-brutal-2xs text-center">
-              <span className="text-xs font-black text-stone-800">
-                {step.bullet}
+            {/* Interactive Live Micro-Preview Widget */}
+            <div className="py-1">
+              <StepComponent />
+            </div>
+
+            {/* Mobile Swipe Hint */}
+            <div className="text-center pt-1">
+              <span className="text-[10px] font-bold text-stone-400 sm:hidden">
+                ← Swipe left or right with your thumb →
+              </span>
+              <span className="text-[10px] font-bold text-stone-400 hidden sm:inline">
+                Use arrow keys ← → or buttons to navigate
               </span>
             </div>
+          </motion.div>
 
-            {/* Stepper Dots */}
-            <div className="flex items-center justify-center gap-1.5 pt-1">
-              {STEPS.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setCurrentStep(idx)}
-                  className={`h-2 rounded-full transition-all border border-stone-900 ${
-                    idx === currentStep
-                      ? "w-6 bg-stone-900"
-                      : "w-2 bg-stone-200 hover:bg-stone-300"
-                  }`}
-                  aria-label={`Go to step ${idx + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Footer Controls */}
-          <div className="p-4 bg-stone-100/90 border-t-2 border-stone-900 flex items-center justify-between gap-3">
+          {/* Footer Navigation Bar */}
+          <div className="p-4 bg-stone-100/95 border-t-2 border-stone-900 flex items-center justify-between gap-3 shrink-0 safe-area-bottom">
             <button
               type="button"
               onClick={handlePrev}
@@ -225,12 +271,18 @@ export const AppWalkthroughModal: React.FC<AppWalkthroughModalProps> = ({
               <span>Back</span>
             </button>
 
+            <span className="text-xs font-black text-stone-500">
+              {step.stepNumber}
+            </span>
+
             <button
               type="button"
               onClick={handleNext}
-              className="py-2 px-5 rounded-xl border-2 border-stone-900 bg-amber-300 hover:bg-amber-400 font-black text-xs text-stone-900 shadow-brutal-2xs active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center gap-1.5"
+              className="py-2.5 px-5 rounded-xl border-2 border-stone-900 bg-amber-300 hover:bg-amber-400 font-black text-xs text-stone-900 shadow-brutal-2xs active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center gap-1.5"
             >
-              <span>{currentStep === STEPS.length - 1 ? "Get Started" : "Next"}</span>
+              <span>
+                {currentStep === STEPS.length - 1 ? "Start Cooking" : "Next"}
+              </span>
               {currentStep === STEPS.length - 1 ? (
                 <Check size={14} weight="bold" />
               ) : (

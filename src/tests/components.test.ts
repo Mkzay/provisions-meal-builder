@@ -97,6 +97,10 @@ describe("Component import integrity", () => {
     await import("../components/AppWalkthroughModal");
   });
 
+  it("imports WalkthroughPreviews", async () => {
+    await import("../components/WalkthroughPreviews");
+  });
+
   it("imports MealRatingCard", async () => {
     await import("../components/MealRatingCard");
   });
