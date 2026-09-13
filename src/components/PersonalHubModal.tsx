@@ -101,12 +101,12 @@ export const PersonalHubModal: React.FC<PersonalHubModalProps> = ({
           </div>
 
           {/* Theme & Segmented Tab Switcher */}
-          <div className="px-5 sm:px-6 pt-3 pb-2 border-b-2 border-stone-900/10 dark:border-stone-800 bg-[#FAF8F5] dark:bg-[#181614] shrink-0 space-y-2.5">
-            <div className="flex items-center justify-between px-1">
+          <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-b-2 border-stone-900/10 dark:border-stone-800 bg-[#FAF8F5] dark:bg-[#181614] shrink-0 space-y-3">
+            <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-3 px-1">
               <span className="text-[11px] font-black uppercase tracking-wider text-stone-700 dark:text-stone-300">
                 Color Theme
               </span>
-              <div className="w-56">
+              <div className="w-full xs:w-auto xs:min-w-[260px] sm:min-w-[280px]">
                 <ThemeSegmentedControl />
               </div>
             </div>

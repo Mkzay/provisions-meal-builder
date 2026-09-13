@@ -20,6 +20,7 @@ export { ChefHat } from "@phosphor-icons/react/dist/ssr/ChefHat";
 export { Clock } from "@phosphor-icons/react/dist/ssr/Clock";
 export { CookingPot } from "@phosphor-icons/react/dist/ssr/CookingPot";
 export { Database } from "@phosphor-icons/react/dist/ssr/Database";
+export { Desktop } from "@phosphor-icons/react/dist/ssr/Desktop";
 export { Egg } from "@phosphor-icons/react/dist/ssr/Egg";
 export { Faders } from "@phosphor-icons/react/dist/ssr/Faders";
 export { FileText } from "@phosphor-icons/react/dist/ssr/FileText";

@@ -82,15 +82,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             <ProvisionsLogo className="w-8 h-8 sm:w-10 sm:h-10 shrink-0" />
             <div className="flex flex-col justify-center shrink-0">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-base sm:text-2xl font-display font-black tracking-tight text-stone-900 group-hover:text-emerald-700 transition-colors whitespace-nowrap">
+                <span className="text-base sm:text-2xl font-display font-black tracking-tight text-stone-900 dark:text-stone-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors whitespace-nowrap">
                   Provisions
                 </span>
-                <span className="hidden md:inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-300 text-stone-900 border border-stone-900">
+                <span className="hidden md:inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-300 dark:bg-amber-400 text-stone-900 dark:text-stone-950 border border-stone-900 dark:border-stone-700 shadow-brutal-xs dark:shadow-brutal-dark-sm">
                   <Sparkle size={11} weight="fill" />
                   <span>Kitchen</span>
                 </span>
               </div>
-              <p className="hidden md:block text-[11px] text-stone-500 font-medium">
+              <p className="hidden md:block text-[11px] text-stone-500 dark:text-stone-400 font-medium">
                 Your meal decider
               </p>
             </div>
