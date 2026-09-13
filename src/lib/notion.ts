@@ -279,7 +279,7 @@ export async function addSupplyToNotion(
             multi_select: input.mealTypes.map((mt) => ({ name: mt })),
           },
           Available: {
-            checkbox: true,
+            checkbox: input.available !== undefined ? input.available : true,
           },
           Owner: {
             select: { name: input.owner || "User" },
@@ -300,7 +300,7 @@ export async function addSupplyToNotion(
             multi_select: input.mealTypes.map((mt) => ({ name: mt })),
           },
           Available: {
-            checkbox: true,
+            checkbox: input.available !== undefined ? input.available : true,
           },
           Owner: {
             select: { name: input.owner || "User" },

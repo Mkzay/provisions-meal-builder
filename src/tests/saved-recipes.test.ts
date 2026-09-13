@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   buildSavedRecipeProperties,
   parseNotionSavedRecipe,
@@ -13,25 +13,29 @@ describe("Saved Recipes (Database 6 & Personal Suggestion Scoring)", () => {
   const stock: Ingredient[] = [
     { id: "ing-rice", name: "Basmati Rice", role: "Main", mealTypes: ["Lunch", "Dinner"], owner: "Esther", available: true },
     { id: "ing-chicken", name: "Grilled Chicken Breast", role: "Protein", mealTypes: ["Lunch", "Dinner"], owner: "Esther", available: true },
+    { id: "ing-beef", name: "Stewed Beef", role: "Protein", mealTypes: ["Lunch", "Dinner"], owner: "Esther", available: true },
     { id: "ing-dodo", name: "Fried Sweet Plantains (Dodo)", role: "Supplementary", mealTypes: ["Lunch", "Dinner"], owner: "Esther", available: true },
+    { id: "ing-coleslaw", name: "Creamy Coleslaw", role: "Supplementary", mealTypes: ["Lunch", "Dinner"], owner: "Esther", available: true },
     { id: "ing-yam", name: "Yam (Tuber / Raw Slices)", role: "Main", mealTypes: ["Breakfast", "Lunch"], owner: "Esther", available: true },
     { id: "ing-eggs", name: "Fresh Eggs", role: "Protein", mealTypes: ["Breakfast", "Lunch"], owner: "Esther", available: false }, // out of stock!
   ];
 
   const rice = stock.find((i) => i.id === "ing-rice")!;
   const chicken = stock.find((i) => i.id === "ing-chicken")!;
+  const beef = stock.find((i) => i.id === "ing-beef")!;
   const dodo = stock.find((i) => i.id === "ing-dodo")!;
+  const coleslaw = stock.find((i) => i.id === "ing-coleslaw")!;
   const yam = stock.find((i) => i.id === "ing-yam")!;
   const eggs = stock.find((i) => i.id === "ing-eggs")!;
 
   describe("Notion Database 6 Serialization & Parsing", () => {
-    it("builds valid Notion properties for creating a Saved Recipe", () => {
+    it("builds valid Notion properties for creating a Saved Recipe with single or multiple proteins/sides", () => {
       const input: CreateSavedRecipeInput = {
         name: "Mama's Special Sunday Rice",
         mealTypes: ["Lunch", "Dinner"],
-        mainIngredientId: "ing-rice",
-        proteinId: "ing-chicken",
-        supplementaryId: "ing-dodo",
+        mainIngredientId: "3d91c68e-ece0-8143-b609-d1e1ffc78f21",
+        proteinIds: ["3d91c68e-ece0-81c4-94da-fa511e545ed0", "3d91c68e-ece0-810f-99e5-d1c47344b1cb"],
+        supplementaryIds: ["3da1c68e-ece0-8128-bc49-f4793b43de97"],
         owner: "Esther",
         sourceUrl: "https://example.com/sunday-rice",
       };
@@ -39,29 +43,34 @@ describe("Saved Recipes (Database 6 & Personal Suggestion Scoring)", () => {
       const props = buildSavedRecipeProperties(input);
       expect(props.Name.title[0].text.content).toBe("Mama's Special Sunday Rice");
       expect(props["Meal Type"].multi_select).toEqual([{ name: "Lunch" }, { name: "Dinner" }]);
-      expect(props["Main Ingredient"].relation).toEqual([{ id: "ing-rice" }]);
-      expect(props.Protein.relation).toEqual([{ id: "ing-chicken" }]);
-      expect(props.Supplementary.relation).toEqual([{ id: "ing-dodo" }]);
+      expect(props["Main Ingredient"].relation).toEqual([{ id: "3d91c68e-ece0-8143-b609-d1e1ffc78f21" }]);
+      expect(props.Protein.relation).toEqual([
+        { id: "3d91c68e-ece0-81c4-94da-fa511e545ed0" },
+        { id: "3d91c68e-ece0-810f-99e5-d1c47344b1cb" },
+      ]);
+      expect(props.Supplementary.relation).toEqual([{ id: "3da1c68e-ece0-8128-bc49-f4793b43de97" }]);
       expect(props.Owner.select.name).toBe("Esther");
       expect(props["Source URL"].url).toBe("https://example.com/sunday-rice");
     });
 
-    it("parses raw Notion page into SavedRecipe with resolved ingredient names", () => {
+    it("parses raw Notion page into SavedRecipe with resolved multiple proteins and sides", () => {
       const ingredientMap = new Map([
         ["ing-rice", "Basmati Rice"],
         ["ing-chicken", "Grilled Chicken Breast"],
+        ["ing-beef", "Stewed Beef"],
         ["ing-dodo", "Fried Sweet Plantains (Dodo)"],
+        ["ing-coleslaw", "Creamy Coleslaw"],
       ]);
 
       const rawPage: any = {
         id: "recipe-1",
         created_time: "2026-09-13T10:00:00.000Z",
         properties: {
-          Name: { title: [{ plain_text: "Mama's Special Sunday Rice" }] },
+          Name: { title: [{ plain_text: "Mama's Feast Rice" }] },
           "Meal Type": { multi_select: [{ name: "Lunch" }, { name: "Dinner" }] },
           "Main Ingredient": { relation: [{ id: "ing-rice" }] },
-          Protein: { relation: [{ id: "ing-chicken" }] },
-          Supplementary: { relation: [{ id: "ing-dodo" }] },
+          Protein: { relation: [{ id: "ing-chicken" }, { id: "ing-beef" }] },
+          Supplementary: { relation: [{ id: "ing-dodo" }, { id: "ing-coleslaw" }] },
           Owner: { select: { name: "Esther" } },
           "Source URL": { url: "https://example.com/sunday-rice" },
         },
@@ -70,16 +79,13 @@ describe("Saved Recipes (Database 6 & Personal Suggestion Scoring)", () => {
       const recipe = parseNotionSavedRecipe(rawPage, ingredientMap);
       expect(recipe).not.toBeNull();
       expect(recipe?.id).toBe("recipe-1");
-      expect(recipe?.name).toBe("Mama's Special Sunday Rice");
-      expect(recipe?.mealTypes).toEqual(["Lunch", "Dinner"]);
-      expect(recipe?.mainIngredientId).toBe("ing-rice");
-      expect(recipe?.mainIngredientName).toBe("Basmati Rice");
-      expect(recipe?.proteinId).toBe("ing-chicken");
-      expect(recipe?.proteinName).toBe("Grilled Chicken Breast");
-      expect(recipe?.supplementaryId).toBe("ing-dodo");
-      expect(recipe?.supplementaryName).toBe("Fried Sweet Plantains (Dodo)");
-      expect(recipe?.owner).toBe("Esther");
-      expect(recipe?.sourceUrl).toBe("https://example.com/sunday-rice");
+      expect(recipe?.name).toBe("Mama's Feast Rice");
+      expect(recipe?.proteinIds).toEqual(["ing-chicken", "ing-beef"]);
+      expect(recipe?.proteinNames).toEqual(["Grilled Chicken Breast", "Stewed Beef"]);
+      expect(recipe?.proteinName).toBe("Grilled Chicken Breast & Stewed Beef");
+      expect(recipe?.supplementaryIds).toEqual(["ing-dodo", "ing-coleslaw"]);
+      expect(recipe?.supplementaryNames).toEqual(["Fried Sweet Plantains (Dodo)", "Creamy Coleslaw"]);
+      expect(recipe?.supplementaryName).toBe("Fried Sweet Plantains (Dodo) & Creamy Coleslaw");
     });
   });
 
@@ -117,6 +123,40 @@ describe("Saved Recipes (Database 6 & Personal Suggestion Scoring)", () => {
 
       // eggs are available: false in stock
       const match = findMatchingSavedRecipe(yam, eggs, undefined, [yamEggRecipe], stock);
+      expect(match).toBeUndefined();
+    });
+
+    it("matches multi-protein/side recipe when candidate is one of the proteins and all recipe items are in stock", () => {
+      const feastRecipe: SavedRecipe = {
+        id: "recipe-3",
+        name: "Mama's Feast Rice",
+        mealTypes: ["Lunch", "Dinner"],
+        mainIngredientId: "ing-rice",
+        mainIngredientName: "Basmati Rice",
+        proteinIds: ["ing-chicken", "ing-beef"],
+        proteinNames: ["Grilled Chicken Breast", "Stewed Beef"],
+        supplementaryIds: ["ing-dodo", "ing-coleslaw"],
+        supplementaryNames: ["Fried Sweet Plantains (Dodo)", "Creamy Coleslaw"],
+        owner: "Esther",
+      };
+
+      // Both chicken and beef, and both dodo and coleslaw are in stock!
+      const match = findMatchingSavedRecipe(rice, chicken, dodo, [feastRecipe], stock);
+      expect(match).toBeDefined();
+      expect(match?.name).toBe("Mama's Feast Rice");
+    });
+
+    it("does NOT match multi-protein recipe if any of the required proteins is out of stock", () => {
+      const feastRecipe: SavedRecipe = {
+        id: "recipe-4",
+        name: "Mama's Feast Rice with Eggs",
+        mealTypes: ["Lunch", "Dinner"],
+        mainIngredientId: "ing-rice",
+        proteinIds: ["ing-chicken", "ing-eggs"], // eggs are out of stock!
+        owner: "Esther",
+      };
+
+      const match = findMatchingSavedRecipe(rice, chicken, undefined, [feastRecipe], stock);
       expect(match).toBeUndefined();
     });
   });

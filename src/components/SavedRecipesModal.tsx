@@ -18,7 +18,7 @@ interface SavedRecipesModalProps {
   onClose: () => void;
   savedRecipes: SavedRecipe[];
   ingredients: Ingredient[];
-  onAddSupply: (input: AddSupplyInput) => Promise<void>;
+  onAddSupply: (input: AddSupplyInput) => Promise<{ success: boolean; id?: string } | void>;
   onCreateRecipe: (input: CreateSavedRecipeInput) => Promise<{ success: boolean; id?: string }>;
   onDeleteRecipe: (id: string) => Promise<{ success: boolean }>;
   onCookRecipe?: (recipe: SavedRecipe) => void;
@@ -63,15 +63,19 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-sm overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-stone-900/60 backdrop-blur-sm">
         <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          className="relative w-full max-w-2xl bg-white border-2 border-stone-900 rounded-3xl shadow-brutal p-5 sm:p-7 my-6 max-h-[90vh] flex flex-col"
+          initial={{ y: 40, opacity: 0, scale: 0.98 }}
+          animate={{ y: 0, opacity: 1, scale: 1 }}
+          exit={{ y: 40, opacity: 0, scale: 0.98 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="relative w-full max-w-2xl bg-white border-t-2 sm:border-2 border-stone-900 rounded-t-3xl sm:rounded-3xl shadow-brutal p-5 sm:p-7 max-h-[85vh] sm:max-h-[90vh] flex flex-col"
         >
+          {/* Mobile Bottom Drawer Drag Handle */}
+          <div className="w-12 h-1.5 bg-stone-300 rounded-full mx-auto mb-3 sm:hidden shrink-0" />
+
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b-2 border-stone-900/10">
+          <div className="flex items-center justify-between pb-4 border-b-2 border-stone-900/10 shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-orange-200 border-2 border-stone-900 shadow-brutal-xs">
                 <BookmarkSimple size={20} weight="fill" className="text-stone-900" />
@@ -95,7 +99,7 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex gap-2 pt-4 pb-3">
+          <div className="flex gap-2 pt-4 pb-3 shrink-0">
             <button
               onClick={() => setActiveTab("list")}
               className={`flex-1 py-2 px-3 text-xs sm:text-sm font-black rounded-xl border-2 border-stone-900 transition-all shadow-brutal-xs ${
@@ -116,7 +120,7 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
           </div>
 
           {/* Body Content */}
-          <div className="flex-1 overflow-y-auto pr-1 py-2 space-y-3">
+          <div className="flex-1 overflow-y-auto pr-1 py-2 space-y-3 min-h-0">
             {activeTab === "list" ? (
               savedRecipes.length === 0 ? (
                 <div className="text-center py-10 px-4 bg-stone-50 rounded-2xl border-2 border-dashed border-stone-300">
@@ -139,14 +143,33 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
                     const mainInStock = recipe.mainIngredientId
                       ? (stockMap.get(recipe.mainIngredientId) ?? false)
                       : false;
-                    const proteinInStock = recipe.proteinId ? (stockMap.get(recipe.proteinId) ?? false) : true;
-                    const suppInStock = recipe.supplementaryId ? (stockMap.get(recipe.supplementaryId) ?? false) : true;
-                    const allInStock = mainInStock && proteinInStock && suppInStock;
+
+                    const pIds = recipe.proteinIds?.length ? recipe.proteinIds : (recipe.proteinId ? [recipe.proteinId] : []);
+                    const missingProteins: string[] = [];
+                    pIds.forEach((pid, idx) => {
+                      if (!(stockMap.get(pid) ?? false)) {
+                        const pName = recipe.proteinNames?.[idx] || (pid === recipe.proteinId ? recipe.proteinName : undefined) || "Protein";
+                        missingProteins.push(pName);
+                      }
+                    });
+
+                    const sIds = recipe.supplementaryIds?.length ? recipe.supplementaryIds : (recipe.supplementaryId ? [recipe.supplementaryId] : []);
+                    const missingSupps: string[] = [];
+                    sIds.forEach((sid, idx) => {
+                      if (!(stockMap.get(sid) ?? false)) {
+                        const sName = recipe.supplementaryNames?.[idx] || (sid === recipe.supplementaryId ? recipe.supplementaryName : undefined) || "Side";
+                        missingSupps.push(sName);
+                      }
+                    });
 
                     const missingNames: string[] = [];
                     if (!mainInStock) missingNames.push(recipe.mainIngredientName || "Base");
-                    if (recipe.proteinId && !proteinInStock) missingNames.push(recipe.proteinName || "Protein");
-                    if (recipe.supplementaryId && !suppInStock) missingNames.push(recipe.supplementaryName || "Side");
+                    missingNames.push(...missingProteins);
+                    missingNames.push(...missingSupps);
+
+                    const allInStock = missingNames.length === 0;
+                    const proteinDisplay = recipe.proteinNames?.length ? recipe.proteinNames.join(" + ") : recipe.proteinName;
+                    const suppDisplay = recipe.supplementaryNames?.length ? recipe.supplementaryNames.join(" + ") : recipe.supplementaryName;
 
                     return (
                       <div
@@ -164,7 +187,7 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
                                 <span>All in stock</span>
                               </span>
                             ) : (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-800 truncate max-w-[200px]">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-800 truncate max-w-[220px]">
                                 Missing: {missingNames.join(", ")}
                               </span>
                             )}
@@ -172,8 +195,8 @@ export const SavedRecipesModal: React.FC<SavedRecipesModalProps> = ({
 
                           <div className="flex flex-wrap items-center gap-1.5 text-xs text-stone-600 font-medium">
                             <span className="font-bold text-stone-800">{recipe.mainIngredientName}</span>
-                            {recipe.proteinName && <span>+ {recipe.proteinName}</span>}
-                            {recipe.supplementaryName && <span>+ {recipe.supplementaryName}</span>}
+                            {proteinDisplay && <span>+ {proteinDisplay}</span>}
+                            {suppDisplay && <span>+ {suppDisplay}</span>}
                           </div>
 
                           <div className="flex items-center gap-2 pt-0.5">

@@ -14,8 +14,8 @@ interface AppModalsProps {
   catalogue: KitchenCatalogue;
   isAddSupplyOpen: boolean;
   onCloseAddSupply: () => void;
-  onAddSupply: (input: AddSupplyInput) => Promise<void>;
-  onAddBulkSupplies: (inputs: AddSupplyInput[]) => Promise<void>;
+  onAddSupply: (input: AddSupplyInput) => Promise<{ success: boolean; id?: string } | void>;
+  onAddBulkSupplies: (inputs: AddSupplyInput[]) => Promise<any>;
   isFoodIdeasOpen: boolean;
   onCloseFoodIdeas: () => void;
   onOpenFoodIdeas: () => void;
@@ -71,7 +71,7 @@ export const AppModals: React.FC<AppModalsProps> = ({
       <AddSupplyModal
         isOpen={isAddSupplyOpen}
         onClose={onCloseAddSupply}
-        onAddSupply={onAddSupply}
+        onAddSupply={async (input) => { await onAddSupply(input); }}
         onAddBulkSupplies={onAddBulkSupplies}
         onOpenFoodIdeas={onOpenFoodIdeas}
         owner={owner}
@@ -80,7 +80,7 @@ export const AppModals: React.FC<AppModalsProps> = ({
       <FoodIdeasModal
         isOpen={isFoodIdeasOpen}
         onClose={onCloseFoodIdeas}
-        onAddSupply={onAddSupply}
+        onAddSupply={async (input) => { await onAddSupply(input); }}
         ingredients={catalogue.ingredients}
         readyMeals={catalogue.readyMeals}
         owner={owner}

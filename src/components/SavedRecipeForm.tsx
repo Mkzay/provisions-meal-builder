@@ -8,7 +8,7 @@ const ALL_MEAL_TYPES: MealType[] = ["Breakfast", "Lunch", "Dinner", "Snack"];
 interface SavedRecipeFormProps {
   ingredients: Ingredient[];
   owner: string;
-  onAddSupply: (input: AddSupplyInput) => Promise<void>;
+  onAddSupply: (input: AddSupplyInput) => Promise<{ success: boolean; id?: string } | void>;
   onSubmit: (input: CreateSavedRecipeInput) => Promise<void>;
   onCancel: () => void;
   isSubmitting?: boolean;
@@ -25,12 +25,13 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
   const [name, setName] = useState("");
   const [mealTypes, setMealTypes] = useState<MealType[]>(["Lunch", "Dinner"]);
   const [mainId, setMainId] = useState("");
-  const [proteinId, setProteinId] = useState("");
-  const [supplementaryId, setSupplementaryId] = useState("");
+  const [proteinIds, setProteinIds] = useState<string[]>([]);
+  const [supplementaryIds, setSupplementaryIds] = useState<string[]>([]);
   const [sourceUrl, setSourceUrl] = useState("");
 
   const [creatingRole, setCreatingRole] = useState<"Main" | "Protein" | "Supplementary" | null>(null);
   const [newIngredientName, setNewIngredientName] = useState("");
+  const [newIngredientInStock, setNewIngredientInStock] = useState(false);
   const [isCreatingIngredient, setIsCreatingIngredient] = useState(false);
 
   const mains = useMemo(() => ingredients.filter((i) => i.role === "Main"), [ingredients]);
@@ -50,22 +51,27 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
     setIsCreatingIngredient(true);
     const itemName = newIngredientName.trim();
     try {
-      await onAddSupply({
+      const res = await onAddSupply({
         name: itemName,
         role: creatingRole,
         mealTypes,
+        available: newIngredientInStock,
         owner,
         kind: "ingredient",
       });
-      const match = ingredients.find(
+
+      const returnedId = res && typeof res === "object" && "id" in res ? res.id : undefined;
+      const targetId = returnedId || ingredients.find(
         (i) => i.name.toLowerCase() === itemName.toLowerCase() && i.role === creatingRole
-      );
-      if (match) {
-        if (creatingRole === "Main") setMainId(match.id);
-        else if (creatingRole === "Protein") setProteinId(match.id);
-        else if (creatingRole === "Supplementary") setSupplementaryId(match.id);
+      )?.id;
+
+      if (targetId) {
+        if (creatingRole === "Main") setMainId(targetId);
+        else if (creatingRole === "Protein") setProteinIds((prev) => [...prev, targetId]);
+        else if (creatingRole === "Supplementary") setSupplementaryIds((prev) => [...prev, targetId]);
       }
       setNewIngredientName("");
+      setNewIngredientInStock(false);
       setCreatingRole(null);
     } catch (err) {
       console.error("Failed to add ingredient inline:", err);
@@ -81,11 +87,50 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
       name: name.trim(),
       mealTypes,
       mainIngredientId: mainId,
-      proteinId: proteinId || undefined,
-      supplementaryId: supplementaryId || undefined,
+      proteinId: proteinIds[0] || undefined,
+      proteinIds,
+      supplementaryId: supplementaryIds[0] || undefined,
+      supplementaryIds,
       sourceUrl: sourceUrl.trim() || undefined,
       owner,
     });
+  };
+
+  const removeProtein = (id: string) => setProteinIds((prev) => prev.filter((p) => p !== id));
+  const removeSide = (id: string) => setSupplementaryIds((prev) => prev.filter((s) => s !== id));
+
+  const renderInlineAdd = (role: "Main" | "Protein" | "Supplementary", placeholder: string) => {
+    if (creatingRole !== role) return null;
+    return (
+      <div className="p-2.5 bg-amber-50 rounded-xl border-2 border-amber-400 mb-2 space-y-2">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder={placeholder}
+            value={newIngredientName}
+            onChange={(e) => setNewIngredientName(e.target.value)}
+            className="flex-1 px-2.5 py-1 text-xs border border-stone-900 rounded-lg bg-white"
+          />
+          <button
+            type="button"
+            disabled={isCreatingIngredient || !newIngredientName.trim()}
+            onClick={handleInlineCreate}
+            className="px-3 py-1 bg-amber-300 border border-stone-900 rounded-lg text-xs font-black shadow-brutal-xs"
+          >
+            {isCreatingIngredient ? "Adding..." : "Add"}
+          </button>
+        </div>
+        <label className="flex items-center gap-1.5 text-[11px] font-bold text-stone-700 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={newIngredientInStock}
+            onChange={(e) => setNewIngredientInStock(e.target.checked)}
+            className="rounded border-stone-400"
+          />
+          I have this in stock now
+        </label>
+      </div>
+    );
   };
 
   return (
@@ -135,28 +180,10 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
             onClick={() => setCreatingRole(creatingRole === "Main" ? null : "Main")}
             className="text-[11px] font-black text-amber-700 hover:underline"
           >
-            + Add New Main
+            {creatingRole === "Main" ? "Cancel" : "+ Add New Main"}
           </button>
         </div>
-        {creatingRole === "Main" && (
-          <div className="flex gap-2 p-2 bg-amber-50 rounded-xl border-2 border-amber-400 mb-2">
-            <input
-              type="text"
-              placeholder="New base name..."
-              value={newIngredientName}
-              onChange={(e) => setNewIngredientName(e.target.value)}
-              className="flex-1 px-2.5 py-1 text-xs border border-stone-900 rounded-lg bg-white"
-            />
-            <button
-              type="button"
-              disabled={isCreatingIngredient || !newIngredientName.trim()}
-              onClick={handleInlineCreate}
-              className="px-3 py-1 bg-amber-300 border border-stone-900 rounded-lg text-xs font-black shadow-brutal-xs"
-            >
-              {isCreatingIngredient ? "Adding..." : "Add"}
-            </button>
-          </div>
-        )}
+        {renderInlineAdd("Main", "New base name...")}
         <select
           required
           value={mainId}
@@ -172,97 +199,117 @@ export const SavedRecipeForm: React.FC<SavedRecipeFormProps> = ({
         </select>
       </div>
 
-      {/* Protein */}
+      {/* Proteins (Multiple Supported) */}
       <div>
         <div className="flex items-center justify-between mb-1">
           <label className="text-xs font-black uppercase tracking-wider text-stone-700">
-            Protein (Optional)
+            Proteins (Optional, Multi-select)
           </label>
           <button
             type="button"
             onClick={() => setCreatingRole(creatingRole === "Protein" ? null : "Protein")}
             className="text-[11px] font-black text-amber-700 hover:underline"
           >
-            + Add New Protein
+            {creatingRole === "Protein" ? "Cancel" : "+ Add New Protein"}
           </button>
         </div>
-        {creatingRole === "Protein" && (
-          <div className="flex gap-2 p-2 bg-amber-50 rounded-xl border-2 border-amber-400 mb-2">
-            <input
-              type="text"
-              placeholder="New protein name..."
-              value={newIngredientName}
-              onChange={(e) => setNewIngredientName(e.target.value)}
-              className="flex-1 px-2.5 py-1 text-xs border border-stone-900 rounded-lg bg-white"
-            />
-            <button
-              type="button"
-              disabled={isCreatingIngredient || !newIngredientName.trim()}
-              onClick={handleInlineCreate}
-              className="px-3 py-1 bg-amber-300 border border-stone-900 rounded-lg text-xs font-black shadow-brutal-xs"
-            >
-              {isCreatingIngredient ? "Adding..." : "Add"}
-            </button>
+        {renderInlineAdd("Protein", "New protein name...")}
+        {proteinIds.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {proteinIds.map((id) => {
+              const p = proteins.find((item) => item.id === id);
+              return (
+                <span
+                  key={id}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border-2 border-stone-900 bg-amber-200 text-stone-900 text-xs font-black shadow-brutal-xs"
+                >
+                  {p ? p.name : "Protein"}
+                  <button
+                    type="button"
+                    onClick={() => removeProtein(id)}
+                    className="hover:text-red-600 font-black ml-0.5 text-sm"
+                  >
+                    ×
+                  </button>
+                </span>
+              );
+            })}
           </div>
         )}
         <select
-          value={proteinId}
-          onChange={(e) => setProteinId(e.target.value)}
+          value=""
+          onChange={(e) => {
+            if (e.target.value && !proteinIds.includes(e.target.value)) {
+              setProteinIds([...proteinIds, e.target.value]);
+            }
+          }}
           className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 bg-stone-50 focus:bg-white focus:outline-none shadow-brutal-xs"
         >
-          <option value="">(None)</option>
-          {proteins.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name} {p.available ? "• in stock" : "(out of stock)"}
-            </option>
-          ))}
+          <option value="">+ Add Protein...</option>
+          {proteins
+            .filter((p) => !proteinIds.includes(p.id))
+            .map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} {p.available ? "• in stock" : "(out of stock)"}
+              </option>
+            ))}
         </select>
       </div>
 
-      {/* Supplementary */}
+      {/* Sides / Supplementary (Multiple Supported) */}
       <div>
         <div className="flex items-center justify-between mb-1">
           <label className="text-xs font-black uppercase tracking-wider text-stone-700">
-            Side / Supplementary (Optional)
+            Sides / Supplementary (Optional, Multi-select)
           </label>
           <button
             type="button"
             onClick={() => setCreatingRole(creatingRole === "Supplementary" ? null : "Supplementary")}
             className="text-[11px] font-black text-amber-700 hover:underline"
           >
-            + Add New Side
+            {creatingRole === "Supplementary" ? "Cancel" : "+ Add New Side"}
           </button>
         </div>
-        {creatingRole === "Supplementary" && (
-          <div className="flex gap-2 p-2 bg-amber-50 rounded-xl border-2 border-amber-400 mb-2">
-            <input
-              type="text"
-              placeholder="New side dish name..."
-              value={newIngredientName}
-              onChange={(e) => setNewIngredientName(e.target.value)}
-              className="flex-1 px-2.5 py-1 text-xs border border-stone-900 rounded-lg bg-white"
-            />
-            <button
-              type="button"
-              disabled={isCreatingIngredient || !newIngredientName.trim()}
-              onClick={handleInlineCreate}
-              className="px-3 py-1 bg-amber-300 border border-stone-900 rounded-lg text-xs font-black shadow-brutal-xs"
-            >
-              {isCreatingIngredient ? "Adding..." : "Add"}
-            </button>
+        {renderInlineAdd("Supplementary", "New side dish name...")}
+        {supplementaryIds.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {supplementaryIds.map((id) => {
+              const s = sides.find((item) => item.id === id);
+              return (
+                <span
+                  key={id}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border-2 border-stone-900 bg-orange-200 text-stone-900 text-xs font-black shadow-brutal-xs"
+                >
+                  {s ? s.name : "Side"}
+                  <button
+                    type="button"
+                    onClick={() => removeSide(id)}
+                    className="hover:text-red-600 font-black ml-0.5 text-sm"
+                  >
+                    ×
+                  </button>
+                </span>
+              );
+            })}
           </div>
         )}
         <select
-          value={supplementaryId}
-          onChange={(e) => setSupplementaryId(e.target.value)}
+          value=""
+          onChange={(e) => {
+            if (e.target.value && !supplementaryIds.includes(e.target.value)) {
+              setSupplementaryIds([...supplementaryIds, e.target.value]);
+            }
+          }}
           className="w-full px-3 py-2 text-sm font-semibold rounded-xl border-2 border-stone-900 bg-stone-50 focus:bg-white focus:outline-none shadow-brutal-xs"
         >
-          <option value="">(None)</option>
-          {sides.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name} {s.available ? "• in stock" : "(out of stock)"}
-            </option>
-          ))}
+          <option value="">+ Add Side Dish...</option>
+          {sides
+            .filter((s) => !supplementaryIds.includes(s.id))
+            .map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} {s.available ? "• in stock" : "(out of stock)"}
+              </option>
+            ))}
         </select>
       </div>
 

@@ -148,6 +148,7 @@ export interface AddSupplyInput {
   mealTypes: MealType[];
   notes?: string;
   owner?: string;
+  available?: boolean;
 }
 
 export type UserGoal =
@@ -159,12 +160,15 @@ export type UserGoal =
 export interface MealProfile {
   id?: string;
   owner: string;
-  goal: UserGoal;
-  height?: number; // Number in Notion Database 4
-  weight?: number; // Number in Notion Database 4
-  nutrientPriorities?: NutrientTag[];
+  targetWeight?: number;
+  currentWeight?: number;
+  weight?: number;
+  height?: number;
+  unit?: "kg" | "lbs";
   mealsPerDay?: number;
-  updatedAt?: string;
+  goal?: UserGoal;
+  nutrientPriorities?: NutrientTag[];
+  updatedAt: string;
 }
 
 export interface WeightLogEntry {
@@ -183,9 +187,13 @@ export interface SavedRecipe {
   mainIngredientId?: string;
   mainIngredientName?: string;
   proteinId?: string;
+  proteinIds?: string[];
   proteinName?: string;
+  proteinNames?: string[];
   supplementaryId?: string;
+  supplementaryIds?: string[];
   supplementaryName?: string;
+  supplementaryNames?: string[];
   owner: string;
   sourceUrl?: string;
   createdAt?: string;
@@ -196,9 +204,9 @@ export interface CreateSavedRecipeInput {
   mealTypes: MealType[];
   mainIngredientId?: string;
   proteinId?: string;
+  proteinIds?: string[];
   supplementaryId?: string;
+  supplementaryIds?: string[];
   owner: string;
   sourceUrl?: string;
 }
-
-

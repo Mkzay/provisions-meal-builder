@@ -155,22 +155,40 @@ export function findMatchingSavedRecipe(
     }
 
     // Check main ingredient match
-    if (recipe.mainIngredientId !== main.id) continue;
+    if (recipe.mainIngredientId && recipe.mainIngredientId !== main.id) continue;
 
-    // Check protein match
-    if (recipe.proteinId && recipe.proteinId !== protein?.id) continue;
-    if (!recipe.proteinId && protein) continue;
+    // Collect all proteins required by the recipe
+    const requiredProteins = (recipe.proteinIds && recipe.proteinIds.length > 0)
+      ? recipe.proteinIds
+      : (recipe.proteinId ? [recipe.proteinId] : []);
+
+    // Check protein match:
+    // If recipe requires proteins, candidate protein must be one of them.
+    // If recipe requires no proteins, candidate must have no protein.
+    if (requiredProteins.length > 0) {
+      if (!protein || !requiredProteins.includes(protein.id)) continue;
+    } else {
+      if (protein) continue;
+    }
+
+    // Collect all supplementaries required by the recipe
+    const requiredSupps = (recipe.supplementaryIds && recipe.supplementaryIds.length > 0)
+      ? recipe.supplementaryIds
+      : (recipe.supplementaryId ? [recipe.supplementaryId] : []);
 
     // Check supplementary match
-    if (recipe.supplementaryId && recipe.supplementaryId !== supplementary?.id) continue;
-    if (!recipe.supplementaryId && supplementary) continue;
+    if (requiredSupps.length > 0) {
+      if (!supplementary || !requiredSupps.includes(supplementary.id)) continue;
+    } else {
+      if (supplementary) continue;
+    }
 
-    // Verify all required components in recipe are available in stock
-    const mainInStock = stockMap.get(recipe.mainIngredientId) ?? false;
-    const proteinInStock = recipe.proteinId ? (stockMap.get(recipe.proteinId) ?? false) : true;
-    const suppInStock = recipe.supplementaryId ? (stockMap.get(recipe.supplementaryId) ?? false) : true;
+    // Verify ALL required components in recipe are available in stock
+    const mainInStock = recipe.mainIngredientId ? (stockMap.get(recipe.mainIngredientId) ?? false) : true;
+    const allProteinsInStock = requiredProteins.every((id) => stockMap.get(id) ?? false);
+    const allSuppsInStock = requiredSupps.every((id) => stockMap.get(id) ?? false);
 
-    if (mainInStock && proteinInStock && suppInStock) {
+    if (mainInStock && allProteinsInStock && allSuppsInStock) {
       return recipe;
     }
   }

@@ -15,12 +15,8 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isAddSupplyOpen, setIsAddSupplyOpen] = useState(false);
-
-  const [mealType, setMealType] = useState<MealType>(
-    getDefaultMealTypeByHour(new Date().getHours())
-  );
+  const [mealType, setMealType] = useState<MealType>(getDefaultMealTypeByHour(new Date().getHours()));
   const [currentStep, setCurrentStep] = useState<FlowStep>("meal_type");
-
   const [selectedSource, setSelectedSource] = useState<MealSource>("Built");
   const [selectedReadyMeal, setSelectedReadyMeal] = useState<ReadyMeal | undefined>();
   const [selectedMain, setSelectedMain] = useState<Ingredient | undefined>();
@@ -28,7 +24,6 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
   const [selectedSupplementary, setSelectedSupplementary] = useState<Ingredient | undefined>();
   const [selectedSupplementaries, setSelectedSupplementaries] = useState<Ingredient[]>([]);
   const [pairingResult, setPairingResult] = useState<PairingResult | null>(null);
-
   const [isLeftoverModalOpen, setIsLeftoverModalOpen] = useState(false);
   const [isLogging, setIsLogging] = useState(false);
   const [ratedHistory, setRatedHistory] = useState<RatedMealRecord[]>([]);
@@ -108,11 +103,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
   const handleSelectMealType = (type: MealType) => {
     setMealType(type);
     const readyMeals = getAvailableReadyMeals(catalogue.readyMeals, type);
-    if (readyMeals.length > 0) {
-      setCurrentStep("ready_meal");
-    } else {
-      setCurrentStep("mode_select");
-    }
+    setCurrentStep(readyMeals.length > 0 ? "ready_meal" : "mode_select");
   };
 
   const handleSelectReadyMeal = (readyMeal: ReadyMeal) => {
@@ -124,9 +115,7 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     setCurrentStep("confirm");
   };
 
-  const handleBypassReadyMeal = () => {
-    setCurrentStep("mode_select");
-  };
+  const handleBypassReadyMeal = () => setCurrentStep("mode_select");
 
   const handleSuggestForMe = () => {
     if (availableMains.length === 0) return;
@@ -154,9 +143,11 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
   const handleCookSavedRecipe = (recipe: SavedRecipe) => {
     const main = catalogue.ingredients.find((i) => i.id === recipe.mainIngredientId);
     if (!main) return;
-    const prot = recipe.proteinId ? catalogue.ingredients.find((i) => i.id === recipe.proteinId) : undefined;
-    const supp = recipe.supplementaryId ? catalogue.ingredients.find((i) => i.id === recipe.supplementaryId) : undefined;
-    const supps = supp ? [supp] : [];
+    const proteinId = recipe.proteinIds?.length ? recipe.proteinIds[0] : recipe.proteinId;
+    const prot = proteinId ? catalogue.ingredients.find((i) => i.id === proteinId) : undefined;
+    const suppIds = recipe.supplementaryIds?.length ? recipe.supplementaryIds : (recipe.supplementaryId ? [recipe.supplementaryId] : []);
+    const supps = suppIds.map((id) => catalogue.ingredients.find((i) => i.id === id)).filter((i): i is Ingredient => !!i);
+    const supp = supps[0];
     const basePairings = findBestPairings(main, catalogue.ingredients, mealType);
     setSelectedMain(main);
     setSelectedProtein(prot);
@@ -283,8 +274,8 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
     setCurrentStep("meal_type");
   };
 
-  const handleAddBulkSupplies = async (inputs: AddSupplyInput[]) => {
-    if (!inputs.length) return;
+  const handleAddBulkSupplies = async (inputs: AddSupplyInput[]): Promise<Array<{ success: boolean; id?: string }>> => {
+    if (!inputs.length) return [];
     let nextCatalogue = { ...catalogue };
     const now = Date.now();
     const newIngredients: Ingredient[] = [];
@@ -292,39 +283,50 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
 
     inputs.forEach((inp, idx) => {
       const sOwner = inp.owner || owner;
+      const isAvail = inp.available !== undefined ? inp.available : true;
       if (inp.kind === "ingredient") {
-        newIngredients.push({ id: `ing-${now}-${idx}`, name: inp.name, mealTypes: inp.mealTypes, role: inp.role || "Main", owner: sOwner, available: true });
+        newIngredients.push({ id: `ing-${now}-${idx}`, name: inp.name, mealTypes: inp.mealTypes, role: inp.role || "Main", owner: sOwner, available: isAvail });
       } else {
-        newReadyMeals.push({ id: `ready-${now}-${idx}`, name: inp.name, mealTypes: inp.mealTypes, owner: sOwner, available: true });
+        newReadyMeals.push({ id: `ready-${now}-${idx}`, name: inp.name, mealTypes: inp.mealTypes, owner: sOwner, available: isAvail });
       }
     });
 
-    if (newIngredients.length) {
-      nextCatalogue = { ...nextCatalogue, ingredients: [...newIngredients, ...nextCatalogue.ingredients] };
-    }
-    if (newReadyMeals.length) {
-      nextCatalogue = { ...nextCatalogue, readyMeals: [...newReadyMeals, ...nextCatalogue.readyMeals] };
-    }
-
+    if (newIngredients.length) nextCatalogue = { ...nextCatalogue, ingredients: [...newIngredients, ...nextCatalogue.ingredients] };
+    if (newReadyMeals.length) nextCatalogue = { ...nextCatalogue, readyMeals: [...newReadyMeals, ...nextCatalogue.readyMeals] };
     setCatalogue(nextCatalogue);
     saveCachedCatalogue(nextCatalogue, owner);
 
-    await Promise.allSettled(
-      inputs.map((inp) => {
+    const outcomes = await Promise.allSettled(
+      inputs.map(async (inp, idx) => {
         const supplyInput = { ...inp, owner: inp.owner || owner };
-        return fetch("/api/notion/supplies", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(supplyInput),
-        }).catch(() => {
-          queueOfflineMutation("supplies", supplyInput);
-        });
+        try {
+          const res = await fetch("/api/notion/supplies", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(supplyInput) });
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.id) {
+              const tempId = inp.kind === "ingredient" ? `ing-${now}-${idx}` : `ready-${now}-${idx}`;
+              setCatalogue((prev) => {
+                const updated = {
+                  ...prev,
+                  ingredients: prev.ingredients.map((i) => (i.id === tempId ? { ...i, id: data.id } : i)),
+                  readyMeals: prev.readyMeals.map((m) => (m.id === tempId ? { ...m, id: data.id } : m)),
+                };
+                saveCachedCatalogue(updated, owner);
+                return updated;
+              });
+              return { success: true, id: data.id as string };
+            }
+          }
+        } catch { queueOfflineMutation("supplies", supplyInput); }
+        return { success: false };
       })
     );
+    return outcomes.map((o) => (o.status === "fulfilled" ? o.value : { success: false }));
   };
 
-  const handleAddSupply = async (input: AddSupplyInput) => {
-    return handleAddBulkSupplies([input]);
+  const handleAddSupply = async (input: AddSupplyInput): Promise<{ success: boolean; id?: string }> => {
+    const results = await handleAddBulkSupplies([input]);
+    return results[0] || { success: false };
   };
 
   const handleRateMeal = async (rating: MealRating) => {
@@ -377,19 +379,12 @@ export function useMealBuilder(owner: string = "User", nutrientPriorities?: Nutr
   };
 
   return {
-    catalogue, isClientReady, isSettingsOpen, setIsSettingsOpen,
-    isNotificationOpen, setIsNotificationOpen, isAddSupplyOpen, setIsAddSupplyOpen,
-    mealType, currentStep, setCurrentStep, selectedSource,
-    selectedReadyMeal, selectedMain, selectedProtein, selectedSupplementary,
-    selectedSupplementaries, setSelectedSupplementaries, pairingResult,
-    isLeftoverModalOpen, setIsLeftoverModalOpen, isLogging,
-    availableReadyMeals, availableMains, totalAvailableInMealType,
-    handleRefreshCatalogue, handleResetSeedData, handleResetToHome,
-    handleSelectMealType, handleSelectReadyMeal, handleBypassReadyMeal,
-    handleSuggestForMe, handleManualPickMode, handleSelectMain,
-    handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision,
-    handleQuickAddStaples, handleAddSupply, handleAddBulkSupplies,
-    handleToggleAvailability, handleDeleteSupply, handleCookSavedRecipe,
-    isRatingCardOpen, setIsRatingCardOpen, activeLogId, handleRateMeal, handleSkipRating, ratedHistory,
+    catalogue, isClientReady, isSettingsOpen, setIsSettingsOpen, isNotificationOpen, setIsNotificationOpen, isAddSupplyOpen, setIsAddSupplyOpen,
+    mealType, currentStep, setCurrentStep, selectedSource, selectedReadyMeal, selectedMain, selectedProtein, selectedSupplementary,
+    selectedSupplementaries, setSelectedSupplementaries, pairingResult, isLeftoverModalOpen, setIsLeftoverModalOpen, isLogging,
+    availableReadyMeals, availableMains, totalAvailableInMealType, handleRefreshCatalogue, handleResetSeedData, handleResetToHome,
+    handleSelectMealType, handleSelectReadyMeal, handleBypassReadyMeal, handleSuggestForMe, handleManualPickMode, handleSelectMain,
+    handleConfirmCombo, handleConfirmAndLog, handleSubmitLeftoverDecision, handleQuickAddStaples, handleAddSupply, handleAddBulkSupplies,
+    handleToggleAvailability, handleDeleteSupply, handleCookSavedRecipe, isRatingCardOpen, setIsRatingCardOpen, activeLogId, handleRateMeal, handleSkipRating, ratedHistory,
   };
 }

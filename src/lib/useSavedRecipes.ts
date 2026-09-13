@@ -38,6 +38,22 @@ export function useSavedRecipes() {
   const createRecipe = useCallback(
     async (input: CreateSavedRecipeInput): Promise<{ success: boolean; id?: string }> => {
       setIsSaving(true);
+      const tempId = `temp-recipe-${Date.now()}`;
+      const optimisticRecipe: SavedRecipe = {
+        id: tempId,
+        name: input.name,
+        mealTypes: input.mealTypes,
+        mainIngredientId: input.mainIngredientId,
+        proteinId: input.proteinId || input.proteinIds?.[0],
+        proteinIds: input.proteinIds || (input.proteinId ? [input.proteinId] : []),
+        supplementaryId: input.supplementaryId || input.supplementaryIds?.[0],
+        supplementaryIds: input.supplementaryIds || (input.supplementaryId ? [input.supplementaryId] : []),
+        sourceUrl: input.sourceUrl,
+        owner: (session?.user as { owner?: string })?.owner || "User",
+        createdAt: new Date().toISOString(),
+      };
+      setSavedRecipes((prev) => [optimisticRecipe, ...prev]);
+
       try {
         const res = await fetch("/api/notion/recipes", {
           method: "POST",
@@ -46,19 +62,20 @@ export function useSavedRecipes() {
         });
         if (res.ok) {
           const data = await res.json();
-          // Re-fetch to ensure resolved ingredient names and real page ID from Notion
           await fetchRecipes();
           return { success: true, id: data.id };
         }
+        setSavedRecipes((prev) => prev.filter((r) => r.id !== tempId));
         return { success: false };
       } catch (err) {
         console.error("Failed to create saved recipe:", err);
+        setSavedRecipes((prev) => prev.filter((r) => r.id !== tempId));
         return { success: false };
       } finally {
         setIsSaving(false);
       }
     },
-    [fetchRecipes]
+    [fetchRecipes, session]
   );
 
   const deleteRecipe = useCallback(
